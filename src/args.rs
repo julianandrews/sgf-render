@@ -1,16 +1,17 @@
-use crate::MakeSvgOptions;
+use crate::lib::{GobanRange, MakeSvgOptions};
 use std::path::PathBuf;
 
 const DEFAULT_MOVE_NUMBER: u64 = 1;
+const DEFAULT_WIDTH: u32 = 800;
 
 pub fn parse_args(
     opts: &getopts::Options,
     args: &Vec<String>,
 ) -> Result<SgfRenderArgs, UsageError> {
-    // TODO: writeme!
+    // TODO: Parse this block of arguments instead of hard-coding.
     let infile = Some(PathBuf::from("/home/julian/Downloads/tsumego/prob0001.sgf"));
-    let outfile = Some(PathBuf::from("/tmp/out.svg"));
-    let options: MakeSvgOptions = Default::default();
+    let outfile = Some(PathBuf::from("/tmp/out.png"));
+    let goban_range = GobanRange::ShrinkWrap;
 
     let matches = opts
         .parse(&args[1..])
@@ -20,7 +21,19 @@ pub fn parse_args(
         .map(|c| c.parse())
         .unwrap_or(Ok(DEFAULT_MOVE_NUMBER))
         .map_err(|_| UsageError::ArgumentParseError)?;
+    let render_labels = !matches.opt_present("no-labels");
+    let viewbox_width = matches
+        .opt_str("w")
+        .map(|c| c.parse::<u32>())
+        .unwrap_or(Ok(DEFAULT_WIDTH))
+        .map_err(|_| UsageError::ArgumentParseError)? as f64;
     let print_help = matches.opt_present("h");
+
+    let options = MakeSvgOptions {
+        goban_range,
+        render_labels,
+        viewbox_width,
+    };
 
     Ok(SgfRenderArgs {
         infile,
@@ -45,6 +58,16 @@ pub fn build_opts() -> getopts::Options {
         &format!("Move number to render (default {})", DEFAULT_MOVE_NUMBER,),
         "MOVE_NUMBER",
     );
+    opts.optopt(
+        "w",
+        "width",
+        &format!(
+            "Width of the output image in pixels (default {})",
+            DEFAULT_WIDTH,
+        ),
+        "WIDTH",
+    );
+    opts.optflag("", "no-labels", "Don't render labels on the diagram");
 
     opts
 }

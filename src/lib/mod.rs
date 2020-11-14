@@ -19,19 +19,9 @@ static HOSHI_RADIUS: f64 = 0.09;
 
 #[derive(Debug)]
 pub struct MakeSvgOptions {
-    goban_range: GobanRange,
-    viewbox_width: f64,
-    render_labels: bool,
-}
-
-impl Default for MakeSvgOptions {
-    fn default() -> Self {
-        MakeSvgOptions {
-            goban_range: GobanRange::ShrinkWrap,
-            viewbox_width: 800.0,
-            render_labels: true,
-        }
-    }
+    pub goban_range: GobanRange,
+    pub viewbox_width: f64,
+    pub render_labels: bool,
 }
 
 pub fn make_svg(goban: &Goban, options: &MakeSvgOptions) -> Result<svg::Document, GobanSVGError> {

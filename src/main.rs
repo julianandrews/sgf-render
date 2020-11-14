@@ -1,7 +1,7 @@
 mod args;
 mod lib;
 
-use lib::{Goban, MakeSvgOptions};
+use lib::Goban;
 use std::error::Error;
 use std::path::PathBuf;
 use svg::node::element::SVG;
