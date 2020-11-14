@@ -1,16 +1,28 @@
+mod args;
 mod lib;
 
 use lib::{Goban, MakeSvgOptions};
-use std::path::Path;
+use std::error::Error;
+use std::path::PathBuf;
+use svg::node::element::SVG;
 
 fn main() {
-    // TODO: Parse these from arguments.
-    let infile = Path::new("/home/julian/Downloads/tsumego/prob0001.sgf");
-    let outfile = Path::new("/tmp/out.png");
-    let options: MakeSvgOptions = Default::default();
-    let move_number = 1;
+    let args: Vec<String> = std::env::args().collect();
+    let opts = args::build_opts();
+    let parsed_args = match args::parse_args(&opts, &args) {
+        Ok(args) => args,
+        Err(error) => {
+            eprintln!("{}", error);
+            args::print_usage(&args[0], &opts);
+            std::process::exit(1);
+        }
+    };
+    if parsed_args.print_help {
+        args::print_usage(&args[0], &opts);
+        return;
+    }
 
-    let goban = match load_goban(&infile, move_number) {
+    let goban = match load_goban(&parsed_args.infile, parsed_args.move_number) {
         Ok(goban) => goban,
         Err(e) => {
             eprintln!("Failed to load requested node from SGF: {}", e);
@@ -18,7 +30,7 @@ fn main() {
         }
     };
 
-    let document = match lib::make_svg(&goban, options) {
+    let document = match lib::make_svg(&goban, &parsed_args.options) {
         Ok(document) => document,
         Err(e) => {
             eprintln!("Failed to generate SVG: {}", e);
@@ -26,37 +38,18 @@ fn main() {
         }
     };
 
-    match outfile.extension().and_then(std::ffi::OsStr::to_str) {
-        Some("svg") => {
-            if let Err(e) = svg::save(&outfile, &document) {
-                eprintln!("Failed to save svg output: {}", e);
-                std::process::exit(1);
-            }
-        }
-        Some("png") => {
-            #[cfg(not(feature = "png"))]
-            {
-                eprintln!("'png' feature not enabled.");
-                std::process::exit(1);
-            }
-            #[cfg(feature = "png")]
-            if let Err(e) = save_png(&outfile, &document) {
-                eprintln!("Failed to save svg output: {}", e);
-                std::process::exit(1);
-            }
-        }
-        extension => {
-            eprintln!("Unsupported file extension: '{}'", extension.unwrap_or(""));
-            std::process::exit(1);
-        }
+    let result: Result<(), Box<dyn Error>> = match parsed_args.outfile {
+        Some(filename) => write_to_file(&filename, &document).into(),
+        None => svg::write(std::io::stdout(), &document).map_err(|e| e.into()),
+    };
+    if let Err(e) = result {
+        eprintln!("Failed to write output: {}", e);
+        std::process::exit(1);
     }
 }
 
-fn load_goban<P: AsRef<Path>>(
-    filename: &P,
-    move_number: u64,
-) -> Result<Goban, Box<dyn std::error::Error>> {
-    let mut sgf_node = &get_sgf_root(filename)?;
+fn load_goban(infile: &Option<PathBuf>, move_number: u64) -> Result<Goban, Box<dyn Error>> {
+    let mut sgf_node = &get_sgf_root(infile)?;
 
     let mut goban = Goban::from_sgf_node(&sgf_node)?;
     for _ in 1..move_number {
@@ -70,10 +63,13 @@ fn load_goban<P: AsRef<Path>>(
     Ok(goban)
 }
 
-fn get_sgf_root<P: AsRef<Path>>(
-    filename: &P,
-) -> Result<sgf_parse::SgfNode, Box<dyn std::error::Error>> {
-    let text = std::fs::read_to_string(filename)?;
+fn get_sgf_root(infile: &Option<PathBuf>) -> Result<sgf_parse::SgfNode, Box<dyn Error>> {
+    let mut reader: Box<dyn std::io::Read> = match infile {
+        Some(filename) => Box::new(std::io::BufReader::new(std::fs::File::open(&filename)?)),
+        None => Box::new(std::io::stdin()),
+    };
+    let mut text = String::new();
+    reader.read_to_string(&mut text)?;
     let collection = sgf_parse::parse(&text)?;
     collection
         .into_iter()
@@ -81,11 +77,20 @@ fn get_sgf_root<P: AsRef<Path>>(
         .ok_or(Box::new(SgfRenderError::NoSgfNodes))
 }
 
+fn write_to_file(outfile: &std::path::PathBuf, document: &SVG) -> Result<(), Box<dyn Error>> {
+    match outfile.extension().and_then(std::ffi::OsStr::to_str) {
+        Some("svg") => svg::save(&outfile, document)?,
+        Some("png") => save_png(&outfile, document)?,
+        extension => {
+            eprintln!("Unsupported file extension: '{}'", extension.unwrap_or(""));
+            std::process::exit(1);
+        }
+    }
+    Ok(())
+}
+
 #[cfg(feature = "png")]
-fn save_png<P: AsRef<Path>>(
-    filename: &P,
-    document: &svg::node::element::SVG,
-) -> Result<(), Box<dyn std::error::Error>> {
+fn save_png(outfile: &PathBuf, document: &SVG) -> Result<(), Box<dyn Error>> {
     let s = document.to_string();
     let mut fontdb = usvg::fontdb::Database::new();
     let font_data = include_bytes!("../data/Roboto-Bold.ttf").to_vec();
@@ -99,7 +104,7 @@ fn save_png<P: AsRef<Path>>(
     )?;
     let img =
         resvg::render(&tree, usvg::FitTo::Original, None).ok_or(SgfRenderError::PNGRenderFailed)?;
-    img.save_png(filename)?;
+    img.save_png(outfile)?;
     Ok(())
 }
 
@@ -122,4 +127,4 @@ impl std::fmt::Display for SgfRenderError {
     }
 }
 
-impl std::error::Error for SgfRenderError {}
+impl Error for SgfRenderError {}

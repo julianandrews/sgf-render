@@ -10,6 +10,7 @@ default = ["png"]
 png = ["resvg", "usvg"]
 
 [dependencies]
+getopts = "^0.2.21"
 sgf-parse = "^2.0.0"
 svg = "^0.8.0"
 

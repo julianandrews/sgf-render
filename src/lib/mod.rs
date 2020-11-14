@@ -34,7 +34,7 @@ impl Default for MakeSvgOptions {
     }
 }
 
-pub fn make_svg(goban: &Goban, options: MakeSvgOptions) -> Result<svg::Document, GobanSVGError> {
+pub fn make_svg(goban: &Goban, options: &MakeSvgOptions) -> Result<svg::Document, GobanSVGError> {
     let (x_range, y_range) = options.goban_range.get_ranges(goban)?;
     let width = x_range.end - x_range.start;
     let height = y_range.end - y_range.start;
