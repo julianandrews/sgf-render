@@ -65,7 +65,6 @@ pub enum UsageError {
 
 impl std::fmt::Display for UsageError {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        // TODO: writeme!
         match self {
             UsageError::ArgumentParseError => write!(f, "Failed to parse arguments."),
         }

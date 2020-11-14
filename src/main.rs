@@ -25,7 +25,7 @@ fn main() {
     let goban = match load_goban(&parsed_args.infile, parsed_args.move_number) {
         Ok(goban) => goban,
         Err(e) => {
-            eprintln!("Failed to load requested node from SGF: {}", e);
+            eprintln!("Failed to load SGF node: {}", e);
             std::process::exit(1);
         }
     };
@@ -81,10 +81,7 @@ fn write_to_file(outfile: &std::path::PathBuf, document: &SVG) -> Result<(), Box
     match outfile.extension().and_then(std::ffi::OsStr::to_str) {
         Some("svg") => svg::save(&outfile, document)?,
         Some("png") => save_png(&outfile, document)?,
-        extension => {
-            eprintln!("Unsupported file extension: '{}'", extension.unwrap_or(""));
-            std::process::exit(1);
-        }
+        _ => Err(SgfRenderError::UnsupportedFileExtension)?,
     }
     Ok(())
 }
@@ -113,16 +110,16 @@ enum SgfRenderError {
     NoSgfNodes,
     InsufficientSgfNodes,
     PNGRenderFailed,
+    UnsupportedFileExtension,
 }
 
 impl std::fmt::Display for SgfRenderError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::NoSgfNodes => write!(f, "No sgf nodes found in collection."),
-            Self::InsufficientSgfNodes => {
-                write!(f, "Insufficient SGF nodes for requested move number.")
-            }
-            Self::PNGRenderFailed => write!(f, "Failed to render png from svg."),
+            Self::NoSgfNodes => write!(f, "No sgf nodes found in input."),
+            Self::InsufficientSgfNodes => write!(f, "Insufficient SGF nodes for move number."),
+            Self::PNGRenderFailed => write!(f, "Rendering png failed."),
+            Self::UnsupportedFileExtension => write!(f, "Unsupported file extension."),
         }
     }
 }
