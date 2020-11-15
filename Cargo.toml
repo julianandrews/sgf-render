@@ -1,9 +1,14 @@
 [package]
 name = "sgf-render"
-version = "0.1.0"
-authors = ["Julian Andrews <jandrews@fusionbox.com>"]
+version = "1.0.0"
+authors = ["Julian Andrews <jandrews271@gmail.com>"]
 edition = "2018"
-include = ["data/Roboto-bold.ttf"]
+license = "MIT"
+keywords = ["baduk", "sgf", "go", "svg", "png"]
+repository = "https://github.com/julianandrews/sgf-render/"
+readme = "README.md"
+description = "A renderer for SGF diagrams."
+categories = ["command-line-utilities", "multimedia::images", "rendering", "visualization"]
 
 [features]
 default = ["png"]

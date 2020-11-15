@@ -1,6 +1,6 @@
 # Sgf Render
 
-CLI to generate `.svg` or `.png` output from an `.sgf` file.
+CLI to generate SVG or PNG output from an SGF file.
 
 SVG output is clean and well labeled for easy re-styling or modification.
 
@@ -8,7 +8,31 @@ SVG output is clean and well labeled for easy re-styling or modification.
 
 ## Installation
 
-TODO: Add CI to build binaries, and link here.
+Check the [releases](https://github.com/julianandrews/sgf-render/releases) page
+on GitHub for pre-built binaries.
+
+Note that the windows, and linux-musl versions are compiled without PNG
+support. If you need PNG support on a platform without it consider building
+`sgf-render` yourself. Alternatively, you can always install
+[ImageMagick](https://imagemagick.org/index.php) to convert the SVG into any
+format you like.
+
+If you have `cargo` installed, you can also install the package from crates.io:
+
+```
+$ cargo install sgf-render
+```
+
+## Building
+
+If you have `git` and `cargo` installed you can also build from source:
+
+```
+$ git clone https://julianandrews/sgf-render
+$ cd sgf-render
+$ cargo build --release
+$ ./target/release/sgf-render -h
+```
 
 ## Usage
 
@@ -26,13 +50,15 @@ Options:
     -h, --help          Display this help and exit
 ```
 
+If `FILE` isn't provided, `sgf-render` will read from stdin. If `--outfile`
+isn't provided `sgf-render` will print the resulting SVG to stdout.
+
 ## Contributing
 Pull requests are welcome! For major changes, please open an issue first to
 discuss what you would like to change.
 
-Feature requests are also welcome. The goal is to make this a general purpose
+Feature requests are also welcome! The goal is to make this a general purpose
 sgf diagram generation tool. I have plans to add support for sgf markup
 rendering, but motivation is low since I don't have any immediate use for it. A
 feature request would get me moving! Just open an issue at
 [GitHub](https://github.com/julianandrews/sgf-render/issues).
-

@@ -346,7 +346,7 @@ checksum = "554abd5c317abf02e47b8625fc3c5c2a7a2837bbce4ae9674950ad826461e6d3"
 
 [[package]]
 name = "sgf-render"
-version = "0.1.0"
+version = "1.0.0"
 dependencies = [
  "getopts",
  "resvg",
