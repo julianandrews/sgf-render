@@ -194,8 +194,8 @@ fn draw_board(goban: &Goban) -> element::Group {
                 .set("fill-opacity", 0.5),
         );
         let fill = match stone.color {
-            goban::StoneColor::Black => "url('#black-stone-fill')",
-            goban::StoneColor::White => "url('#white-stone-fill')",
+            goban::StoneColor::Black => "url(#black-stone-fill)",
+            goban::StoneColor::White => "url(#white-stone-fill)",
         };
         // Draw the stone
         stones = stones.add(
