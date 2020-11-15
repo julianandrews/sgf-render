@@ -1,4 +1,4 @@
-<svg viewBox="0 0 600 525.7425742574258" xmlns="http://www.w3.org/2000/svg">
+<svg viewBox="0 0 400 350.4950495049505" width="400" xmlns="http://www.w3.org/2000/svg">
 <defs>
 <clipPath id="board-clip">
 <rect height="6" width="7" x="-0.5" y="-0.5"/>
@@ -14,7 +14,7 @@
 </radialGradient>
 </defs>
 <rect fill="#cfa87e" height="100%" width="100%" x="0" y="0"/>
-<g id="diagram" transform="scale(74.25742574257426, 74.25742574257426)">
+<g id="diagram" transform="scale(49.504950495049506, 49.504950495049506)">
 <g id="board-view" transform="translate(1.44, 1.44)">
 <g clip-path="url(#board-clip)" id="goban">
 <g id="lines" stroke="black" stroke-linecap="square" stroke-width="0.045">
@@ -69,38 +69,38 @@
 </g>
 </g>
 <g id="stones" stroke="none">
-<circle cx="1.025" cy="1.025" fill="black" fill-opacity="0.5" r="0.475"/>
-<circle cx="0.983" cy="0.983" fill="url('#black-stone-fill')" r="0.475"/>
-<circle cx="2.025" cy="2.025" fill="black" fill-opacity="0.5" r="0.475"/>
-<circle cx="1.983" cy="1.983" fill="url('#black-stone-fill')" r="0.475"/>
-<circle cx="2.025" cy="4.025" fill="black" fill-opacity="0.5" r="0.475"/>
-<circle cx="1.983" cy="3.983" fill="url('#white-stone-fill')" r="0.475"/>
-<circle cx="3.025" cy="3.025" fill="black" fill-opacity="0.5" r="0.475"/>
-<circle cx="2.983" cy="2.983" fill="url('#white-stone-fill')" r="0.475"/>
-<circle cx="0.025" cy="3.025" fill="black" fill-opacity="0.5" r="0.475"/>
-<circle cx="-0.017" cy="2.983" fill="url('#white-stone-fill')" r="0.475"/>
-<circle cx="2.025" cy="1.025" fill="black" fill-opacity="0.5" r="0.475"/>
-<circle cx="1.983" cy="0.983" fill="url('#white-stone-fill')" r="0.475"/>
-<circle cx="3.025" cy="1.025" fill="black" fill-opacity="0.5" r="0.475"/>
-<circle cx="2.983" cy="0.983" fill="url('#black-stone-fill')" r="0.475"/>
 <circle cx="0.025" cy="1.025" fill="black" fill-opacity="0.5" r="0.475"/>
-<circle cx="-0.017" cy="0.983" fill="url('#black-stone-fill')" r="0.475"/>
-<circle cx="5.025" cy="0.025" fill="black" fill-opacity="0.5" r="0.475"/>
-<circle cx="4.983" cy="-0.017" fill="url('#white-stone-fill')" r="0.475"/>
-<circle cx="5.025" cy="2.025" fill="black" fill-opacity="0.5" r="0.475"/>
-<circle cx="4.983" cy="1.983" fill="url('#white-stone-fill')" r="0.475"/>
-<circle cx="3.025" cy="2.025" fill="black" fill-opacity="0.5" r="0.475"/>
-<circle cx="2.983" cy="1.983" fill="url('#white-stone-fill')" r="0.475"/>
-<circle cx="1.025" cy="4.025" fill="black" fill-opacity="0.5" r="0.475"/>
-<circle cx="0.983" cy="3.983" fill="url('#white-stone-fill')" r="0.475"/>
+<circle cx="-0.017" cy="0.983" fill="url(#black-stone-fill)" r="0.475"/>
 <circle cx="2.025" cy="3.025" fill="black" fill-opacity="0.5" r="0.475"/>
-<circle cx="1.983" cy="2.983" fill="url('#black-stone-fill')" r="0.475"/>
+<circle cx="1.983" cy="2.983" fill="url(#black-stone-fill)" r="0.475"/>
+<circle cx="1.025" cy="4.025" fill="black" fill-opacity="0.5" r="0.475"/>
+<circle cx="0.983" cy="3.983" fill="url(#white-stone-fill)" r="0.475"/>
 <circle cx="4.025" cy="1.025" fill="black" fill-opacity="0.5" r="0.475"/>
-<circle cx="3.983" cy="0.983" fill="url('#black-stone-fill')" r="0.475"/>
+<circle cx="3.983" cy="0.983" fill="url(#black-stone-fill)" r="0.475"/>
+<circle cx="5.025" cy="2.025" fill="black" fill-opacity="0.5" r="0.475"/>
+<circle cx="4.983" cy="1.983" fill="url(#white-stone-fill)" r="0.475"/>
+<circle cx="5.025" cy="0.025" fill="black" fill-opacity="0.5" r="0.475"/>
+<circle cx="4.983" cy="-0.017" fill="url(#white-stone-fill)" r="0.475"/>
+<circle cx="2.025" cy="4.025" fill="black" fill-opacity="0.5" r="0.475"/>
+<circle cx="1.983" cy="3.983" fill="url(#white-stone-fill)" r="0.475"/>
+<circle cx="3.025" cy="1.025" fill="black" fill-opacity="0.5" r="0.475"/>
+<circle cx="2.983" cy="0.983" fill="url(#black-stone-fill)" r="0.475"/>
+<circle cx="2.025" cy="1.025" fill="black" fill-opacity="0.5" r="0.475"/>
+<circle cx="1.983" cy="0.983" fill="url(#white-stone-fill)" r="0.475"/>
+<circle cx="0.025" cy="3.025" fill="black" fill-opacity="0.5" r="0.475"/>
+<circle cx="-0.017" cy="2.983" fill="url(#white-stone-fill)" r="0.475"/>
 <circle cx="5.025" cy="1.025" fill="black" fill-opacity="0.5" r="0.475"/>
-<circle cx="4.983" cy="0.983" fill="url('#white-stone-fill')" r="0.475"/>
+<circle cx="4.983" cy="0.983" fill="url(#white-stone-fill)" r="0.475"/>
 <circle cx="4.025" cy="2.025" fill="black" fill-opacity="0.5" r="0.475"/>
-<circle cx="3.983" cy="1.983" fill="url('#white-stone-fill')" r="0.475"/>
+<circle cx="3.983" cy="1.983" fill="url(#white-stone-fill)" r="0.475"/>
+<circle cx="3.025" cy="3.025" fill="black" fill-opacity="0.5" r="0.475"/>
+<circle cx="2.983" cy="2.983" fill="url(#white-stone-fill)" r="0.475"/>
+<circle cx="2.025" cy="2.025" fill="black" fill-opacity="0.5" r="0.475"/>
+<circle cx="1.983" cy="1.983" fill="url(#black-stone-fill)" r="0.475"/>
+<circle cx="1.025" cy="1.025" fill="black" fill-opacity="0.5" r="0.475"/>
+<circle cx="0.983" cy="0.983" fill="url(#black-stone-fill)" r="0.475"/>
+<circle cx="3.025" cy="2.025" fill="black" fill-opacity="0.5" r="0.475"/>
+<circle cx="2.983" cy="1.983" fill="url(#white-stone-fill)" r="0.475"/>
 </g>
 </g>
 </g>
