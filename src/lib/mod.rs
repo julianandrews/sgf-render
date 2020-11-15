@@ -46,7 +46,7 @@ pub fn make_svg(goban: &Goban, options: &MakeSvgOptions) -> Result<svg::Document
                 .set("height", height as f64),
         );
         let black_stone_fill = element::RadialGradient::new()
-            .set("id", "black-stone-fille")
+            .set("id", "black-stone-fill")
             .set("cx", "35%")
             .set("cy", "35%")
             .add(
@@ -194,7 +194,7 @@ fn draw_board(goban: &Goban) -> element::Group {
                 .set("fill-opacity", 0.5),
         );
         let fill = match stone.color {
-            goban::StoneColor::Black => "url('#black-stone-fille')",
+            goban::StoneColor::Black => "url('#black-stone-fill')",
             goban::StoneColor::White => "url('#white-stone-fill')",
         };
         // Draw the stone
