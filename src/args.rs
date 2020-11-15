@@ -9,14 +9,13 @@ pub fn parse_args(
     args: &Vec<String>,
 ) -> Result<SgfRenderArgs, UsageError> {
     // TODO: Parse goban_range somehow.
-    // TODO: Provide more granular error messages.
     let goban_range = GobanRange::ShrinkWrap;
 
     let matches = opts
         .parse(&args[1..])
-        .map_err(|_| UsageError::ArgumentParseError)?;
+        .map_err(|_| UsageError::FailedToParse)?;
     if matches.free.len() > 1 {
-        return Err(UsageError::ArgumentParseError);
+        return Err(UsageError::TooManyArguments);
     }
     let infile = matches.free.first().map(PathBuf::from);
     let outfile = matches.opt_str("o").map(PathBuf::from);
@@ -24,13 +23,13 @@ pub fn parse_args(
         .opt_str("m")
         .map(|c| c.parse())
         .unwrap_or(Ok(DEFAULT_MOVE_NUMBER))
-        .map_err(|_| UsageError::ArgumentParseError)?;
+        .map_err(|_| UsageError::InvalidMoveNumber)?;
     let render_labels = !matches.opt_present("no-labels");
     let viewbox_width = matches
         .opt_str("w")
         .map(|c| c.parse::<u32>())
         .unwrap_or(Ok(DEFAULT_WIDTH))
-        .map_err(|_| UsageError::ArgumentParseError)? as f64;
+        .map_err(|_| UsageError::InvalidWidth)? as f64;
     let print_help = matches.opt_present("h");
 
     let options = MakeSvgOptions {
@@ -49,7 +48,7 @@ pub fn parse_args(
 }
 
 pub fn print_usage(program: &str, opts: &getopts::Options) {
-    let brief = format!("Usage: {} [options]", program);
+    let brief = format!("Usage: {} [FILE] [options]", program);
     print!("{}", opts.usage(&brief));
 }
 
@@ -63,9 +62,9 @@ pub fn build_opts() -> getopts::Options {
     );
     opts.optopt(
         "m",
-        "move-number",
+        "move-num",
         &format!("Move number to render (default {})", DEFAULT_MOVE_NUMBER,),
-        "MOVE_NUMBER",
+        "NUM",
     );
     opts.optopt(
         "w",
@@ -93,13 +92,19 @@ pub struct SgfRenderArgs {
 
 #[derive(Debug)]
 pub enum UsageError {
-    ArgumentParseError,
+    FailedToParse,
+    TooManyArguments,
+    InvalidMoveNumber,
+    InvalidWidth,
 }
 
 impl std::fmt::Display for UsageError {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         match self {
-            UsageError::ArgumentParseError => write!(f, "Failed to parse arguments."),
+            UsageError::FailedToParse => write!(f, "Failed to parse arguments."),
+            UsageError::TooManyArguments => write!(f, "Too many arguments."),
+            UsageError::InvalidMoveNumber => write!(f, "Invalid move number."),
+            UsageError::InvalidWidth => write!(f, "Invalid width."),
         }
     }
 }
