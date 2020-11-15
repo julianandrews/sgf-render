@@ -10,7 +10,7 @@ pub fn parse_args(
 ) -> Result<SgfRenderArgs, UsageError> {
     // TODO: Parse this block of arguments instead of hard-coding.
     let infile = Some(PathBuf::from("/home/julian/Downloads/tsumego/prob0001.sgf"));
-    let outfile = Some(PathBuf::from("/tmp/out.png"));
+    let outfile = Some(PathBuf::from("/tmp/out.svg"));
     let goban_range = GobanRange::ShrinkWrap;
 
     let matches = opts

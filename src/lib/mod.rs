@@ -37,15 +37,53 @@ pub fn make_svg(goban: &Goban, options: &MakeSvgOptions) -> Result<svg::Document
         0.0
     };
 
-    let definitions = element::Definitions::new().add(
-        element::ClipPath::new().set("id", "board-clip").add(
+    let definitions = {
+        let clip_path = element::ClipPath::new().set("id", "board-clip").add(
             element::Rectangle::new()
                 .set("x", x_range.start as f64 - 0.5)
                 .set("y", y_range.start as f64 - 0.5)
                 .set("width", width as f64)
                 .set("height", height as f64),
-        ),
-    );
+        );
+        let black_stone_fill = element::RadialGradient::new()
+            .set("id", "black-stone-fille")
+            .set("cx", "35%")
+            .set("cy", "35%")
+            .add(
+                element::Stop::new()
+                    .set("offset", "0%")
+                    .set("stop-color", "#666"),
+            )
+            .add(
+                element::Stop::new()
+                    .set("offset", "100%")
+                    .set("stop-color", "black"),
+            );
+        let white_stone_fill = element::RadialGradient::new()
+            .set("id", "white-stone-fill")
+            .set("cx", "35%")
+            .set("cy", "35%")
+            .add(
+                element::Stop::new()
+                    .set("offset", "0%")
+                    .set("stop-color", "#ddd"),
+            )
+            .add(
+                element::Stop::new()
+                    .set("offset", "30%")
+                    .set("stop-color", "#bbb"),
+            )
+            .add(
+                element::Stop::new()
+                    .set("offset", "100%")
+                    .set("stop-color", "#9a9a9a"),
+            );
+
+        element::Definitions::new()
+            .add(clip_path)
+            .add(black_stone_fill)
+            .add(white_stone_fill)
+    };
     let board_width = width as f64 - 1.0 + 2.0 * BOARD_MARGIN + label_margin;
     let board_height = height as f64 - 1.0 + 2.0 * BOARD_MARGIN + label_margin;
 
@@ -156,8 +194,8 @@ fn draw_board(goban: &Goban) -> element::Group {
                 .set("fill-opacity", 0.5),
         );
         let fill = match stone.color {
-            goban::StoneColor::Black => "black",
-            goban::StoneColor::White => "white",
+            goban::StoneColor::Black => "url('#black-stone-fille')",
+            goban::StoneColor::White => "url('#white-stone-fill')",
         };
         // Draw the stone
         stones = stones.add(
