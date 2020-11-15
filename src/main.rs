@@ -1,3 +1,5 @@
+#![feature(str_split_once)]
+
 mod args;
 mod lib;
 
