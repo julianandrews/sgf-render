@@ -130,6 +130,7 @@ pub fn make_svg(goban: &Goban, options: &MakeSvgOptions) -> Result<svg::Document
     let viewbox_height = options.viewbox_width * board_height / board_width;
     Ok(svg::Document::new()
         .set("viewBox", (0.0, 0.0, options.viewbox_width, viewbox_height))
+        .set("width", options.viewbox_width)
         .add(definitions)
         .add(background)
         .add(diagram))
