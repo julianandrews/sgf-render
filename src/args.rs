@@ -8,14 +8,18 @@ pub fn parse_args(
     opts: &getopts::Options,
     args: &Vec<String>,
 ) -> Result<SgfRenderArgs, UsageError> {
-    // TODO: Parse this block of arguments instead of hard-coding.
-    let infile = Some(PathBuf::from("/home/julian/Downloads/tsumego/prob0001.sgf"));
-    let outfile = Some(PathBuf::from("/tmp/out.svg"));
+    // TODO: Parse goban_range somehow.
+    // TODO: Provide more granular error messages.
     let goban_range = GobanRange::ShrinkWrap;
 
     let matches = opts
         .parse(&args[1..])
         .map_err(|_| UsageError::ArgumentParseError)?;
+    if matches.free.len() > 1 {
+        return Err(UsageError::ArgumentParseError);
+    }
+    let infile = matches.free.first().map(PathBuf::from);
+    let outfile = matches.opt_str("o").map(PathBuf::from);
     let move_number = matches
         .opt_str("m")
         .map(|c| c.parse())
@@ -51,7 +55,12 @@ pub fn print_usage(program: &str, opts: &getopts::Options) {
 
 pub fn build_opts() -> getopts::Options {
     let mut opts = getopts::Options::new();
-    opts.optflag("h", "help", "Display this help and exit");
+    opts.optopt(
+        "o",
+        "outfile",
+        "Output file. SVG and PNG formats supported.",
+        "FILE",
+    );
     opts.optopt(
         "m",
         "move-number",
@@ -68,6 +77,7 @@ pub fn build_opts() -> getopts::Options {
         "WIDTH",
     );
     opts.optflag("", "no-labels", "Don't render labels on the diagram");
+    opts.optflag("h", "help", "Display this help and exit");
 
     opts
 }
