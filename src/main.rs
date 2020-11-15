@@ -107,12 +107,18 @@ fn save_png(outfile: &PathBuf, document: &SVG) -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
+#[cfg(not(feature = "png"))]
+fn save_png(_outfile: &PathBuf, _document: &SVG) -> Result<(), Box<dyn Error>> {
+    Err(SgfRenderError::NoPngSupport)?
+}
+
 #[derive(Debug)]
 enum SgfRenderError {
     NoSgfNodes,
     InsufficientSgfNodes,
     PNGRenderFailed,
     UnsupportedFileExtension,
+    NoPngSupport,
 }
 
 impl std::fmt::Display for SgfRenderError {
@@ -122,6 +128,7 @@ impl std::fmt::Display for SgfRenderError {
             Self::InsufficientSgfNodes => write!(f, "Insufficient SGF nodes for move number."),
             Self::PNGRenderFailed => write!(f, "Rendering png failed."),
             Self::UnsupportedFileExtension => write!(f, "Unsupported file extension."),
+            Self::NoPngSupport => write!(f, "Compiled without png support."),
         }
     }
 }
