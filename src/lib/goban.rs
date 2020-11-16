@@ -4,6 +4,7 @@ use std::collections::{HashMap, HashSet, VecDeque};
 pub struct Goban {
     pub size: (u8, u8),
     pub stones: HashMap<(u8, u8), StoneColor>,
+    pub move_numbers: HashMap<(u8, u8), Vec<u64>>,
     pub move_number: u64,
     pub black_captures: u64,
     pub white_captures: u64,
@@ -29,6 +30,7 @@ impl Goban {
         Self {
             size: board_size,
             stones: HashMap::new(),
+            move_numbers: HashMap::new(),
             move_number: 0,
             black_captures: 0,
             white_captures: 0,
@@ -122,6 +124,11 @@ impl Goban {
         // Now remove the played stone if still neccessary
         self.process_captures(&key);
         self.move_number += 1;
+        (*self
+            .move_numbers
+            .entry((stone.x, stone.y))
+            .or_insert(vec![]))
+        .push(self.move_number);
 
         Ok(())
     }
@@ -214,11 +221,7 @@ pub struct Stone {
 
 impl Stone {
     pub fn new(x: u8, y: u8, color: StoneColor) -> Stone {
-        Stone {
-            x: x,
-            y: y,
-            color: color,
-        }
+        Stone { x, y, color }
     }
 }
 

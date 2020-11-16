@@ -41,11 +41,17 @@ Usage: sgf-render [FILE] [options]
 
 Options:
     -o, --outfile FILE  Output file. SVG and PNG formats supported.
-    -m, --move-num NUM  Move number to render (default 1)
+    -n, --node-num NUM  Node number to render (default 1). Note that SGFs may
+                        have nodes without moves.
     -w, --width WIDTH   Width of the output image in pixels (default 800)
     -s, --shrink-wrap   Draw only enough of the board to hold all the stones
                         (with 1 space padding)
     -r, --range RANGE   Range to draw as a pair of corners (e.g. 'cc-ff')
+        --style STYLE   Style to use. One of 'default', 'simple' or
+                        'minimalist'
+        --move-numbers  Draw move numbers.
+        --first-move-number NUM
+                        First move number to draw if using --move-numbers
         --no-labels     Don't render labels on the diagram
     -h, --help          Display this help and exit
 ```

@@ -24,7 +24,7 @@ fn main() {
         return;
     }
 
-    let goban = match load_goban(&parsed_args.infile, parsed_args.move_number) {
+    let goban = match load_goban(&parsed_args.infile, parsed_args.node_number) {
         Ok(goban) => goban,
         Err(e) => {
             eprintln!("Failed to load SGF node: {}", e);
@@ -50,11 +50,11 @@ fn main() {
     }
 }
 
-fn load_goban(infile: &Option<PathBuf>, move_number: u64) -> Result<Goban, Box<dyn Error>> {
+fn load_goban(infile: &Option<PathBuf>, node_number: u64) -> Result<Goban, Box<dyn Error>> {
     let mut sgf_node = &get_sgf_root(infile)?;
 
     let mut goban = Goban::from_sgf_node(&sgf_node)?;
-    for _ in 1..move_number {
+    for _ in 1..node_number {
         sgf_node = sgf_node
             .children()
             .next()

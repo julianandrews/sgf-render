@@ -1,7 +1,8 @@
-use crate::lib::{GobanRange, MakeSvgOptions};
+use crate::lib::{GobanRange, GobanStyle, MakeSvgOptions};
 use std::path::PathBuf;
 
-const DEFAULT_MOVE_NUMBER: u64 = 1;
+const DEFAULT_NODE_NUM: u64 = 1;
+const DEFAULT_FIRST_MOVE_NUM: u64 = 1;
 const DEFAULT_WIDTH: u32 = 800;
 
 pub fn parse_args(
@@ -16,11 +17,11 @@ pub fn parse_args(
     }
     let infile = matches.free.first().map(PathBuf::from);
     let outfile = matches.opt_str("o").map(PathBuf::from);
-    let move_number = matches
-        .opt_str("m")
+    let node_number = matches
+        .opt_str("n")
         .map(|c| c.parse())
-        .unwrap_or(Ok(DEFAULT_MOVE_NUMBER))
-        .map_err(|_| UsageError::InvalidMoveNumber)?;
+        .unwrap_or(Ok(DEFAULT_NODE_NUM))
+        .map_err(|_| UsageError::InvalidNodeNumber)?;
     let render_labels = !matches.opt_present("no-labels");
     let viewbox_width = matches
         .opt_str("w")
@@ -42,17 +43,37 @@ pub fn parse_args(
             }
         }
     };
+    let style = match matches
+        .opt_str("style")
+        .unwrap_or("default".to_string())
+        .as_str()
+    {
+        "default" => Ok(GobanStyle::Default),
+        "simple" => Ok(GobanStyle::Simple),
+        "minimalist" => Ok(GobanStyle::Minimalist),
+        _ => Err(UsageError::InvalidStyle),
+    }?;
+    // TODO: parse from args!
+    let render_move_numbers = matches.opt_present("move-numbers");
+    let first_move_number = matches
+        .opt_str("first-move-number")
+        .map(|c| c.parse())
+        .unwrap_or(Ok(DEFAULT_FIRST_MOVE_NUM))
+        .map_err(|_| UsageError::InvalidFirstMoveNumber)?;
 
     let options = MakeSvgOptions {
         goban_range,
         render_labels,
+        render_move_numbers,
+        first_move_number,
         viewbox_width,
+        style,
     };
 
     Ok(SgfRenderArgs {
         infile,
         outfile,
-        move_number,
+        node_number,
         options,
         print_help,
     })
@@ -72,9 +93,13 @@ pub fn build_opts() -> getopts::Options {
         "FILE",
     );
     opts.optopt(
-        "m",
-        "move-num",
-        &format!("Move number to render (default {})", DEFAULT_MOVE_NUMBER,),
+        "n",
+        "node-num",
+        &format!(
+            "Node number to render (default {}). Note that SGFs \
+            may have nodes without moves.",
+            DEFAULT_NODE_NUM,
+        ),
         "NUM",
     );
     opts.optopt(
@@ -97,6 +122,19 @@ pub fn build_opts() -> getopts::Options {
         "Range to draw as a pair of corners (e.g. 'cc-ff')",
         "RANGE",
     );
+    opts.optopt(
+        "",
+        "style",
+        "Style to use. One of 'default', 'simple' or 'minimalist'",
+        "STYLE",
+    );
+    opts.optflag("", "move-numbers", "Draw move numbers.");
+    opts.optopt(
+        "",
+        "first-move-number",
+        "First move number to draw if using --move-numbers",
+        "NUM",
+    );
     opts.optflag("", "no-labels", "Don't render labels on the diagram");
     opts.optflag("h", "help", "Display this help and exit");
 
@@ -107,7 +145,7 @@ pub fn build_opts() -> getopts::Options {
 pub struct SgfRenderArgs {
     pub infile: Option<PathBuf>,
     pub outfile: Option<PathBuf>,
-    pub move_number: u64,
+    pub node_number: u64,
     pub options: MakeSvgOptions,
     pub print_help: bool,
 }
@@ -116,10 +154,12 @@ pub struct SgfRenderArgs {
 pub enum UsageError {
     FailedToParse,
     TooManyArguments,
-    InvalidMoveNumber,
+    InvalidNodeNumber,
     InvalidWidth,
     OverspecifiedRange,
     InvalidRange,
+    InvalidStyle,
+    InvalidFirstMoveNumber,
 }
 
 impl std::fmt::Display for UsageError {
@@ -127,10 +167,12 @@ impl std::fmt::Display for UsageError {
         match self {
             UsageError::FailedToParse => write!(f, "Failed to parse arguments."),
             UsageError::TooManyArguments => write!(f, "Too many arguments."),
-            UsageError::InvalidMoveNumber => write!(f, "Invalid move number."),
+            UsageError::InvalidNodeNumber => write!(f, "Invalid node number."),
             UsageError::InvalidWidth => write!(f, "Invalid width."),
             UsageError::OverspecifiedRange => write!(f, "Specify only '-r' or '-s'"),
             UsageError::InvalidRange => write!(f, "Invalid range."),
+            UsageError::InvalidStyle => write!(f, "Invalid style."),
+            UsageError::InvalidFirstMoveNumber => write!(f, "Invalid first move number."),
         }
     }
 }
