@@ -4,7 +4,7 @@ CLI to generate SVG or PNG output from an SGF file.
 
 SVG output is clean and well labeled for easy re-styling or modification.
 
-![Cho Chikun Elementary, Problem 45](data/problem45.svg).
+![Cho Chikun Elementary, Problem 45](demo/prob45.svg).
 
 ## Installation
 
