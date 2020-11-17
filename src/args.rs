@@ -60,14 +60,24 @@ pub fn parse_args(
         .unwrap_or(Ok(DEFAULT_FIRST_MOVE_NUM))
         .map_err(|_| UsageError::InvalidFirstMoveNumber)?;
 
-    // There isn't really a clean way to render both marks and move numebrs that I can see.
+    // There isn't really a clean way to render both markup and move numbers that I can see.
     let render_marks = !render_move_numbers && !matches.opt_present("no-marks");
+    let render_triangles = !render_move_numbers && !matches.opt_present("no-triangles");
+    let render_circles = !render_move_numbers && !matches.opt_present("no-circles");
+    let render_squares = !render_move_numbers && !matches.opt_present("no-squares");
+    let render_selected = !render_move_numbers && !matches.opt_present("no-selected");
+    let render_dimmed = !render_move_numbers && !matches.opt_present("no-dimmed");
 
     let options = MakeSvgOptions {
         goban_range,
         render_labels,
         render_move_numbers,
         render_marks,
+        render_triangles,
+        render_circles,
+        render_squares,
+        render_selected,
+        render_dimmed,
         first_move_number,
         viewbox_width,
         style,
@@ -131,8 +141,17 @@ pub fn build_opts() -> getopts::Options {
         "Style to use. One of 'default', 'simple' or 'minimalist'",
         "STYLE",
     );
-    opts.optflag("", "move-numbers", "Draw move numbers.");
+    opts.optflag(
+        "",
+        "move-numbers",
+        "Draw move numbers (disables other markup).",
+    );
     opts.optflag("", "no-marks", "Don't render SGF marks.");
+    opts.optflag("", "no-triangles", "Don't render SGF triangles.");
+    opts.optflag("", "no-circles", "Don't render SGF circles.");
+    opts.optflag("", "no-squares", "Don't render SGF squares.");
+    opts.optflag("", "no-selected", "Don't render SGF selected.");
+    opts.optflag("", "no-dimmed", "Don't render SGF dimmmed.");
     opts.optopt(
         "",
         "first-move-number",

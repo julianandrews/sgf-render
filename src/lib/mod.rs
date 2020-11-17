@@ -25,6 +25,11 @@ pub struct MakeSvgOptions {
     pub render_labels: bool,
     pub render_move_numbers: bool,
     pub render_marks: bool,
+    pub render_triangles: bool,
+    pub render_circles: bool,
+    pub render_squares: bool,
+    pub render_selected: bool,
+    pub render_dimmed: bool,
     pub first_move_number: u64,
     pub style: GobanStyle,
 }
@@ -116,8 +121,6 @@ pub fn make_svg(goban: &Goban, options: &MakeSvgOptions) -> Result<svg::Document
 
 /// Draws a goban of with squares of unit size.
 fn draw_board(goban: &Goban, options: &MakeSvgOptions) -> element::Group {
-    // TODO: Add support for:
-    //   TR, CR, SQ, LB, LS, DD, AR, and LN properties
     let mut lines = element::Group::new()
         .set("id", "lines")
         .set("stroke", LINE_COLOR)
@@ -167,6 +170,12 @@ fn draw_board(goban: &Goban, options: &MakeSvgOptions) -> element::Group {
         stones = stones.add(draw_stone(stone, options.style));
     }
 
+    // Draw optional markup
+    let mut group = element::Group::new()
+        .set("id", "goban")
+        .add(lines)
+        .add(stones);
+
     // Draw move numbers
     let mut move_numbers = element::Group::new()
         .set("id", "move-numbers")
@@ -189,8 +198,10 @@ fn draw_board(goban: &Goban, options: &MakeSvgOptions) -> element::Group {
                 ));
             }
         }
+        group = group.add(move_numbers);
     }
 
+    // TODO: Add support for: LB, AR, and LN properties
     // Draw Marks
     let mut marks = element::Group::new().set("id", "marks");
     if options.render_marks {
@@ -198,17 +209,51 @@ fn draw_board(goban: &Goban, options: &MakeSvgOptions) -> element::Group {
             let stone_color = goban.stones.get(&point).map(|&s| s);
             marks = marks.add(draw_mark(point.0, point.1, stone_color, options.style));
         }
-    }
-
-    let mut group = element::Group::new()
-        .set("id", "goban")
-        .add(lines)
-        .add(stones);
-    if options.render_move_numbers {
-        group = group.add(move_numbers);
-    }
-    if options.render_marks {
         group = group.add(marks);
+    }
+    // Draw Triangles
+    let mut triangles = element::Group::new().set("id", "triangles");
+    if options.render_triangles {
+        for point in goban.triangles.iter() {
+            let stone_color = goban.stones.get(&point).map(|&s| s);
+            triangles = triangles.add(draw_triangle(point.0, point.1, stone_color, options.style));
+        }
+        group = group.add(triangles);
+    }
+    // Draw Circles
+    let mut circles = element::Group::new().set("id", "circles");
+    if options.render_circles {
+        for point in goban.circles.iter() {
+            let stone_color = goban.stones.get(&point).map(|&s| s);
+            circles = circles.add(draw_circle(point.0, point.1, stone_color, options.style));
+        }
+        group = group.add(circles);
+    }
+    // Draw Squares
+    let mut squares = element::Group::new().set("id", "squares");
+    if options.render_squares {
+        for point in goban.squares.iter() {
+            let stone_color = goban.stones.get(&point).map(|&s| s);
+            squares = squares.add(draw_square(point.0, point.1, stone_color, options.style));
+        }
+        group = group.add(squares);
+    }
+    // Draw selected
+    let mut selected = element::Group::new().set("id", "selected");
+    if options.render_selected {
+        for point in goban.selected.iter() {
+            let stone_color = goban.stones.get(&point).map(|&s| s);
+            selected = selected.add(draw_selected(point.0, point.1, stone_color, options.style));
+        }
+        group = group.add(selected);
+    }
+    // Draw dimmed
+    let mut dimmed = element::Group::new().set("id", "dimmed");
+    if options.render_dimmed {
+        for point in goban.dimmed.iter() {
+            dimmed = dimmed.add(dim_square(point.0, point.1));
+        }
+        group = group.add(dimmed);
     }
 
     group
@@ -347,7 +392,96 @@ fn draw_mark(x: u8, y: u8, color: Option<StoneColor>, style: GobanStyle) -> impl
                 .set("y1", y as f64 + 0.25)
                 .set("y2", y as f64 - 0.25),
         )
-    // TODO
+}
+
+fn draw_triangle(
+    x: u8,
+    y: u8,
+    color: Option<StoneColor>,
+    style: GobanStyle,
+) -> impl svg::node::Node {
+    let triangle_radius = 0.45;
+    element::Group::new()
+        .set("stroke", style.markup_color(color))
+        .set("fill", "none")
+        .set("stroke-width", LINE_WIDTH)
+        .add(element::Polygon::new().set(
+            "points",
+            format!(
+                "{},{} {},{} {},{}",
+                x as f64,
+                y as f64 - triangle_radius,
+                x as f64 - 0.866 * triangle_radius,
+                y as f64 + 0.5 * triangle_radius,
+                x as f64 + 0.866 * triangle_radius,
+                y as f64 + 0.5 * triangle_radius,
+            ),
+        ))
+}
+
+fn draw_circle(x: u8, y: u8, color: Option<StoneColor>, style: GobanStyle) -> impl svg::node::Node {
+    let radius = 0.25;
+    element::Group::new()
+        .set("stroke", style.markup_color(color))
+        .set("fill", "none")
+        .set("stroke-width", LINE_WIDTH)
+        .add(
+            element::Circle::new()
+                .set("cx", x as f64)
+                .set("cy", y as f64)
+                .set("r", radius),
+        )
+}
+
+fn draw_square(x: u8, y: u8, color: Option<StoneColor>, style: GobanStyle) -> impl svg::node::Node {
+    let width = 0.55;
+    element::Group::new()
+        .set("stroke", style.markup_color(color))
+        .set("fill", "none")
+        .set("stroke-width", LINE_WIDTH)
+        .add(
+            element::Rectangle::new()
+                .set("x", x as f64 - 0.5 * width)
+                .set("y", y as f64 - 0.5 * width)
+                .set("width", width)
+                .set("height", width),
+        )
+}
+
+fn draw_selected(
+    x: u8,
+    y: u8,
+    color: Option<StoneColor>,
+    style: GobanStyle,
+) -> impl svg::node::Node {
+    let width = 0.25;
+    element::Group::new()
+        .set("stroke", "none")
+        .set("fill", style.selected_color(color))
+        .set("stroke-width", LINE_WIDTH)
+        .add(
+            element::Rectangle::new()
+                .set("x", x as f64 - 0.5 * width)
+                .set("y", y as f64 - 0.5 * width)
+                .set("width", width)
+                .set("height", width),
+        )
+}
+
+fn dim_square(x: u8, y: u8) -> impl svg::node::Node {
+    let width = 1.00;
+    element::Group::new()
+        .set("stroke", "none")
+        .set("fill", "black")
+        .set("fill-opacity", 0.5)
+        .set("shape-rendering", "crispEdges")
+        .add(
+            element::Rectangle::new()
+                .set("x", x as f64 - 0.5 * width)
+                .set("y", y as f64 - 0.5 * width)
+                .set("width", width)
+                .set("height", width),
+        )
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -377,6 +511,10 @@ impl GobanStyle {
             None | Some(StoneColor::White) => "black".to_string(),
             Some(StoneColor::Black) => "white".to_string(),
         }
+    }
+
+    fn selected_color(&self, _color: Option<StoneColor>) -> String {
+        "blue".to_string()
     }
 
     fn defs(&self) -> Vec<impl svg::node::Node> {
@@ -439,12 +577,11 @@ impl GobanRange {
                     .stones()
                     .map(|s| (s.x, s.y))
                     .chain(goban.marks.iter().copied())
-                    // TODO:
-                    // .chain(goban.triangles.iter().copied())
-                    // .chain(goban.circles.iter().copied())
-                    // .chain(goban.squares.iter().copied())
-                    // .chain(goban.selected.iter().copied())
-                    // .chain(goban.dimmed.iter().copied())
+                    .chain(goban.triangles.iter().copied())
+                    .chain(goban.circles.iter().copied())
+                    .chain(goban.squares.iter().copied())
+                    .chain(goban.selected.iter().copied())
+                    // Don't necessarily include dimmed points!
                     .collect();
                 let x_start = points
                     .iter()
