@@ -307,7 +307,7 @@ fn label_text(x: u8) -> String {
 
 fn draw_stone(stone: Stone, style: GobanStyle) -> impl svg::node::Node {
     let stone_group = match style {
-        GobanStyle::Default => {
+        GobanStyle::Fancy => {
             let shadow = element::Circle::new()
                 .set("cx", stone.x as f64 + 0.025)
                 .set("cy", stone.y as f64 + 0.025)
@@ -486,7 +486,7 @@ fn dim_square(x: u8, y: u8) -> impl svg::node::Node {
 
 #[derive(Debug, Clone, Copy)]
 pub enum GobanStyle {
-    Default,
+    Fancy,
     Simple,
     Minimalist,
 }
@@ -494,14 +494,14 @@ pub enum GobanStyle {
 impl GobanStyle {
     fn label_color(&self) -> String {
         match self {
-            Self::Default | Self::Simple => "#6e5840".to_string(),
+            Self::Fancy | Self::Simple => "#6e5840".to_string(),
             Self::Minimalist => "black".to_string(),
         }
     }
 
     fn background_fill(&self) -> String {
         match self {
-            Self::Default | Self::Simple => "#cfa87e".to_string(),
+            Self::Fancy | Self::Simple => "#cfa87e".to_string(),
             Self::Minimalist => "white".to_string(),
         }
     }
@@ -519,7 +519,7 @@ impl GobanStyle {
 
     fn defs(&self) -> Vec<impl svg::node::Node> {
         match self {
-            Self::Default => {
+            Self::Fancy => {
                 let black_stone_fill = element::RadialGradient::new()
                     .set("id", "black-stone-fill")
                     .set("cx", "35%")

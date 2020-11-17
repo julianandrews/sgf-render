@@ -45,11 +45,11 @@ pub fn parse_args(
     };
     let style = match matches
         .opt_str("style")
-        .unwrap_or("default".to_string())
+        .unwrap_or("simple".to_string())
         .as_str()
     {
-        "default" => Ok(GobanStyle::Default),
         "simple" => Ok(GobanStyle::Simple),
+        "fancy" => Ok(GobanStyle::Fancy),
         "minimalist" => Ok(GobanStyle::Minimalist),
         _ => Err(UsageError::InvalidStyle),
     }?;
@@ -138,7 +138,7 @@ pub fn build_opts() -> getopts::Options {
     opts.optopt(
         "",
         "style",
-        "Style to use. One of 'default', 'simple' or 'minimalist'",
+        "Style to use. One of 'simple', 'fancy' or 'minimalist'",
         "STYLE",
     );
     opts.optflag(
