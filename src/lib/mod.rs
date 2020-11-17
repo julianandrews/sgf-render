@@ -159,7 +159,7 @@ fn draw_board(goban: &Goban, options: &MakeSvgOptions) -> element::Group {
         .set("id", "stones")
         .set("stroke", "none");
     for stone in goban.stones() {
-        stones = stones.add(options.style.draw_stone(stone));
+        stones = stones.add(draw_stone(stone, options.style));
     }
     if options.render_move_numbers {
         // TODO: Indicate older moves on the side.
@@ -170,11 +170,12 @@ fn draw_board(goban: &Goban, options: &MakeSvgOptions) -> element::Group {
             if n >= options.first_move_number {
                 let stone_color = goban.stones.get(&point).map(|&s| s);
                 let starting_num = (n - options.first_move_number) % 99 + 1;
-                stones = stones.add(options.style.draw_move_number(
+                stones = stones.add(draw_move_number(
                     point.0,
                     point.1,
                     starting_num,
                     stone_color,
+                    options.style,
                 ));
             }
         }
@@ -230,6 +231,81 @@ fn label_text(x: u8) -> String {
     } else {
         ((x + b'B') as char).to_string() // skip 'I'
     }
+}
+
+fn draw_stone(stone: Stone, style: GobanStyle) -> impl svg::node::Node {
+    let stone_group = match style {
+        GobanStyle::Default => {
+            let shadow = element::Circle::new()
+                .set("cx", stone.x as f64 + 0.025)
+                .set("cy", stone.y as f64 + 0.025)
+                .set("r", 0.475)
+                .set("fill", "black")
+                .set("fill-opacity", 0.5);
+            let fill = match stone.color {
+                StoneColor::Black => "url(#black-stone-fill)",
+                StoneColor::White => "url(#white-stone-fill)",
+            };
+            let stone_element = element::Circle::new()
+                .set("cx", stone.x as f64 - 0.017)
+                .set("cy", stone.y as f64 - 0.017)
+                .set("r", 0.475)
+                .set("fill", fill);
+            element::Group::new().add(shadow).add(stone_element)
+        }
+        GobanStyle::Minimalist | GobanStyle::Simple => {
+            let fill = match stone.color {
+                StoneColor::Black => "black",
+                StoneColor::White => "white",
+            };
+            element::Group::new().add(
+                element::Circle::new()
+                    .set("cx", stone.x as f64)
+                    .set("cy", stone.y as f64)
+                    .set("r", 0.48)
+                    .set("stroke", "black")
+                    .set("stroke-width", LINE_WIDTH)
+                    .set("fill", fill),
+            )
+        }
+    };
+
+    stone_group
+}
+
+fn draw_move_number(
+    x: u8,
+    y: u8,
+    n: u64,
+    color: Option<StoneColor>,
+    style: GobanStyle,
+) -> impl svg::node::Node {
+    let text = svg::node::Text::new(n.to_string());
+    let fill = match color {
+        None | Some(StoneColor::White) => "black",
+        Some(StoneColor::Black) => "white",
+    };
+    let text_element = element::Text::new()
+        .set("x", x as f64)
+        .set("y", y as f64)
+        .set("text-anchor", "middle")
+        .set("dy", "0.35em")
+        // .set("dominant-baseline", "central")
+        .set("fill", fill)
+        .add(text);
+    let mut group = element::Group::new();
+    if color.is_none() {
+        group = group.add(
+            element::Rectangle::new()
+                .set("fill", style.background_fill())
+                .set("x", x as f64 - 0.4)
+                .set("y", y as f64 - 0.4)
+                .set("width", 0.8)
+                .set("height", 0.8),
+        );
+    }
+
+    group.add(text_element)
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -295,81 +371,6 @@ impl GobanStyle {
             Self::Simple => vec![],
             Self::Minimalist => vec![],
         }
-    }
-
-    fn draw_stone(&self, stone: Stone) -> impl svg::node::Node {
-        let stone_group = match self {
-            GobanStyle::Default => {
-                let shadow = element::Circle::new()
-                    .set("cx", stone.x as f64 + 0.025)
-                    .set("cy", stone.y as f64 + 0.025)
-                    .set("r", 0.475)
-                    .set("fill", "black")
-                    .set("fill-opacity", 0.5);
-                let fill = match stone.color {
-                    StoneColor::Black => "url(#black-stone-fill)",
-                    StoneColor::White => "url(#white-stone-fill)",
-                };
-                let stone_element = element::Circle::new()
-                    .set("cx", stone.x as f64 - 0.017)
-                    .set("cy", stone.y as f64 - 0.017)
-                    .set("r", 0.475)
-                    .set("fill", fill);
-                element::Group::new().add(shadow).add(stone_element)
-            }
-            GobanStyle::Minimalist | GobanStyle::Simple => {
-                let fill = match stone.color {
-                    StoneColor::Black => "black",
-                    StoneColor::White => "white",
-                };
-                element::Group::new().add(
-                    element::Circle::new()
-                        .set("cx", stone.x as f64)
-                        .set("cy", stone.y as f64)
-                        .set("r", 0.48)
-                        .set("stroke", "black")
-                        .set("stroke-width", LINE_WIDTH)
-                        .set("fill", fill),
-                )
-            }
-        };
-
-        stone_group
-    }
-
-    fn draw_move_number(
-        &self,
-        x: u8,
-        y: u8,
-        n: u64,
-        color: Option<StoneColor>,
-    ) -> impl svg::node::Node {
-        let text = svg::node::Text::new(n.to_string());
-        let fill = match color {
-            None | Some(StoneColor::White) => "black",
-            Some(StoneColor::Black) => "white",
-        };
-        let text_element = element::Text::new()
-            .set("x", x as f64)
-            .set("y", y as f64)
-            .set("text-anchor", "middle")
-            .set("dy", "0.35em")
-            // .set("dominant-baseline", "central")
-            .set("fill", fill)
-            .add(text);
-        let mut group = element::Group::new();
-        if color.is_none() {
-            group = group.add(
-                element::Rectangle::new()
-                    .set("fill", self.background_fill())
-                    .set("x", x as f64 - 0.4)
-                    .set("y", y as f64 - 0.4)
-                    .set("width", 0.8)
-                    .set("height", 0.8),
-            );
-        }
-
-        group.add(text_element)
     }
 }
 
