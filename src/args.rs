@@ -53,7 +53,6 @@ pub fn parse_args(
         "minimalist" => Ok(GobanStyle::Minimalist),
         _ => Err(UsageError::InvalidStyle),
     }?;
-    // TODO: parse from args!
     let render_move_numbers = matches.opt_present("move-numbers");
     let first_move_number = matches
         .opt_str("first-move-number")
