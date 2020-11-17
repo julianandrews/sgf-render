@@ -22,7 +22,7 @@ pub fn parse_args(
         .map(|c| c.parse())
         .unwrap_or(Ok(DEFAULT_NODE_NUM))
         .map_err(|_| UsageError::InvalidNodeNumber)?;
-    let render_labels = !matches.opt_present("no-labels");
+    let draw_board_labels = !matches.opt_present("no-board-labels");
     let viewbox_width = matches
         .opt_str("w")
         .map(|c| c.parse::<u32>())
@@ -53,31 +53,33 @@ pub fn parse_args(
         "minimalist" => Ok(GobanStyle::Minimalist),
         _ => Err(UsageError::InvalidStyle),
     }?;
-    let render_move_numbers = matches.opt_present("move-numbers");
+    let draw_move_numbers = matches.opt_present("move-numbers");
     let first_move_number = matches
         .opt_str("first-move-number")
         .map(|c| c.parse())
         .unwrap_or(Ok(DEFAULT_FIRST_MOVE_NUM))
         .map_err(|_| UsageError::InvalidFirstMoveNumber)?;
 
-    // There isn't really a clean way to render both markup and move numbers that I can see.
-    let render_marks = !render_move_numbers && !matches.opt_present("no-marks");
-    let render_triangles = !render_move_numbers && !matches.opt_present("no-triangles");
-    let render_circles = !render_move_numbers && !matches.opt_present("no-circles");
-    let render_squares = !render_move_numbers && !matches.opt_present("no-squares");
-    let render_selected = !render_move_numbers && !matches.opt_present("no-selected");
-    let render_dimmed = !render_move_numbers && !matches.opt_present("no-dimmed");
+    // There isn't really a clean way to draw both markup and move numbers that I can see.
+    let draw_marks = !draw_move_numbers && !matches.opt_present("no-marks");
+    let draw_triangles = !draw_move_numbers && !matches.opt_present("no-triangles");
+    let draw_circles = !draw_move_numbers && !matches.opt_present("no-circles");
+    let draw_squares = !draw_move_numbers && !matches.opt_present("no-squares");
+    let draw_selected = !draw_move_numbers && !matches.opt_present("no-selected");
+    let draw_dimmed = !draw_move_numbers && !matches.opt_present("no-dimmed");
+    let draw_labels = !draw_move_numbers && !matches.opt_present("no-labels");
 
     let options = MakeSvgOptions {
         goban_range,
-        render_labels,
-        render_move_numbers,
-        render_marks,
-        render_triangles,
-        render_circles,
-        render_squares,
-        render_selected,
-        render_dimmed,
+        draw_board_labels,
+        draw_move_numbers,
+        draw_marks,
+        draw_triangles,
+        draw_circles,
+        draw_squares,
+        draw_selected,
+        draw_dimmed,
+        draw_labels,
         first_move_number,
         viewbox_width,
         style,
@@ -146,19 +148,20 @@ pub fn build_opts() -> getopts::Options {
         "move-numbers",
         "Draw move numbers (disables other markup).",
     );
-    opts.optflag("", "no-marks", "Don't render SGF marks.");
-    opts.optflag("", "no-triangles", "Don't render SGF triangles.");
-    opts.optflag("", "no-circles", "Don't render SGF circles.");
-    opts.optflag("", "no-squares", "Don't render SGF squares.");
-    opts.optflag("", "no-selected", "Don't render SGF selected.");
-    opts.optflag("", "no-dimmed", "Don't render SGF dimmmed.");
+    opts.optflag("", "no-board-labels", "Don't draw position labels.");
+    opts.optflag("", "no-marks", "Don't draw SGF marks.");
+    opts.optflag("", "no-triangles", "Don't draw SGF triangles.");
+    opts.optflag("", "no-circles", "Don't draw SGF circles.");
+    opts.optflag("", "no-squares", "Don't draw SGF squares.");
+    opts.optflag("", "no-selected", "Don't draw SGF selected.");
+    opts.optflag("", "no-dimmed", "Don't draw SGF dimmmed.");
+    opts.optflag("", "no-labels", "Don't draw SGF labels.");
     opts.optopt(
         "",
         "first-move-number",
         "First move number to draw if using --move-numbers",
         "NUM",
     );
-    opts.optflag("", "no-labels", "Don't render labels on the diagram");
     opts.optflag("h", "help", "Display this help and exit");
 
     opts

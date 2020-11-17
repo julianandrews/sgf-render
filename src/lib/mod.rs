@@ -22,14 +22,15 @@ static HOSHI_RADIUS: f64 = 0.09;
 pub struct MakeSvgOptions {
     pub goban_range: GobanRange,
     pub viewbox_width: f64,
-    pub render_labels: bool,
-    pub render_move_numbers: bool,
-    pub render_marks: bool,
-    pub render_triangles: bool,
-    pub render_circles: bool,
-    pub render_squares: bool,
-    pub render_selected: bool,
-    pub render_dimmed: bool,
+    pub draw_board_labels: bool,
+    pub draw_move_numbers: bool,
+    pub draw_marks: bool,
+    pub draw_triangles: bool,
+    pub draw_circles: bool,
+    pub draw_squares: bool,
+    pub draw_selected: bool,
+    pub draw_dimmed: bool,
+    pub draw_labels: bool,
     pub first_move_number: u64,
     pub style: GobanStyle,
 }
@@ -38,7 +39,7 @@ pub fn make_svg(goban: &Goban, options: &MakeSvgOptions) -> Result<svg::Document
     let (x_range, y_range) = options.goban_range.get_ranges(goban)?;
     let width = x_range.end - x_range.start;
     let height = y_range.end - y_range.start;
-    let label_margin = if options.render_labels {
+    let label_margin = if options.draw_board_labels {
         if width > 25 || height > 99 {
             return Err(GobanSVGError::UnlabellableRange);
         }
@@ -89,8 +90,8 @@ pub fn make_svg(goban: &Goban, options: &MakeSvgOptions) -> Result<svg::Document
             .add(board_view)
             .set("transform", transform);
 
-        if options.render_labels {
-            diagram = diagram.add(draw_labels(
+        if options.draw_board_labels {
+            diagram = diagram.add(draw_board_labels(
                 x_range,
                 goban.size.1 - height - y_range.start + 1..goban.size.1 - y_range.start + 1,
                 options.style,
@@ -180,7 +181,7 @@ fn draw_board(goban: &Goban, options: &MakeSvgOptions) -> element::Group {
     let mut move_numbers = element::Group::new()
         .set("id", "move-numbers")
         .set("text-anchor", "middle");
-    if options.render_move_numbers {
+    if options.draw_move_numbers {
         // TODO: Indicate older moves on the side.
         for (point, nums) in &goban.move_numbers {
             let n = *nums
@@ -201,10 +202,10 @@ fn draw_board(goban: &Goban, options: &MakeSvgOptions) -> element::Group {
         group = group.add(move_numbers);
     }
 
-    // TODO: Add support for: LB, AR, and LN properties
+    // TODO: Add support for AR and LN properties
     // Draw Marks
     let mut marks = element::Group::new().set("id", "marks");
-    if options.render_marks {
+    if options.draw_marks {
         for point in goban.marks.iter() {
             let stone_color = goban.stones.get(&point).map(|&s| s);
             marks = marks.add(draw_mark(point.0, point.1, stone_color, options.style));
@@ -213,7 +214,7 @@ fn draw_board(goban: &Goban, options: &MakeSvgOptions) -> element::Group {
     }
     // Draw Triangles
     let mut triangles = element::Group::new().set("id", "triangles");
-    if options.render_triangles {
+    if options.draw_triangles {
         for point in goban.triangles.iter() {
             let stone_color = goban.stones.get(&point).map(|&s| s);
             triangles = triangles.add(draw_triangle(point.0, point.1, stone_color, options.style));
@@ -222,7 +223,7 @@ fn draw_board(goban: &Goban, options: &MakeSvgOptions) -> element::Group {
     }
     // Draw Circles
     let mut circles = element::Group::new().set("id", "circles");
-    if options.render_circles {
+    if options.draw_circles {
         for point in goban.circles.iter() {
             let stone_color = goban.stones.get(&point).map(|&s| s);
             circles = circles.add(draw_circle(point.0, point.1, stone_color, options.style));
@@ -231,7 +232,7 @@ fn draw_board(goban: &Goban, options: &MakeSvgOptions) -> element::Group {
     }
     // Draw Squares
     let mut squares = element::Group::new().set("id", "squares");
-    if options.render_squares {
+    if options.draw_squares {
         for point in goban.squares.iter() {
             let stone_color = goban.stones.get(&point).map(|&s| s);
             squares = squares.add(draw_square(point.0, point.1, stone_color, options.style));
@@ -240,7 +241,7 @@ fn draw_board(goban: &Goban, options: &MakeSvgOptions) -> element::Group {
     }
     // Draw selected
     let mut selected = element::Group::new().set("id", "selected");
-    if options.render_selected {
+    if options.draw_selected {
         for point in goban.selected.iter() {
             let stone_color = goban.stones.get(&point).map(|&s| s);
             selected = selected.add(draw_selected(point.0, point.1, stone_color, options.style));
@@ -249,11 +250,26 @@ fn draw_board(goban: &Goban, options: &MakeSvgOptions) -> element::Group {
     }
     // Draw dimmed
     let mut dimmed = element::Group::new().set("id", "dimmed");
-    if options.render_dimmed {
+    if options.draw_dimmed {
         for point in goban.dimmed.iter() {
             dimmed = dimmed.add(dim_square(point.0, point.1));
         }
         group = group.add(dimmed);
+    }
+    // Draw labels
+    let mut labels = element::Group::new().set("id", "dimmed");
+    if options.draw_labels {
+        for (point, text) in goban.labels.iter() {
+            let stone_color = goban.stones.get(&point).map(|&s| s);
+            labels = labels.add(draw_label(
+                point.0,
+                point.1,
+                text,
+                stone_color,
+                options.style,
+            ));
+        }
+        group = group.add(labels);
     }
 
     group
@@ -263,7 +279,7 @@ fn draw_board(goban: &Goban, options: &MakeSvgOptions) -> element::Group {
 ///
 /// Assumes lines are a unit apart, offset by BOARD_MARGIN.
 /// Respects LABEL_MARGIN.
-fn draw_labels(x_range: Range<u8>, y_range: Range<u8>, style: GobanStyle) -> element::Group {
+fn draw_board_labels(x_range: Range<u8>, y_range: Range<u8>, style: GobanStyle) -> element::Group {
     let mut row_labels = element::Group::new().set("text-anchor", "middle");
     let start = x_range.start;
     for x in x_range {
@@ -484,6 +500,35 @@ fn dim_square(x: u8, y: u8) -> impl svg::node::Node {
         )
 }
 
+fn draw_label(
+    x: u8,
+    y: u8,
+    text: &str,
+    color: Option<StoneColor>,
+    style: GobanStyle,
+) -> impl svg::node::Node {
+    let text = svg::node::Text::new(text.chars().take(2).collect::<String>());
+    let text_element = element::Text::new()
+        .set("x", x as f64)
+        .set("y", y as f64)
+        .set("text-anchor", "middle")
+        .set("dy", "0.35em")
+        .set("fill", style.markup_color(color))
+        .add(text);
+    let mut group = element::Group::new();
+    if color.is_none() {
+        group = group.add(
+            element::Rectangle::new()
+                .set("fill", style.background_fill())
+                .set("x", x as f64 - 0.4)
+                .set("y", y as f64 - 0.4)
+                .set("width", 0.8)
+                .set("height", 0.8),
+        );
+    }
+
+    group.add(text_element)
+}
 #[derive(Debug, Clone, Copy)]
 pub enum GobanStyle {
     Fancy,
@@ -581,6 +626,7 @@ impl GobanRange {
                     .chain(goban.circles.iter().copied())
                     .chain(goban.squares.iter().copied())
                     .chain(goban.selected.iter().copied())
+                    .chain(goban.labels.keys().copied())
                     // Don't necessarily include dimmed points!
                     .collect();
                 let x_start = points

@@ -14,6 +14,7 @@ pub struct Goban {
     pub squares: HashSet<(u8, u8)>,
     pub selected: HashSet<(u8, u8)>,
     pub dimmed: HashSet<(u8, u8)>,
+    pub labels: HashMap<(u8, u8), String>,
 }
 
 impl Goban {
@@ -46,6 +47,7 @@ impl Goban {
             squares: HashSet::new(),
             selected: HashSet::new(),
             dimmed: HashSet::new(),
+            labels: HashMap::new(),
         }
     }
 
@@ -76,6 +78,7 @@ impl Goban {
         self.squares.clear();
         self.selected.clear();
         self.dimmed.clear();
+        self.labels.clear();
         for prop in sgf_node.properties() {
             match prop {
                 SgfProp::B(sgf_parse::Move::Move(point)) => {
@@ -110,6 +113,12 @@ impl Goban {
                 SgfProp::SQ(points) => self.squares = points.iter().map(|p| (p.x, p.y)).collect(),
                 SgfProp::SL(points) => self.selected = points.iter().map(|p| (p.x, p.y)).collect(),
                 SgfProp::DD(points) => self.dimmed = points.iter().map(|p| (p.x, p.y)).collect(),
+                SgfProp::LB(labels) => {
+                    self.labels = labels
+                        .iter()
+                        .map(|(p, t)| ((p.x, p.y), t.to_string()))
+                        .collect()
+                }
                 _ => {}
             }
         }
