@@ -546,12 +546,12 @@ impl GobanStyle {
                     .add(
                         element::Stop::new()
                             .set("offset", "30%")
-                            .set("stop-color", "#b9b9b9"),
+                            .set("stop-color", "#ddd"),
                     )
                     .add(
                         element::Stop::new()
                             .set("offset", "100%")
-                            .set("stop-color", "#aaa"),
+                            .set("stop-color", "#bbb"),
                     );
                 vec![black_stone_fill, white_stone_fill]
             }
