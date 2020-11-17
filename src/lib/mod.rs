@@ -1,6 +1,8 @@
 mod goban;
 pub use goban::{Goban, Stone, StoneColor};
 
+use std::collections::HashSet;
+
 use std::ops::Range;
 use svg::node::element;
 
@@ -13,6 +15,7 @@ static FONT_WEIGHT: usize = 700;
 
 static LINE_COLOR: &str = "black";
 static LINE_WIDTH: f64 = 0.045;
+static MARKUP_WIDTH: f64 = 0.1;
 static HOSHI_RADIUS: f64 = 0.09;
 
 #[derive(Debug)]
@@ -21,6 +24,7 @@ pub struct MakeSvgOptions {
     pub viewbox_width: f64,
     pub render_labels: bool,
     pub render_move_numbers: bool,
+    pub render_marks: bool,
     pub first_move_number: u64,
     pub style: GobanStyle,
 }
@@ -112,7 +116,8 @@ pub fn make_svg(goban: &Goban, options: &MakeSvgOptions) -> Result<svg::Document
 
 /// Draws a goban of with squares of unit size.
 fn draw_board(goban: &Goban, options: &MakeSvgOptions) -> element::Group {
-    // TODO: Add support for markup and comments
+    // TODO: Add support for:
+    //   TR, CR, SQ, LB, LS, DD, AR, and LN properties
     let mut lines = element::Group::new()
         .set("id", "lines")
         .set("stroke", LINE_COLOR)
@@ -161,6 +166,11 @@ fn draw_board(goban: &Goban, options: &MakeSvgOptions) -> element::Group {
     for stone in goban.stones() {
         stones = stones.add(draw_stone(stone, options.style));
     }
+
+    // Draw move numbers
+    let mut move_numbers = element::Group::new()
+        .set("id", "move-numbers")
+        .set("text-anchor", "middle");
     if options.render_move_numbers {
         // TODO: Indicate older moves on the side.
         for (point, nums) in &goban.move_numbers {
@@ -170,7 +180,7 @@ fn draw_board(goban: &Goban, options: &MakeSvgOptions) -> element::Group {
             if n >= options.first_move_number {
                 let stone_color = goban.stones.get(&point).map(|&s| s);
                 let starting_num = (n - options.first_move_number) % 99 + 1;
-                stones = stones.add(draw_move_number(
+                move_numbers = move_numbers.add(draw_move_number(
                     point.0,
                     point.1,
                     starting_num,
@@ -181,10 +191,27 @@ fn draw_board(goban: &Goban, options: &MakeSvgOptions) -> element::Group {
         }
     }
 
-    element::Group::new()
+    // Draw Marks
+    let mut marks = element::Group::new().set("id", "marks");
+    if options.render_marks {
+        for point in goban.marks.iter() {
+            let stone_color = goban.stones.get(&point).map(|&s| s);
+            marks = marks.add(draw_mark(point.0, point.1, stone_color, options.style));
+        }
+    }
+
+    let mut group = element::Group::new()
         .set("id", "goban")
         .add(lines)
-        .add(stones)
+        .add(stones);
+    if options.render_move_numbers {
+        group = group.add(move_numbers);
+    }
+    if options.render_marks {
+        group = group.add(marks);
+    }
+
+    group
 }
 
 /// Draw labels for the provided ranges.
@@ -281,17 +308,11 @@ fn draw_move_number(
     style: GobanStyle,
 ) -> impl svg::node::Node {
     let text = svg::node::Text::new(n.to_string());
-    let fill = match color {
-        None | Some(StoneColor::White) => "black",
-        Some(StoneColor::Black) => "white",
-    };
     let text_element = element::Text::new()
         .set("x", x as f64)
         .set("y", y as f64)
-        .set("text-anchor", "middle")
         .set("dy", "0.35em")
-        // .set("dominant-baseline", "central")
-        .set("fill", fill)
+        .set("fill", style.markup_color(color))
         .add(text);
     let mut group = element::Group::new();
     if color.is_none() {
@@ -306,6 +327,27 @@ fn draw_move_number(
     }
 
     group.add(text_element)
+}
+
+fn draw_mark(x: u8, y: u8, color: Option<StoneColor>, style: GobanStyle) -> impl svg::node::Node {
+    element::Group::new()
+        .set("stroke", style.markup_color(color))
+        .set("stroke-width", MARKUP_WIDTH)
+        .add(
+            element::Line::new()
+                .set("x1", x as f64 - 0.25)
+                .set("x2", x as f64 + 0.25)
+                .set("y1", y as f64 - 0.25)
+                .set("y2", y as f64 + 0.25),
+        )
+        .add(
+            element::Line::new()
+                .set("x1", x as f64 - 0.25)
+                .set("x2", x as f64 + 0.25)
+                .set("y1", y as f64 + 0.25)
+                .set("y2", y as f64 - 0.25),
+        )
+    // TODO
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -327,6 +369,13 @@ impl GobanStyle {
         match self {
             Self::Default | Self::Simple => "#cfa87e".to_string(),
             Self::Minimalist => "white".to_string(),
+        }
+    }
+
+    fn markup_color(&self, color: Option<StoneColor>) -> String {
+        match color {
+            None | Some(StoneColor::White) => "black".to_string(),
+            Some(StoneColor::Black) => "white".to_string(),
         }
     }
 
@@ -386,26 +435,37 @@ impl GobanRange {
         match self {
             Self::FullBoard => Ok((0..goban.size.0, 0..goban.size.1)),
             Self::ShrinkWrap => {
-                let x_start = goban
+                let points: HashSet<(u8, u8)> = goban
                     .stones()
-                    .map(|s| s.x)
+                    .map(|s| (s.x, s.y))
+                    .chain(goban.marks.iter().copied())
+                    // TODO:
+                    // .chain(goban.triangles.iter().copied())
+                    // .chain(goban.circles.iter().copied())
+                    // .chain(goban.squares.iter().copied())
+                    // .chain(goban.selected.iter().copied())
+                    // .chain(goban.dimmed.iter().copied())
+                    .collect();
+                let x_start = points
+                    .iter()
+                    .map(|&(x, _)| x)
                     .min()
                     .unwrap_or(0)
                     .saturating_sub(1);
-                let x_end = goban
-                    .stones()
-                    .map(|s| s.x + 2)
+                let x_end = points
+                    .iter()
+                    .map(|&(x, _)| x + 2)
                     .max()
                     .unwrap_or(goban.size.0);
-                let y_start = goban
-                    .stones()
-                    .map(|s| s.y)
+                let y_start = points
+                    .iter()
+                    .map(|&(_, y)| y)
                     .min()
                     .unwrap_or(0)
                     .saturating_sub(1);
-                let y_end = goban
-                    .stones()
-                    .map(|s| s.y + 2)
+                let y_end = points
+                    .iter()
+                    .map(|&(_, y)| y + 2)
                     .max()
                     .unwrap_or(goban.size.1);
                 Ok((x_start..x_end, y_start..y_end))

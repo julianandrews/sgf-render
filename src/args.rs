@@ -60,10 +60,14 @@ pub fn parse_args(
         .unwrap_or(Ok(DEFAULT_FIRST_MOVE_NUM))
         .map_err(|_| UsageError::InvalidFirstMoveNumber)?;
 
+    // There isn't really a clean way to render both marks and move numebrs that I can see.
+    let render_marks = !render_move_numbers && !matches.opt_present("no-marks");
+
     let options = MakeSvgOptions {
         goban_range,
         render_labels,
         render_move_numbers,
+        render_marks,
         first_move_number,
         viewbox_width,
         style,
@@ -128,6 +132,7 @@ pub fn build_opts() -> getopts::Options {
         "STYLE",
     );
     opts.optflag("", "move-numbers", "Draw move numbers.");
+    opts.optflag("", "no-marks", "Don't render SGF marks.");
     opts.optopt(
         "",
         "first-move-number",

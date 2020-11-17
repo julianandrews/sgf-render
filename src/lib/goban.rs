@@ -8,6 +8,12 @@ pub struct Goban {
     pub move_number: u64,
     pub black_captures: u64,
     pub white_captures: u64,
+    pub marks: HashSet<(u8, u8)>,
+    pub triangles: HashSet<(u8, u8)>,
+    pub circles: HashSet<(u8, u8)>,
+    pub squares: HashSet<(u8, u8)>,
+    pub selected: HashSet<(u8, u8)>,
+    pub dimmed: HashSet<(u8, u8)>,
 }
 
 impl Goban {
@@ -34,6 +40,12 @@ impl Goban {
             move_number: 0,
             black_captures: 0,
             white_captures: 0,
+            marks: HashSet::new(),
+            triangles: HashSet::new(),
+            circles: HashSet::new(),
+            squares: HashSet::new(),
+            selected: HashSet::new(),
+            dimmed: HashSet::new(),
         }
     }
 
@@ -58,6 +70,12 @@ impl Goban {
     }
 
     pub fn process_node(&mut self, sgf_node: &SgfNode) -> Result<(), Box<dyn std::error::Error>> {
+        self.marks.clear();
+        self.triangles.clear();
+        self.circles.clear();
+        self.squares.clear();
+        self.selected.clear();
+        self.dimmed.clear();
         for prop in sgf_node.properties() {
             match prop {
                 SgfProp::B(sgf_parse::Move::Move(point)) => {
@@ -86,6 +104,12 @@ impl Goban {
                     }
                 }
                 SgfProp::MN(num) => self.set_move_number(*num as u64),
+                SgfProp::MA(points) => self.marks = points.iter().map(|p| (p.x, p.y)).collect(),
+                SgfProp::TR(points) => self.triangles = points.iter().map(|p| (p.x, p.y)).collect(),
+                SgfProp::CR(points) => self.circles = points.iter().map(|p| (p.x, p.y)).collect(),
+                SgfProp::SQ(points) => self.squares = points.iter().map(|p| (p.x, p.y)).collect(),
+                SgfProp::SL(points) => self.selected = points.iter().map(|p| (p.x, p.y)).collect(),
+                SgfProp::DD(points) => self.dimmed = points.iter().map(|p| (p.x, p.y)).collect(),
                 _ => {}
             }
         }
