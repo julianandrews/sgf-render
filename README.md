@@ -1,10 +1,17 @@
 # Sgf Render
 
+![Cho Chikun Elementary, Problem 45](demo/prob45.svg).
+
 CLI to generate SVG or PNG output from an SGF file.
 
 SVG output is clean and well labeled for easy re-styling or modification.
 
-![Cho Chikun Elementary, Problem 45](demo/prob45.svg).
+Supports [numbered
+moves](https://raw.githubusercontent.com/julianandrews/sgf-render/master/demo/simple-numbered.svg),
+[markup](https://raw.githubusercontent.com/julianandrews/sgf-render/master/demo/markup.svg),
+and
+[several](https://raw.githubusercontent.com/julianandrews/sgf-render/master/demo/minimalist-numbered.svg)
+[styles](https://raw.githubusercontent.com/julianandrews/sgf-render/master/demo/prob45-fancy.svg).
 
 ## Installation
 
@@ -47,12 +54,21 @@ Options:
     -s, --shrink-wrap   Draw only enough of the board to hold all the stones
                         (with 1 space padding)
     -r, --range RANGE   Range to draw as a pair of corners (e.g. 'cc-ff')
-        --style STYLE   Style to use. One of 'default', 'simple' or
-                        'minimalist'
-        --move-numbers  Draw move numbers.
+        --style STYLE   Style to use. One of 'simple', 'fancy' or 'minimalist'
+        --move-numbers  Draw move numbers (disables other markup).
+        --no-board-labels
+                        Don't draw position labels.
+        --no-marks      Don't draw SGF marks.
+        --no-triangles  Don't draw SGF triangles.
+        --no-circles    Don't draw SGF circles.
+        --no-squares    Don't draw SGF squares.
+        --no-selected   Don't draw SGF selected.
+        --no-dimmed     Don't draw SGF dimmmed.
+        --no-labels     Don't draw SGF labels.
+        --no-lines      Don't draw SGF lines.
+        --no-arrows     Don't draw SGF arrows.
         --first-move-number NUM
                         First move number to draw if using --move-numbers
-        --no-labels     Don't render labels on the diagram
     -h, --help          Display this help and exit
 ```
 
