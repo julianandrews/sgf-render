@@ -68,6 +68,8 @@ pub fn parse_args(
     let draw_selected = !draw_move_numbers && !matches.opt_present("no-selected");
     let draw_dimmed = !draw_move_numbers && !matches.opt_present("no-dimmed");
     let draw_labels = !draw_move_numbers && !matches.opt_present("no-labels");
+    let draw_lines = !draw_move_numbers && !matches.opt_present("no-lines");
+    let draw_arrows = !draw_move_numbers && !matches.opt_present("no-arrows");
 
     let options = MakeSvgOptions {
         goban_range,
@@ -80,6 +82,8 @@ pub fn parse_args(
         draw_selected,
         draw_dimmed,
         draw_labels,
+        draw_lines,
+        draw_arrows,
         first_move_number,
         viewbox_width,
         style,
@@ -156,6 +160,8 @@ pub fn build_opts() -> getopts::Options {
     opts.optflag("", "no-selected", "Don't draw SGF selected.");
     opts.optflag("", "no-dimmed", "Don't draw SGF dimmmed.");
     opts.optflag("", "no-labels", "Don't draw SGF labels.");
+    opts.optflag("", "no-lines", "Don't draw SGF lines.");
+    opts.optflag("", "no-arrows", "Don't draw SGF arrows.");
     opts.optopt(
         "",
         "first-move-number",

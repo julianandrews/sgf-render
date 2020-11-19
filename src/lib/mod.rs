@@ -31,6 +31,8 @@ pub struct MakeSvgOptions {
     pub draw_selected: bool,
     pub draw_dimmed: bool,
     pub draw_labels: bool,
+    pub draw_lines: bool,
+    pub draw_arrows: bool,
     pub first_move_number: u64,
     pub style: GobanStyle,
 }
@@ -57,7 +59,10 @@ pub fn make_svg(goban: &Goban, options: &MakeSvgOptions) -> Result<svg::Document
                 .set("height", height as f64),
         );
 
-        let mut defs = element::Definitions::new().add(clip_path);
+        let mut defs = element::Definitions::new()
+            .add(clip_path)
+            .add(options.style.linehead().set("id", "linehead"))
+            .add(options.style.arrowhead().set("id", "arrowhead"));
         for element in options.style.defs() {
             defs = defs.add(element);
         }
@@ -202,10 +207,9 @@ fn draw_board(goban: &Goban, options: &MakeSvgOptions) -> element::Group {
         group = group.add(move_numbers);
     }
 
-    // TODO: Add support for AR and LN properties
     // Draw Marks
-    let mut marks = element::Group::new().set("id", "marks");
     if options.draw_marks {
+        let mut marks = element::Group::new().set("id", "markup-marks");
         for point in goban.marks.iter() {
             let stone_color = goban.stones.get(&point).map(|&s| s);
             marks = marks.add(draw_mark(point.0, point.1, stone_color, options.style));
@@ -213,8 +217,8 @@ fn draw_board(goban: &Goban, options: &MakeSvgOptions) -> element::Group {
         group = group.add(marks);
     }
     // Draw Triangles
-    let mut triangles = element::Group::new().set("id", "triangles");
     if options.draw_triangles {
+        let mut triangles = element::Group::new().set("id", "markup-triangles");
         for point in goban.triangles.iter() {
             let stone_color = goban.stones.get(&point).map(|&s| s);
             triangles = triangles.add(draw_triangle(point.0, point.1, stone_color, options.style));
@@ -222,8 +226,8 @@ fn draw_board(goban: &Goban, options: &MakeSvgOptions) -> element::Group {
         group = group.add(triangles);
     }
     // Draw Circles
-    let mut circles = element::Group::new().set("id", "circles");
     if options.draw_circles {
+        let mut circles = element::Group::new().set("id", "markup-circles");
         for point in goban.circles.iter() {
             let stone_color = goban.stones.get(&point).map(|&s| s);
             circles = circles.add(draw_circle(point.0, point.1, stone_color, options.style));
@@ -231,8 +235,8 @@ fn draw_board(goban: &Goban, options: &MakeSvgOptions) -> element::Group {
         group = group.add(circles);
     }
     // Draw Squares
-    let mut squares = element::Group::new().set("id", "squares");
     if options.draw_squares {
+        let mut squares = element::Group::new().set("id", "markup-squares");
         for point in goban.squares.iter() {
             let stone_color = goban.stones.get(&point).map(|&s| s);
             squares = squares.add(draw_square(point.0, point.1, stone_color, options.style));
@@ -240,8 +244,8 @@ fn draw_board(goban: &Goban, options: &MakeSvgOptions) -> element::Group {
         group = group.add(squares);
     }
     // Draw selected
-    let mut selected = element::Group::new().set("id", "selected");
     if options.draw_selected {
+        let mut selected = element::Group::new().set("id", "markup-selected");
         for point in goban.selected.iter() {
             let stone_color = goban.stones.get(&point).map(|&s| s);
             selected = selected.add(draw_selected(point.0, point.1, stone_color, options.style));
@@ -249,16 +253,16 @@ fn draw_board(goban: &Goban, options: &MakeSvgOptions) -> element::Group {
         group = group.add(selected);
     }
     // Draw dimmed
-    let mut dimmed = element::Group::new().set("id", "dimmed");
     if options.draw_dimmed {
+        let mut dimmed = element::Group::new().set("id", "markup-dimmed");
         for point in goban.dimmed.iter() {
             dimmed = dimmed.add(dim_square(point.0, point.1));
         }
         group = group.add(dimmed);
     }
     // Draw labels
-    let mut labels = element::Group::new().set("id", "dimmed");
     if options.draw_labels {
+        let mut labels = element::Group::new().set("id", "markup-labels");
         for (point, text) in goban.labels.iter() {
             let stone_color = goban.stones.get(&point).map(|&s| s);
             labels = labels.add(draw_label(
@@ -270,6 +274,43 @@ fn draw_board(goban: &Goban, options: &MakeSvgOptions) -> element::Group {
             ));
         }
         group = group.add(labels);
+    }
+    // Draw lines
+    let mut lines = element::Group::new()
+        .set("id", "markup-lines")
+        .set("stroke", "black")
+        .set("stroke-width", LINE_WIDTH)
+        .set("marker-start", "url(#linehead)")
+        .set("marker-end", "url(#linehead)");
+    if options.draw_lines {
+        for &(p1, p2) in goban.lines.iter() {
+            lines = lines.add(
+                element::Line::new()
+                    .set("x1", p1.0)
+                    .set("x2", p2.0)
+                    .set("y1", p1.1)
+                    .set("y2", p2.1),
+            );
+        }
+        group = group.add(lines);
+    }
+    // Draw arrows
+    let mut arrows = element::Group::new()
+        .set("id", "markup-arrows")
+        .set("stroke", "black")
+        .set("stroke-width", LINE_WIDTH)
+        .set("marker-end", "url(#arrowhead)");
+    if options.draw_arrows {
+        for &(p1, p2) in goban.arrows.iter() {
+            arrows = arrows.add(
+                element::Line::new()
+                    .set("x1", p1.0)
+                    .set("x2", p2.0)
+                    .set("y1", p1.1)
+                    .set("y2", p2.1),
+            );
+        }
+        group = group.add(arrows);
     }
 
     group
@@ -562,6 +603,25 @@ impl GobanStyle {
         "blue".to_string()
     }
 
+    fn arrowhead(&self) -> element::Marker {
+        element::Marker::new()
+            .set("markerWidth", 7)
+            .set("markerHeight", 5)
+            .set("refX", 7)
+            .set("refY", 2.5)
+            .set("orient", "auto")
+            .add(element::Polygon::new().set("points", "0 0, 7 2.5, 0 5"))
+    }
+
+    fn linehead(&self) -> element::Marker {
+        element::Marker::new()
+            .set("markerWidth", 4)
+            .set("markerHeight", 4)
+            .set("refX", 2)
+            .set("refY", 2)
+            .add(element::Circle::new().set("cx", 2).set("cy", 2).set("r", 2))
+    }
+
     fn defs(&self) -> Vec<impl svg::node::Node> {
         match self {
             Self::Fancy => {
@@ -627,6 +687,8 @@ impl GobanRange {
                     .chain(goban.squares.iter().copied())
                     .chain(goban.selected.iter().copied())
                     .chain(goban.labels.keys().copied())
+                    .chain(goban.lines.iter().flat_map(|&(p1, p2)| vec![p1, p2]))
+                    .chain(goban.arrows.iter().flat_map(|&(p1, p2)| vec![p1, p2]))
                     // Don't necessarily include dimmed points!
                     .collect();
                 let x_start = points

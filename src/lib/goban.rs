@@ -13,6 +13,8 @@ pub struct Goban {
     pub circles: HashSet<(u8, u8)>,
     pub squares: HashSet<(u8, u8)>,
     pub selected: HashSet<(u8, u8)>,
+    pub lines: HashSet<((u8, u8), (u8, u8))>,
+    pub arrows: HashSet<((u8, u8), (u8, u8))>,
     pub dimmed: HashSet<(u8, u8)>,
     pub labels: HashMap<(u8, u8), String>,
 }
@@ -46,6 +48,8 @@ impl Goban {
             circles: HashSet::new(),
             squares: HashSet::new(),
             selected: HashSet::new(),
+            lines: HashSet::new(),
+            arrows: HashSet::new(),
             dimmed: HashSet::new(),
             labels: HashMap::new(),
         }
@@ -79,6 +83,8 @@ impl Goban {
         self.selected.clear();
         self.dimmed.clear();
         self.labels.clear();
+        self.lines.clear();
+        self.arrows.clear();
         for prop in sgf_node.properties() {
             match prop {
                 SgfProp::B(sgf_parse::Move::Move(point)) => {
@@ -117,6 +123,18 @@ impl Goban {
                     self.labels = labels
                         .iter()
                         .map(|(p, t)| ((p.x, p.y), t.to_string()))
+                        .collect()
+                }
+                SgfProp::LN(pairs) => {
+                    self.lines = pairs
+                        .iter()
+                        .map(|(p1, p2)| ((p1.x, p1.y), (p2.x, p2.y)))
+                        .collect()
+                }
+                SgfProp::AR(pairs) => {
+                    self.arrows = pairs
+                        .iter()
+                        .map(|(p1, p2)| ((p1.x, p1.y), (p2.x, p2.y)))
                         .collect()
                 }
                 _ => {}
