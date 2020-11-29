@@ -80,7 +80,5 @@ Pull requests are welcome! For major changes, please open an issue first to
 discuss what you would like to change.
 
 Feature requests are also welcome! The goal is to make this a general purpose
-sgf diagram generation tool. I have plans to add support for sgf markup
-rendering, but motivation is low since I don't have any immediate use for it. A
-feature request would get me moving! Just open an issue at
+sgf diagram generation tool. Just open an issue at
 [GitHub](https://github.com/julianandrews/sgf-render/issues).
