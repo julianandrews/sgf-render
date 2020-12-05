@@ -18,12 +18,6 @@ and
 Check the [releases](https://github.com/julianandrews/sgf-render/releases) page
 on GitHub for pre-built binaries.
 
-Note that the windows, and linux-musl versions are compiled without PNG
-support. If you need PNG support on a platform without it consider building
-`sgf-render` yourself. Alternatively, you can always install
-[ImageMagick](https://imagemagick.org/index.php) to convert the SVG into any
-format you like.
-
 If you have `cargo` installed, you can also install the package from crates.io:
 
 ```

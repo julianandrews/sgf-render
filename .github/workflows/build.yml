@@ -14,25 +14,21 @@ jobs:
           rust: nightly
           target: x86_64-unknown-linux-musl
           archive-name: sgf-render-linux-musl.tar.gz
-          flags: "--no-default-features"
         - build: linux-gnu
           os: ubuntu-18.04
           rust: nightly
           target: x86_64-unknown-linux-gnu
           archive-name: sgf-render-linux-gnu.tar.gz
-          flags: ""
         - build: macos
           os: macos-latest
           rust: nightly
           target: x86_64-apple-darwin
           archive-name: sgf-render-macos.tar.gz
-          flags: ""
         - build: windows
           os: windows-2019
           rust: nightly-x86_64-msvc
           target: x86_64-pc-windows-msvc
           archive-name: sgf-render-windows.7z
-          flags: "--no-default-features"
       fail-fast: false
 
     steps:
@@ -48,7 +44,7 @@ jobs:
         target: ${{ matrix.target }}
 
     - name: Build binary
-      run: cargo build --verbose --release --target ${{ matrix.target }} ${{ matrix.flags }}
+      run: cargo build --verbose --release --target ${{ matrix.target }}
       env:
         RUST_BACKTRACE: 1
 
