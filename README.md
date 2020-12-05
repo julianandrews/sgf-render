@@ -2,7 +2,8 @@
 
 ![Cho Chikun Elementary, Problem 45](demo/prob45.svg).
 
-CLI to generate SVG or PNG output from an SGF file.
+CLI to generate SVG or PNG diagrams of Go games from
+[SGF](https://www.red-bean.com/sgf/) format game records.
 
 SVG output is clean and well labeled for easy re-styling or modification.
 
