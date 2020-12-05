@@ -599,8 +599,14 @@ impl GobanStyle {
         }
     }
 
-    fn selected_color(&self, _color: Option<StoneColor>) -> String {
-        "blue".to_string()
+    fn selected_color(&self, color: Option<StoneColor>) -> String {
+        match self {
+            Self::Minimalist => match color {
+                Some(StoneColor::Black) => "white".to_string(),
+                _ => "black".to_string(),
+            },
+            _ => "blue".to_string(),
+        }
     }
 
     fn arrowhead(&self) -> element::Marker {
