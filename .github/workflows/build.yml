@@ -7,18 +7,13 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        build: [linux-musl, linux-gnu, macos, windows]
+        build: [linux, macos, windows]
         include:
-        - build: linux-musl
+        - build: linux
           os: ubuntu-18.04
           rust: nightly
           target: x86_64-unknown-linux-musl
-          archive-name: sgf-render-linux-musl.tar.gz
-        - build: linux-gnu
-          os: ubuntu-18.04
-          rust: nightly
-          target: x86_64-unknown-linux-gnu
-          archive-name: sgf-render-linux-gnu.tar.gz
+          archive-name: sgf-render-linux.tar.gz
         - build: macos
           os: macos-latest
           rust: nightly
@@ -49,7 +44,7 @@ jobs:
         RUST_BACKTRACE: 1
 
     - name: Strip binary (linux and macos)
-      if: matrix.build == 'linux-musl' || matrix.build == 'linux-gnu' || matrix.build == 'macos'
+      if: matrix.build == 'linux' || matrix.build == 'macos'
       run: strip "target/${{ matrix.target }}/release/sgf-render"
 
     - name: Build archive
