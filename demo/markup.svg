@@ -3,12 +3,18 @@
 <clipPath id="board-clip">
 <rect height="9" width="15" x="1.5" y="1.5"/>
 </clipPath>
+<marker id="linehead" markerHeight="4" markerWidth="4" refX="2" refY="2">
+<circle cx="2" cy="2" r="2"/>
+</marker>
+<marker id="arrowhead" markerHeight="5" markerWidth="7" orient="auto" refX="7" refY="2.5">
+<polygon points="0 0, 7 2.5, 0 5"/>
+</marker>
 </defs>
 <rect fill="#cfa87e" height="100%" width="100%" x="0" y="0"/>
 <g id="diagram" transform="scale(49.75124378109453, 49.75124378109453)">
 <g id="board-view" transform="translate(-0.56, -0.56)">
 <g clip-path="url(#board-clip)" id="goban">
-<g id="lines" stroke="black" stroke-linecap="square" stroke-width="0.045">
+<g id="lines" stroke="black" stroke-linecap="square" stroke-width="0.03">
 <line x1="0" x2="0" y1="0" y2="18"/>
 <line x1="1" x2="1" y1="0" y2="18"/>
 <line x1="2" x2="2" y1="0" y2="18"/>
@@ -61,122 +67,110 @@
 </g>
 <g id="stones" stroke="none">
 <g>
-<circle cx="13" cy="4" fill="black" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="13" cy="4" fill="black" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="3" cy="3" fill="black" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="13" cy="8" fill="black" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="13" cy="9" fill="black" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="3" cy="8" fill="black" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="13" cy="5" fill="black" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="13" cy="7" fill="black" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="5" cy="5" fill="white" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="8" cy="8" fill="black" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="10" cy="8" fill="white" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="5" cy="8" fill="white" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="15" cy="3" fill="white" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="15" cy="5" fill="white" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="10" cy="9" fill="white" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="5" cy="4" fill="white" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="8" cy="7" fill="black" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="3" cy="3" fill="black" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="5" cy="7" fill="white" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="3" cy="9" fill="black" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="15" cy="8" fill="white" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="5" cy="7" fill="white" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="15" cy="4" fill="white" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="8" cy="7" fill="black" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="13" cy="8" fill="black" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="15" cy="8" fill="white" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="13" cy="7" fill="black" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="13" cy="3" fill="black" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="10" cy="7" fill="white" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="13" cy="5" fill="black" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="3" cy="8" fill="black" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="15" cy="6" fill="white" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="3" cy="9" fill="black" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="10" cy="9" fill="white" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="8" cy="8" fill="black" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="15" cy="4" fill="white" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="5" cy="8" fill="white" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="5" cy="5" fill="white" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="3" cy="7" fill="black" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="8" cy="9" fill="black" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="5" cy="3" fill="white" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="5" cy="9" fill="white" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="8" cy="9" fill="black" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="3" cy="4" fill="black" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="15" cy="7" fill="white" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="10" cy="8" fill="white" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="5" cy="9" fill="white" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="15" cy="7" fill="white" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="3" cy="6" fill="black" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="10" cy="7" fill="white" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="13" cy="3" fill="black" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="15" cy="3" fill="white" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="15" cy="6" fill="white" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="3" cy="5" fill="black" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="15" cy="5" fill="white" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="13" cy="9" fill="black" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="5" cy="4" fill="white" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="5" cy="3" fill="white" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="3" cy="5" fill="black" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="15" cy="9" fill="white" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="3" cy="4" fill="black" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="3" cy="7" fill="black" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="15" cy="9" fill="white" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="3" cy="6" fill="black" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 </g>
-<g id="marks">
-<g stroke="black" stroke-width="0.1">
-<line x1="3.75" x2="4.25" y1="6.75" y2="7.25"/>
-<line x1="3.75" x2="4.25" y1="7.25" y2="6.75"/>
-</g>
+<g id="markup-marks">
 <g stroke="black" stroke-width="0.1">
 <line x1="3.75" x2="4.25" y1="8.75" y2="9.25"/>
 <line x1="3.75" x2="4.25" y1="9.25" y2="8.75"/>
 </g>
-<g stroke="white" stroke-width="0.1">
-<line x1="2.75" x2="3.25" y1="7.75" y2="8.25"/>
-<line x1="2.75" x2="3.25" y1="8.25" y2="7.75"/>
-</g>
 <g stroke="black" stroke-width="0.1">
-<line x1="4.75" x2="5.25" y1="8.75" y2="9.25"/>
-<line x1="4.75" x2="5.25" y1="9.25" y2="8.75"/>
-</g>
-<g stroke="black" stroke-width="0.1">
-<line x1="4.75" x2="5.25" y1="7.75" y2="8.25"/>
-<line x1="4.75" x2="5.25" y1="8.25" y2="7.75"/>
+<line x1="3.75" x2="4.25" y1="6.75" y2="7.25"/>
+<line x1="3.75" x2="4.25" y1="7.25" y2="6.75"/>
 </g>
 <g stroke="white" stroke-width="0.1">
 <line x1="2.75" x2="3.25" y1="6.75" y2="7.25"/>
@@ -187,131 +181,146 @@
 <line x1="2.75" x2="3.25" y1="9.25" y2="8.75"/>
 </g>
 <g stroke="black" stroke-width="0.1">
-<line x1="4.75" x2="5.25" y1="6.75" y2="7.25"/>
-<line x1="4.75" x2="5.25" y1="7.25" y2="6.75"/>
+<line x1="4.75" x2="5.25" y1="8.75" y2="9.25"/>
+<line x1="4.75" x2="5.25" y1="9.25" y2="8.75"/>
+</g>
+<g stroke="black" stroke-width="0.1">
+<line x1="4.75" x2="5.25" y1="7.75" y2="8.25"/>
+<line x1="4.75" x2="5.25" y1="8.25" y2="7.75"/>
 </g>
 <g stroke="black" stroke-width="0.1">
 <line x1="3.75" x2="4.25" y1="7.75" y2="8.25"/>
 <line x1="3.75" x2="4.25" y1="8.25" y2="7.75"/>
 </g>
+<g stroke="black" stroke-width="0.1">
+<line x1="4.75" x2="5.25" y1="6.75" y2="7.25"/>
+<line x1="4.75" x2="5.25" y1="7.25" y2="6.75"/>
 </g>
-<g id="triangles">
-<g fill="none" stroke="black" stroke-width="0.045">
-<polygon points="4,2.55 3.6103,3.225 4.3897,3.225"/>
+<g stroke="white" stroke-width="0.1">
+<line x1="2.75" x2="3.25" y1="7.75" y2="8.25"/>
+<line x1="2.75" x2="3.25" y1="8.25" y2="7.75"/>
 </g>
-<g fill="none" stroke="black" stroke-width="0.045">
-<polygon points="5,4.55 4.6103,5.225 5.3897,5.225"/>
 </g>
-<g fill="none" stroke="white" stroke-width="0.045">
-<polygon points="3,3.55 2.6103,4.225 3.3897,4.225"/>
-</g>
-<g fill="none" stroke="black" stroke-width="0.045">
-<polygon points="4,3.55 3.6103,4.225 4.3897,4.225"/>
-</g>
-<g fill="none" stroke="white" stroke-width="0.045">
-<polygon points="3,4.55 2.6103,5.225 3.3897,5.225"/>
-</g>
-<g fill="none" stroke="black" stroke-width="0.045">
+<g id="markup-triangles">
+<g fill="none" stroke="black" stroke-width="0.03">
 <polygon points="5,3.55 4.6103,4.225 5.3897,4.225"/>
 </g>
-<g fill="none" stroke="black" stroke-width="0.045">
+<g fill="none" stroke="black" stroke-width="0.03">
 <polygon points="4,4.55 3.6103,5.225 4.3897,5.225"/>
 </g>
-<g fill="none" stroke="white" stroke-width="0.045">
-<polygon points="3,2.55 2.6103,3.225 3.3897,3.225"/>
+<g fill="none" stroke="white" stroke-width="0.03">
+<polygon points="3,4.55 2.6103,5.225 3.3897,5.225"/>
 </g>
-<g fill="none" stroke="black" stroke-width="0.045">
+<g fill="none" stroke="white" stroke-width="0.03">
+<polygon points="3,3.55 2.6103,4.225 3.3897,4.225"/>
+</g>
+<g fill="none" stroke="black" stroke-width="0.03">
 <polygon points="5,2.55 4.6103,3.225 5.3897,3.225"/>
 </g>
+<g fill="none" stroke="white" stroke-width="0.03">
+<polygon points="3,2.55 2.6103,3.225 3.3897,3.225"/>
 </g>
-<g id="circles">
-<g fill="none" stroke="white" stroke-width="0.045">
-<circle cx="13" cy="5" r="0.25"/>
+<g fill="none" stroke="black" stroke-width="0.03">
+<polygon points="4,2.55 3.6103,3.225 4.3897,3.225"/>
 </g>
-<g fill="none" stroke="black" stroke-width="0.045">
-<circle cx="14" cy="3" r="0.25"/>
+<g fill="none" stroke="black" stroke-width="0.03">
+<polygon points="5,4.55 4.6103,5.225 5.3897,5.225"/>
 </g>
-<g fill="none" stroke="black" stroke-width="0.045">
-<circle cx="15" cy="4" r="0.25"/>
+<g fill="none" stroke="black" stroke-width="0.03">
+<polygon points="4,3.55 3.6103,4.225 4.3897,4.225"/>
 </g>
-<g fill="none" stroke="black" stroke-width="0.045">
-<circle cx="15" cy="3" r="0.25"/>
 </g>
-<g fill="none" stroke="black" stroke-width="0.045">
-<circle cx="14" cy="4" r="0.25"/>
-</g>
-<g fill="none" stroke="white" stroke-width="0.045">
-<circle cx="13" cy="3" r="0.25"/>
-</g>
-<g fill="none" stroke="black" stroke-width="0.045">
-<circle cx="15" cy="5" r="0.25"/>
-</g>
-<g fill="none" stroke="black" stroke-width="0.045">
+<g id="markup-circles">
+<g fill="none" stroke="black" stroke-width="0.03">
 <circle cx="14" cy="5" r="0.25"/>
 </g>
-<g fill="none" stroke="white" stroke-width="0.045">
+<g fill="none" stroke="black" stroke-width="0.03">
+<circle cx="14" cy="3" r="0.25"/>
+</g>
+<g fill="none" stroke="white" stroke-width="0.03">
 <circle cx="13" cy="4" r="0.25"/>
 </g>
+<g fill="none" stroke="black" stroke-width="0.03">
+<circle cx="15" cy="5" r="0.25"/>
 </g>
-<g id="squares">
-<g fill="none" stroke="black" stroke-width="0.045">
-<rect height="0.55" width="0.55" x="14.725" y="8.725"/>
+<g fill="none" stroke="black" stroke-width="0.03">
+<circle cx="15" cy="4" r="0.25"/>
 </g>
-<g fill="none" stroke="black" stroke-width="0.045">
-<rect height="0.55" width="0.55" x="14.725" y="6.725"/>
+<g fill="none" stroke="white" stroke-width="0.03">
+<circle cx="13" cy="5" r="0.25"/>
 </g>
-<g fill="none" stroke="white" stroke-width="0.045">
-<rect height="0.55" width="0.55" x="12.725" y="7.725"/>
+<g fill="none" stroke="black" stroke-width="0.03">
+<circle cx="15" cy="3" r="0.25"/>
 </g>
-<g fill="none" stroke="white" stroke-width="0.045">
-<rect height="0.55" width="0.55" x="12.725" y="8.725"/>
+<g fill="none" stroke="black" stroke-width="0.03">
+<circle cx="14" cy="4" r="0.25"/>
 </g>
-<g fill="none" stroke="black" stroke-width="0.045">
-<rect height="0.55" width="0.55" x="13.725" y="8.725"/>
+<g fill="none" stroke="white" stroke-width="0.03">
+<circle cx="13" cy="3" r="0.25"/>
 </g>
-<g fill="none" stroke="black" stroke-width="0.045">
+</g>
+<g id="markup-squares">
+<g fill="none" stroke="black" stroke-width="0.03">
 <rect height="0.55" width="0.55" x="13.725" y="6.725"/>
 </g>
-<g fill="none" stroke="black" stroke-width="0.045">
-<rect height="0.55" width="0.55" x="14.725" y="7.725"/>
+<g fill="none" stroke="black" stroke-width="0.03">
+<rect height="0.55" width="0.55" x="13.725" y="8.725"/>
 </g>
-<g fill="none" stroke="black" stroke-width="0.045">
-<rect height="0.55" width="0.55" x="13.725" y="7.725"/>
-</g>
-<g fill="none" stroke="white" stroke-width="0.045">
+<g fill="none" stroke="white" stroke-width="0.03">
 <rect height="0.55" width="0.55" x="12.725" y="6.725"/>
 </g>
+<g fill="none" stroke="black" stroke-width="0.03">
+<rect height="0.55" width="0.55" x="14.725" y="7.725"/>
 </g>
-<g id="selected">
-<g fill="blue" stroke="none" stroke-width="0.045">
-<rect height="0.25" width="0.25" x="8.875" y="7.875"/>
+<g fill="none" stroke="black" stroke-width="0.03">
+<rect height="0.55" width="0.55" x="13.725" y="7.725"/>
 </g>
-<g fill="blue" stroke="none" stroke-width="0.045">
+<g fill="none" stroke="white" stroke-width="0.03">
+<rect height="0.55" width="0.55" x="12.725" y="7.725"/>
+</g>
+<g fill="none" stroke="black" stroke-width="0.03">
+<rect height="0.55" width="0.55" x="14.725" y="6.725"/>
+</g>
+<g fill="none" stroke="white" stroke-width="0.03">
+<rect height="0.55" width="0.55" x="12.725" y="8.725"/>
+</g>
+<g fill="none" stroke="black" stroke-width="0.03">
+<rect height="0.55" width="0.55" x="14.725" y="8.725"/>
+</g>
+</g>
+<g id="markup-selected">
+<g fill="blue" stroke="none" stroke-width="0.03">
 <rect height="0.25" width="0.25" x="7.875" y="8.875"/>
 </g>
-<g fill="blue" stroke="none" stroke-width="0.045">
-<rect height="0.25" width="0.25" x="9.875" y="8.875"/>
-</g>
-<g fill="blue" stroke="none" stroke-width="0.045">
+<g fill="blue" stroke="none" stroke-width="0.03">
 <rect height="0.25" width="0.25" x="7.875" y="7.875"/>
 </g>
-<g fill="blue" stroke="none" stroke-width="0.045">
-<rect height="0.25" width="0.25" x="8.875" y="6.875"/>
+<g fill="blue" stroke="none" stroke-width="0.03">
+<rect height="0.25" width="0.25" x="9.875" y="8.875"/>
 </g>
-<g fill="blue" stroke="none" stroke-width="0.045">
-<rect height="0.25" width="0.25" x="8.875" y="8.875"/>
-</g>
-<g fill="blue" stroke="none" stroke-width="0.045">
+<g fill="blue" stroke="none" stroke-width="0.03">
 <rect height="0.25" width="0.25" x="7.875" y="6.875"/>
 </g>
-<g fill="blue" stroke="none" stroke-width="0.045">
+<g fill="blue" stroke="none" stroke-width="0.03">
+<rect height="0.25" width="0.25" x="8.875" y="8.875"/>
+</g>
+<g fill="blue" stroke="none" stroke-width="0.03">
 <rect height="0.25" width="0.25" x="9.875" y="7.875"/>
 </g>
-<g fill="blue" stroke="none" stroke-width="0.045">
+<g fill="blue" stroke="none" stroke-width="0.03">
+<rect height="0.25" width="0.25" x="8.875" y="6.875"/>
+</g>
+<g fill="blue" stroke="none" stroke-width="0.03">
+<rect height="0.25" width="0.25" x="8.875" y="7.875"/>
+</g>
+<g fill="blue" stroke="none" stroke-width="0.03">
 <rect height="0.25" width="0.25" x="9.875" y="6.875"/>
 </g>
 </g>
-<g id="dimmed"/>
+<g id="markup-dimmed"/>
+<g id="markup-labels"/>
+<g id="markup-lines" marker-end="url(#linehead)" marker-start="url(#linehead)" stroke="black" stroke-width="0.03"/>
+<g id="markup-arrows" marker-end="url(#arrowhead)" stroke="black" stroke-width="0.03"/>
 </g>
 </g>
 <g fill="#6e5840" id="board-labels" transform="translate(0.8, 0.8)">

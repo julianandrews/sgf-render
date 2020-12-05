@@ -3,12 +3,18 @@
 <clipPath id="board-clip">
 <rect height="19" width="19" x="-0.5" y="-0.5"/>
 </clipPath>
+<marker id="linehead" markerHeight="4" markerWidth="4" refX="2" refY="2">
+<circle cx="2" cy="2" r="2"/>
+</marker>
+<marker id="arrowhead" markerHeight="5" markerWidth="7" orient="auto" refX="7" refY="2.5">
+<polygon points="0 0, 7 2.5, 0 5"/>
+</marker>
 </defs>
 <rect fill="white" height="100%" width="100%" x="0" y="0"/>
 <g id="diagram" transform="scale(39.840637450199196, 39.840637450199196)">
 <g id="board-view" transform="translate(1.44, 1.44)">
 <g clip-path="url(#board-clip)" id="goban">
-<g id="lines" stroke="black" stroke-linecap="square" stroke-width="0.045">
+<g id="lines" stroke="black" stroke-linecap="square" stroke-width="0.03">
 <line x1="0" x2="0" y1="0" y2="18"/>
 <line x1="1" x2="1" y1="0" y2="18"/>
 <line x1="2" x2="2" y1="0" y2="18"/>
@@ -61,673 +67,358 @@
 </g>
 <g id="stones" stroke="none">
 <g>
-<circle cx="16" cy="4" fill="black" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="3" cy="10" fill="white" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="9" cy="15" fill="black" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="5" cy="11" fill="black" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="7" cy="10" fill="white" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="5" cy="12" fill="black" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="15" cy="14" fill="black" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="6" cy="4" fill="white" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="1" cy="13" fill="white" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="17" cy="6" fill="white" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="3" cy="5" fill="black" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="17" cy="4" fill="white" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="2" cy="7" fill="black" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="1" cy="8" fill="white" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="1" cy="14" fill="white" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="8" cy="9" fill="white" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="12" cy="9" fill="black" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="4" cy="15" fill="white" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="7" cy="12" fill="black" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="3" cy="13" fill="black" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="6" cy="8" fill="white" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="17" cy="3" fill="black" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="15" cy="16" fill="white" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="7" cy="11" fill="black" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="3" cy="6" fill="black" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="15" cy="5" fill="white" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="18" cy="5" fill="white" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="3" cy="12" fill="white" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="3" cy="15" fill="white" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="7" cy="15" fill="white" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="5" cy="11" fill="black" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="6" cy="8" fill="white" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="16" cy="13" fill="white" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="4" cy="13" fill="black" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="15" cy="5" fill="white" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="4" cy="12" fill="black" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="6" cy="7" fill="white" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="8" cy="3" fill="white" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="6" cy="2" fill="white" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="8" cy="10" fill="black" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="8" cy="12" fill="black" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="15" cy="14" fill="black" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="4" cy="14" fill="white" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="4" cy="3" fill="black" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="17" cy="4" fill="white" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="2" cy="11" fill="white" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="7" cy="15" fill="white" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="7" cy="3" fill="black" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="2" cy="12" fill="white" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="2" cy="15" fill="black" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="1" cy="15" fill="black" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="7" cy="14" fill="black" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="16" cy="15" fill="white" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="6" cy="7" fill="white" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="5" cy="12" fill="black" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="9" cy="2" fill="black" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="5" cy="4" fill="white" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="5" cy="16" fill="white" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="5" cy="3" fill="white" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="6" cy="16" fill="white" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="12" cy="15" fill="black" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="3" cy="5" fill="black" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="3" cy="7" fill="black" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="16" cy="14" fill="white" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="11" cy="8" fill="black" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="14" cy="12" fill="black" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="4" cy="3" fill="black" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="16" cy="15" fill="white" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="8" cy="3" fill="white" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="1" cy="14" fill="white" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="11" cy="10" fill="black" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="2" cy="9" fill="white" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="4" cy="12" fill="black" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="10" cy="3" fill="black" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="2" cy="9" fill="white" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="10" cy="9" fill="white" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="7" cy="14" fill="black" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="11" cy="10" fill="black" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="2" cy="6" fill="white" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="2" cy="16" fill="white" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="8" cy="5" fill="black" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="2" cy="14" fill="white" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="7" cy="4" fill="white" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="11" cy="9" fill="white" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="10" cy="3" fill="black" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="11" cy="8" fill="black" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="9" cy="9" fill="white" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="2" cy="12" fill="white" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="10" cy="11" fill="black" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="2" cy="6" fill="white" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="2" cy="15" fill="black" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="2" cy="13" fill="black" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="3" cy="8" fill="white" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="6" cy="3" fill="black" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="4" cy="2" fill="black" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="13" cy="3" fill="black" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="8" cy="9" fill="white" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="6" cy="14" fill="white" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="6" cy="16" fill="white" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="3" cy="7" fill="black" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="17" cy="3" fill="black" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="9" cy="9" fill="white" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="14" cy="9" fill="black" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="5" cy="8" fill="black" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="6" cy="15" fill="black" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="5" cy="3" fill="white" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="14" cy="15" fill="black" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="12" cy="15" fill="black" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="14" cy="8" fill="white" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="3" cy="17" fill="black" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="3" cy="12" fill="white" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="9" cy="11" fill="black" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="13" cy="3" fill="black" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="8" cy="5" fill="black" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="8" cy="10" fill="black" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="3" cy="15" fill="white" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="10" cy="15" fill="black" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="2" cy="8" fill="black" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="5" cy="8" fill="black" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="15" cy="3" fill="black" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="1" cy="8" fill="white" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="5" cy="13" fill="white" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="6" cy="10" fill="white" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="2" cy="7" fill="black" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="11" cy="14" fill="white" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="10" cy="11" fill="black" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="6" cy="3" fill="black" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="1" cy="13" fill="white" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="1" cy="16" fill="black" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="3" cy="14" fill="black" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="2" cy="14" fill="white" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="1" cy="7" fill="white" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="5" cy="14" fill="black" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="7" cy="10" fill="white" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="9" cy="2" fill="black" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="15" cy="9" fill="black" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="1" cy="7" fill="white" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="6" cy="10" fill="white" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="3" cy="17" fill="black" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="3" cy="6" fill="black" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="8" cy="13" fill="white" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="3" cy="16" fill="black" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="17" cy="6" fill="white" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="5" cy="2" fill="black" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="2" cy="16" fill="white" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="15" cy="16" fill="white" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="4" cy="7" fill="black" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="13" cy="16" fill="black" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="3" cy="16" fill="black" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="13" cy="9" fill="black" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="4" cy="13" fill="black" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="7" cy="13" fill="white" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="16" cy="5" fill="white" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="12" cy="9" fill="black" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="14" cy="12" fill="black" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="18" cy="5" fill="white" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="9" cy="11" fill="black" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="6" cy="13" fill="white" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="2" cy="13" fill="black" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="10" cy="12" fill="white" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="6" cy="14" fill="white" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="6" cy="2" fill="white" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="7" cy="11" fill="black" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="9" cy="15" fill="black" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="2" cy="5" fill="white" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="8" cy="2" fill="black" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="12" cy="7" fill="white" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="2" cy="3" fill="black" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="5" cy="16" fill="white" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="14" cy="15" fill="black" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="3" cy="10" fill="white" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="3" cy="8" fill="white" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="15" cy="9" fill="black" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="1" cy="15" fill="black" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="11" cy="9" fill="white" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="6" cy="15" fill="black" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="7" cy="2" fill="black" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="7" cy="2" fill="black" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="4" cy="10" fill="black" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="4" cy="14" fill="white" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="5" cy="2" fill="black" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="10" cy="15" fill="black" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="15" cy="3" fill="black" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="8" cy="13" fill="white" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="3" cy="13" fill="black" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="16" cy="8" fill="white" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="10" cy="9" fill="white" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="10" cy="14" fill="white" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="8" cy="8" fill="black" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="2" cy="5" fill="white" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="14" cy="16" fill="white" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="4" cy="2" fill="black" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="2" cy="3" fill="black" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="4" cy="10" fill="black" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="8" cy="2" fill="black" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="1" cy="16" fill="black" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="13" cy="9" fill="black" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="8" cy="8" fill="black" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="15" cy="8" fill="white" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="3" cy="9" fill="white" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="16" cy="14" fill="white" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="15" cy="8" fill="white" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="10" cy="12" fill="white" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="3" cy="11" fill="black" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="7" cy="3" fill="black" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="4" cy="7" fill="black" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="3" cy="11" fill="black" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="7" cy="12" fill="black" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="3" cy="9" fill="white" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="16" cy="4" fill="black" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="6" cy="4" fill="white" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="16" cy="13" fill="white" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="5" cy="13" fill="white" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="14" cy="9" fill="black" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="13" cy="16" fill="black" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="16" cy="5" fill="white" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="16" cy="8" fill="white" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="5" cy="14" fill="black" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="2" cy="11" fill="white" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="8" cy="12" fill="black" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="3" cy="14" fill="black" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="11" cy="14" fill="white" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="7" cy="13" fill="white" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="14" cy="8" fill="white" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="10" cy="14" fill="white" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="14" cy="16" fill="white" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="6" cy="13" fill="white" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="7" cy="4" fill="white" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="4" cy="15" fill="white" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="12" cy="7" fill="white" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="2" cy="8" fill="black" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="5" cy="4" fill="white" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 </g>
 <g id="move-numbers" text-anchor="middle">
 <g>
-<text dy="0.35em" fill="white" x="8" y="10">
-4
-</text>
-</g>
-<g>
-<text dy="0.35em" fill="white" x="8" y="8">
-2
-</text>
-</g>
-<g>
-<text dy="0.35em" fill="white" x="1" y="16">
-19
-</text>
-</g>
-<g>
-<text dy="0.35em" fill="black" x="3" y="10">
-58
-</text>
-</g>
-<g>
-<text dy="0.35em" fill="white" x="12" y="9">
-20
-</text>
-</g>
-<g>
-<text dy="0.35em" fill="white" x="11" y="10">
-14
-</text>
-</g>
-<g>
-<text dy="0.35em" fill="black" x="3" y="9">
-14
-</text>
-</g>
-<g>
-<text dy="0.35em" fill="black" x="2" y="14">
-20
-</text>
-</g>
-<g>
-<text dy="0.35em" fill="black" x="12" y="7">
-40
-</text>
-</g>
-<g>
-<text dy="0.35em" fill="black" x="3" y="8">
-62
-</text>
-</g>
-<g>
-<text dy="0.35em" fill="white" x="3" y="11">
-59
-</text>
-</g>
-<g>
-<text dy="0.35em" fill="black" x="17" y="4">
-70
-</text>
-</g>
-<g>
-<text dy="0.35em" fill="white" x="3" y="6">
-85
-</text>
-</g>
-<g>
-<text dy="0.35em" fill="black" x="18" y="5">
-72
-</text>
-</g>
-<g>
-<text dy="0.35em" fill="white" x="7" y="11">
-77
-</text>
-</g>
-<g>
-<text dy="0.35em" fill="black" x="10" y="12">
-11
-</text>
-</g>
-<g>
-<text dy="0.35em" fill="black" x="10" y="9">
-17
-</text>
-</g>
-<g>
-<text dy="0.35em" fill="black" x="2" y="9">
-19
-</text>
-</g>
-<g>
-<text dy="0.35em" fill="black" x="2" y="6">
-30
-</text>
-</g>
-<g>
-<text dy="0.35em" fill="white" x="13" y="16">
-7
-</text>
-</g>
-<g>
-<text dy="0.35em" fill="black" x="6" y="10">
-74
-</text>
-</g>
-<g>
-<text dy="0.35em" fill="black" x="3" y="15">
-2
-</text>
-</g>
-<g>
-<text dy="0.35em" fill="white" x="3" y="5">
-81
-</text>
-</g>
-<g>
-<text dy="0.35em" fill="white" x="4" y="3">
-31
-</text>
-</g>
-<g>
-<text dy="0.35em" fill="black" x="6" y="13">
-54
-</text>
-</g>
-<g>
-<text dy="0.35em" fill="black" x="7" y="10">
-3
-</text>
-</g>
-<g>
-<text dy="0.35em" fill="white" x="2" y="15">
-17
-</text>
-</g>
-<g>
-<text dy="0.35em" fill="black" x="11" y="14">
-15
-</text>
-</g>
-<g>
-<text dy="0.35em" fill="white" x="10" y="11">
-12
-</text>
-</g>
-<g>
-<text dy="0.35em" fill="black" x="14" y="8">
-38
-</text>
-</g>
-<g>
-<text dy="0.35em" fill="black" x="15" y="16">
-8
-</text>
-</g>
-<g>
-<text dy="0.35em" fill="white" x="12" y="15">
-11
-</text>
-</g>
-<g>
-<text dy="0.35em" fill="white" x="4" y="2">
-97
-</text>
-</g>
-<g>
-<text dy="0.35em" fill="black" x="7" y="15">
-46
-</text>
-</g>
-<g>
-<text dy="0.35em" fill="white" x="9" y="11">
-8
-</text>
-</g>
-<g>
-<text dy="0.35em" fill="black" x="4" y="14">
-48
-</text>
-</g>
-<g>
-<text dy="0.35em" fill="black" x="16" y="15">
-4
-</text>
-</g>
-<g>
-<text dy="0.35em" fill="white" x="13" y="9">
-39
-</text>
-</g>
-<g>
-<text dy="0.35em" fill="black" x="11" y="9">
-13
-</text>
-</g>
-<g>
-<text dy="0.35em" fill="white" x="7" y="12">
-75
-</text>
-</g>
-<g>
-<text dy="0.35em" fill="black" x="16" y="14">
-16
-</text>
-</g>
-<g>
-<text dy="0.35em" fill="white" x="14" y="12">
-69
-</text>
-</g>
-<g>
-<text dy="0.35em" fill="black" x="5" y="16">
-10
-</text>
-</g>
-<g>
-<text dy="0.35em" fill="black" x="7" y="4">
-92
-</text>
-</g>
-<g>
-<text dy="0.35em" fill="white" x="2" y="7">
-87
-</text>
-</g>
-<g>
-<text dy="0.35em" fill="black" x="15" y="5">
-34
-</text>
-</g>
-<g>
-<text dy="0.35em" fill="black" x="6" y="4">
-84
-</text>
-</g>
-<g>
-<text dy="0.35em" fill="white" x="9" y="2">
-83
-</text>
-</g>
-<g>
-<text dy="0.35em" fill="white" x="6" y="3">
-93
-</text>
-</g>
-<g>
-<text dy="0.35em" fill="black" x="1" y="14">
-22
-</text>
-</g>
-<g>
-<text dy="0.35em" fill="white" x="10" y="15">
-79
-</text>
-</g>
-<g>
-<text dy="0.35em" fill="black" x="5" y="3">
-94
-</text>
-</g>
-<g>
-<text dy="0.35em" fill="black" x="6" y="14">
-56
-</text>
-</g>
-<g>
-<text dy="0.35em" fill="black" x="16" y="13">
-12
-</text>
-</g>
-<g>
-<text dy="0.35em" fill="white" x="15" y="9">
-63
-</text>
-</g>
-<g>
-<text dy="0.35em" fill="white" x="14" y="15">
-5
-</text>
-</g>
-<g>
-<text dy="0.35em" fill="white" x="10" y="3">
-67
-</text>
-</g>
-<g>
-<text dy="0.35em" fill="white" x="14" y="9">
-37
-</text>
-</g>
-<g>
-<text dy="0.35em" fill="black" x="1" y="8">
-90
-</text>
-</g>
-<g>
 <text dy="0.35em" fill="black" x="2" y="5">
 86
-</text>
-</g>
-<g>
-<text dy="0.35em" fill="black" x="6" y="8">
-1
-</text>
-</g>
-<g>
-<text dy="0.35em" fill="white" x="8" y="12">
-6
-</text>
-</g>
-<g>
-<text dy="0.35em" fill="white" x="4" y="13">
-49
-</text>
-</g>
-<g>
-<text dy="0.35em" fill="white" x="3" y="14">
-23
 </text>
 </g>
 <g>
@@ -736,28 +427,38 @@
 </text>
 </g>
 <g>
-<text dy="0.35em" fill="black" x="2" y="16">
-18
+<text dy="0.35em" fill="white" x="6" y="3">
+93
 </text>
 </g>
 <g>
-<text dy="0.35em" fill="white" x="5" y="11">
-55
+<text dy="0.35em" fill="black" x="14" y="8">
+38
 </text>
 </g>
 <g>
-<text dy="0.35em" fill="white" x="13" y="3">
-35
+<text dy="0.35em" fill="white" x="2" y="13">
+9
 </text>
 </g>
 <g>
-<text dy="0.35em" fill="white" x="9" y="15">
-29
+<text dy="0.35em" fill="white" x="14" y="12">
+69
 </text>
 </g>
 <g>
-<text dy="0.35em" fill="black" x="16" y="5">
-32
+<text dy="0.35em" fill="black" x="8" y="9">
+7
+</text>
+</g>
+<g>
+<text dy="0.35em" fill="white" x="10" y="11">
+12
+</text>
+</g>
+<g>
+<text dy="0.35em" fill="black" x="4" y="14">
+48
 </text>
 </g>
 <g>
@@ -766,79 +467,68 @@
 </text>
 </g>
 <g>
-<text dy="0.35em" fill="black" x="14" y="16">
-6
+<text dy="0.35em" fill="white" x="5" y="8">
+73
 </text>
 </g>
 <g>
-<text dy="0.35em" fill="white" x="15" y="3">
-1
+<text dy="0.35em" fill="black" x="15" y="5">
+34
 </text>
 </g>
 <g>
-<text dy="0.35em" fill="white" x="2" y="8">
-18
+<text dy="0.35em" fill="white" x="12" y="15">
+11
 </text>
 </g>
 <g>
-<text dy="0.35em" fill="black" x="10" y="14">
-78
+<text dy="0.35em" fill="white" x="3" y="6">
+85
 </text>
 </g>
 <g>
-<rect fill="white" height="0.8" width="0.8" x="16.6" y="4.6"/>
-<text dy="0.35em" fill="black" x="17" y="5">
-65
+<text dy="0.35em" fill="black" x="11" y="9">
+13
 </text>
 </g>
 <g>
-<text dy="0.35em" fill="black" x="16" y="8">
-64
+<text dy="0.35em" fill="black" x="15" y="8">
+36
 </text>
 </g>
 <g>
-<text dy="0.35em" fill="white" x="2" y="3">
-3
+<text dy="0.35em" fill="black" x="8" y="13">
+76
 </text>
 </g>
 <g>
-<text dy="0.35em" fill="white" x="3" y="16">
-25
+<text dy="0.35em" fill="white" x="13" y="3">
+35
 </text>
 </g>
 <g>
-<text dy="0.35em" fill="white" x="4" y="10">
-57
+<text dy="0.35em" fill="white" x="14" y="9">
+37
 </text>
 </g>
 <g>
-<text dy="0.35em" fill="white" x="3" y="17">
-27
+<text dy="0.35em" fill="white" x="5" y="12">
+53
 </text>
 </g>
 <g>
-<text dy="0.35em" fill="white" x="7" y="14">
-47
+<text dy="0.35em" fill="black" x="2" y="11">
+60
 </text>
 </g>
 <g>
-<text dy="0.35em" fill="white" x="6" y="15">
-41
+<text dy="0.35em" fill="black" x="6" y="14">
+56
 </text>
 </g>
 <g>
-<text dy="0.35em" fill="black" x="9" y="9">
-9
-</text>
-</g>
-<g>
-<text dy="0.35em" fill="black" x="4" y="15">
-26
-</text>
-</g>
-<g>
-<text dy="0.35em" fill="white" x="1" y="15">
-21
+<text dy="0.35em" fill="black" x="6" y="4">
+84
 </text>
 </g>
 <g>
@@ -848,64 +538,18 @@
 </text>
 </g>
 <g>
-<rect fill="white" height="0.8" width="0.8" x="3.6" y="10.6"/>
-<text dy="0.35em" fill="black" x="4" y="11">
-52
+<text dy="0.35em" fill="white" x="3" y="13">
+43
 </text>
 </g>
 <g>
-<text dy="0.35em" fill="black" x="5" y="13">
-50
+<text dy="0.35em" fill="white" x="9" y="11">
+8
 </text>
 </g>
 <g>
-<text dy="0.35em" fill="black" x="6" y="2">
-80
-</text>
-</g>
-<g>
-<text dy="0.35em" fill="white" x="7" y="3">
-91
-</text>
-</g>
-<g>
-<text dy="0.35em" fill="white" x="8" y="5">
-10
-</text>
-</g>
-<g>
-<text dy="0.35em" fill="white" x="5" y="14">
-45
-</text>
-</g>
-<g>
-<text dy="0.35em" fill="white" x="5" y="12">
-53
-</text>
-</g>
-<g>
-<text dy="0.35em" fill="black" x="3" y="12">
-44
-</text>
-</g>
-<g>
-<text dy="0.35em" fill="black" x="2" y="11">
-60
-</text>
-</g>
-<g>
-<text dy="0.35em" fill="white" x="5" y="8">
-73
-</text>
-</g>
-<g>
-<text dy="0.35em" fill="black" x="17" y="6">
-66
-</text>
-</g>
-<g>
-<text dy="0.35em" fill="black" x="6" y="7">
-98
+<text dy="0.35em" fill="white" x="15" y="14">
+15
 </text>
 </g>
 <g>
@@ -914,13 +558,320 @@
 </text>
 </g>
 <g>
-<text dy="0.35em" fill="black" x="15" y="8">
-36
+<text dy="0.35em" fill="black" x="5" y="16">
+10
 </text>
 </g>
 <g>
-<text dy="0.35em" fill="black" x="8" y="9">
-7
+<text dy="0.35em" fill="white" x="9" y="15">
+29
+</text>
+</g>
+<g>
+<text dy="0.35em" fill="white" x="4" y="7">
+61
+</text>
+</g>
+<g>
+<text dy="0.35em" fill="black" x="6" y="8">
+1
+</text>
+</g>
+<g>
+<rect fill="white" height="0.8" width="0.8" x="3.6" y="10.6"/>
+<text dy="0.35em" fill="black" x="4" y="11">
+52
+</text>
+</g>
+<g>
+<text dy="0.35em" fill="white" x="10" y="15">
+79
+</text>
+</g>
+<g>
+<text dy="0.35em" fill="black" x="3" y="12">
+44
+</text>
+</g>
+<g>
+<text dy="0.35em" fill="black" x="1" y="13">
+24
+</text>
+</g>
+<g>
+<text dy="0.35em" fill="black" x="10" y="9">
+17
+</text>
+</g>
+<g>
+<text dy="0.35em" fill="white" x="4" y="12">
+51
+</text>
+</g>
+<g>
+<text dy="0.35em" fill="black" x="5" y="13">
+50
+</text>
+</g>
+<g>
+<text dy="0.35em" fill="black" x="4" y="15">
+26
+</text>
+</g>
+<g>
+<text dy="0.35em" fill="black" x="7" y="15">
+46
+</text>
+</g>
+<g>
+<text dy="0.35em" fill="white" x="7" y="3">
+91
+</text>
+</g>
+<g>
+<text dy="0.35em" fill="black" x="3" y="8">
+62
+</text>
+</g>
+<g>
+<text dy="0.35em" fill="black" x="1" y="7">
+88
+</text>
+</g>
+<g>
+<text dy="0.35em" fill="black" x="16" y="15">
+4
+</text>
+</g>
+<g>
+<text dy="0.35em" fill="white" x="1" y="16">
+19
+</text>
+</g>
+<g>
+<text dy="0.35em" fill="white" x="6" y="15">
+41
+</text>
+</g>
+<g>
+<text dy="0.35em" fill="black" x="7" y="13">
+68
+</text>
+</g>
+<g>
+<rect fill="white" height="0.8" width="0.8" x="16.6" y="4.6"/>
+<text dy="0.35em" fill="black" x="17" y="5">
+65
+</text>
+</g>
+<g>
+<text dy="0.35em" fill="black" x="16" y="13">
+12
+</text>
+</g>
+<g>
+<text dy="0.35em" fill="white" x="3" y="11">
+59
+</text>
+</g>
+<g>
+<text dy="0.35em" fill="white" x="11" y="8">
+16
+</text>
+</g>
+<g>
+<text dy="0.35em" fill="black" x="2" y="9">
+19
+</text>
+</g>
+<g>
+<text dy="0.35em" fill="white" x="4" y="10">
+57
+</text>
+</g>
+<g>
+<text dy="0.35em" fill="white" x="8" y="8">
+2
+</text>
+</g>
+<g>
+<text dy="0.35em" fill="white" x="7" y="11">
+77
+</text>
+</g>
+<g>
+<text dy="0.35em" fill="black" x="8" y="3">
+82
+</text>
+</g>
+<g>
+<text dy="0.35em" fill="black" x="10" y="12">
+11
+</text>
+</g>
+<g>
+<text dy="0.35em" fill="black" x="2" y="6">
+30
+</text>
+</g>
+<g>
+<text dy="0.35em" fill="white" x="3" y="7">
+89
+</text>
+</g>
+<g>
+<text dy="0.35em" fill="white" x="4" y="3">
+31
+</text>
+</g>
+<g>
+<text dy="0.35em" fill="black" x="3" y="9">
+14
+</text>
+</g>
+<g>
+<text dy="0.35em" fill="white" x="5" y="14">
+45
+</text>
+</g>
+<g>
+<text dy="0.35em" fill="white" x="15" y="3">
+1
+</text>
+</g>
+<g>
+<text dy="0.35em" fill="white" x="5" y="11">
+55
+</text>
+</g>
+<g>
+<text dy="0.35em" fill="black" x="3" y="15">
+2
+</text>
+</g>
+<g>
+<text dy="0.35em" fill="white" x="13" y="9">
+39
+</text>
+</g>
+<g>
+<text dy="0.35em" fill="white" x="10" y="3">
+67
+</text>
+</g>
+<g>
+<text dy="0.35em" fill="black" x="1" y="8">
+90
+</text>
+</g>
+<g>
+<text dy="0.35em" fill="black" x="5" y="3">
+94
+</text>
+</g>
+<g>
+<text dy="0.35em" fill="white" x="7" y="2">
+95
+</text>
+</g>
+<g>
+<text dy="0.35em" fill="black" x="6" y="7">
+98
+</text>
+</g>
+<g>
+<text dy="0.35em" fill="black" x="18" y="5">
+72
+</text>
+</g>
+<g>
+<text dy="0.35em" fill="black" x="14" y="16">
+6
+</text>
+</g>
+<g>
+<text dy="0.35em" fill="white" x="3" y="5">
+81
+</text>
+</g>
+<g>
+<text dy="0.35em" fill="white" x="2" y="8">
+18
+</text>
+</g>
+<g>
+<text dy="0.35em" fill="black" x="7" y="4">
+92
+</text>
+</g>
+<g>
+<text dy="0.35em" fill="black" x="12" y="7">
+40
+</text>
+</g>
+<g>
+<text dy="0.35em" fill="black" x="1" y="14">
+22
+</text>
+</g>
+<g>
+<text dy="0.35em" fill="black" x="17" y="6">
+66
+</text>
+</g>
+<g>
+<text dy="0.35em" fill="black" x="15" y="16">
+8
+</text>
+</g>
+<g>
+<text dy="0.35em" fill="white" x="8" y="5">
+10
+</text>
+</g>
+<g>
+<text dy="0.35em" fill="white" x="17" y="3">
+71
+</text>
+</g>
+<g>
+<text dy="0.35em" fill="white" x="4" y="13">
+49
+</text>
+</g>
+<g>
+<text dy="0.35em" fill="black" x="16" y="8">
+64
+</text>
+</g>
+<g>
+<text dy="0.35em" fill="white" x="7" y="14">
+47
+</text>
+</g>
+<g>
+<text dy="0.35em" fill="white" x="11" y="10">
+14
+</text>
+</g>
+<g>
+<text dy="0.35em" fill="white" x="3" y="14">
+23
+</text>
+</g>
+<g>
+<text dy="0.35em" fill="white" x="8" y="2">
+13
+</text>
+</g>
+<g>
+<text dy="0.35em" fill="black" x="2" y="16">
+18
+</text>
+</g>
+<g>
+<text dy="0.35em" fill="black" x="11" y="14">
+15
 </text>
 </g>
 <g>
@@ -934,78 +885,133 @@
 </text>
 </g>
 <g>
-<text dy="0.35em" fill="white" x="11" y="8">
-16
+<text dy="0.35em" fill="white" x="8" y="10">
+4
 </text>
 </g>
 <g>
-<text dy="0.35em" fill="white" x="3" y="7">
-89
+<text dy="0.35em" fill="white" x="9" y="2">
+83
 </text>
 </g>
 <g>
-<text dy="0.35em" fill="white" x="3" y="13">
-43
+<text dy="0.35em" fill="white" x="2" y="15">
+17
 </text>
 </g>
 <g>
-<text dy="0.35em" fill="white" x="4" y="12">
-51
-</text>
-</g>
-<g>
-<text dy="0.35em" fill="white" x="7" y="2">
-95
-</text>
-</g>
-<g>
-<text dy="0.35em" fill="white" x="4" y="7">
-61
-</text>
-</g>
-<g>
-<text dy="0.35em" fill="black" x="8" y="3">
-82
-</text>
-</g>
-<g>
-<text dy="0.35em" fill="black" x="1" y="13">
-24
-</text>
-</g>
-<g>
-<text dy="0.35em" fill="white" x="17" y="3">
-71
-</text>
-</g>
-<g>
-<text dy="0.35em" fill="black" x="1" y="7">
-88
-</text>
-</g>
-<g>
-<text dy="0.35em" fill="black" x="7" y="13">
-68
-</text>
-</g>
-<g>
-<text dy="0.35em" fill="white" x="2" y="13">
+<text dy="0.35em" fill="black" x="9" y="9">
 9
 </text>
 </g>
 <g>
-<text dy="0.35em" fill="white" x="8" y="2">
-13
+<text dy="0.35em" fill="black" x="17" y="4">
+70
 </text>
 </g>
 <g>
-<text dy="0.35em" fill="white" x="15" y="14">
-15
+<text dy="0.35em" fill="white" x="14" y="15">
+5
 </text>
 </g>
 <g>
-<text dy="0.35em" fill="black" x="8" y="13">
-76
+<text dy="0.35em" fill="black" x="7" y="10">
+3
+</text>
+</g>
+<g>
+<text dy="0.35em" fill="black" x="6" y="10">
+74
+</text>
+</g>
+<g>
+<text dy="0.35em" fill="black" x="16" y="5">
+32
+</text>
+</g>
+<g>
+<text dy="0.35em" fill="black" x="10" y="14">
+78
+</text>
+</g>
+<g>
+<text dy="0.35em" fill="white" x="2" y="3">
+3
+</text>
+</g>
+<g>
+<text dy="0.35em" fill="white" x="7" y="12">
+75
+</text>
+</g>
+<g>
+<text dy="0.35em" fill="white" x="12" y="9">
+20
+</text>
+</g>
+<g>
+<text dy="0.35em" fill="black" x="6" y="2">
+80
+</text>
+</g>
+<g>
+<text dy="0.35em" fill="white" x="15" y="9">
+63
+</text>
+</g>
+<g>
+<text dy="0.35em" fill="white" x="3" y="16">
+25
+</text>
+</g>
+<g>
+<text dy="0.35em" fill="white" x="8" y="12">
+6
+</text>
+</g>
+<g>
+<text dy="0.35em" fill="white" x="1" y="15">
+21
+</text>
+</g>
+<g>
+<text dy="0.35em" fill="black" x="3" y="10">
+58
+</text>
+</g>
+<g>
+<text dy="0.35em" fill="white" x="4" y="2">
+97
+</text>
+</g>
+<g>
+<text dy="0.35em" fill="white" x="3" y="17">
+27
+</text>
+</g>
+<g>
+<text dy="0.35em" fill="white" x="2" y="7">
+87
+</text>
+</g>
+<g>
+<text dy="0.35em" fill="black" x="16" y="14">
+16
+</text>
+</g>
+<g>
+<text dy="0.35em" fill="black" x="2" y="14">
+20
+</text>
+</g>
+<g>
+<text dy="0.35em" fill="black" x="6" y="13">
+54
+</text>
+</g>
+<g>
+<text dy="0.35em" fill="white" x="13" y="16">
+7
 </text>
 </g>
 </g>

@@ -3,12 +3,18 @@
 <clipPath id="board-clip">
 <rect height="6" width="7" x="-0.5" y="-0.5"/>
 </clipPath>
+<marker id="linehead" markerHeight="4" markerWidth="4" refX="2" refY="2">
+<circle cx="2" cy="2" r="2"/>
+</marker>
+<marker id="arrowhead" markerHeight="5" markerWidth="7" orient="auto" refX="7" refY="2.5">
+<polygon points="0 0, 7 2.5, 0 5"/>
+</marker>
 </defs>
 <rect fill="#cfa87e" height="100%" width="100%" x="0" y="0"/>
 <g id="diagram" transform="scale(49.504950495049506, 49.504950495049506)">
 <g id="board-view" transform="translate(1.44, 1.44)">
 <g clip-path="url(#board-clip)" id="goban">
-<g id="lines" stroke="black" stroke-linecap="square" stroke-width="0.045">
+<g id="lines" stroke="black" stroke-linecap="square" stroke-width="0.03">
 <line x1="0" x2="0" y1="0" y2="18"/>
 <line x1="1" x2="1" y1="0" y2="18"/>
 <line x1="2" x2="2" y1="0" y2="18"/>
@@ -61,60 +67,63 @@
 </g>
 <g id="stones" stroke="none">
 <g>
-<circle cx="3" cy="2" fill="white" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="0" cy="1" fill="black" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="1" cy="1" fill="black" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="2" cy="3" fill="black" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="3" cy="3" fill="white" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="4" cy="2" fill="white" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="1" cy="4" fill="white" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="0" cy="3" fill="white" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="0" cy="3" fill="white" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="2" cy="2" fill="black" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="5" cy="2" fill="white" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="5" cy="1" fill="white" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="3" cy="1" fill="black" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="4" cy="1" fill="black" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="4" cy="2" fill="white" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="2" cy="4" fill="white" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="2" cy="2" fill="black" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="3" cy="2" fill="white" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="0" cy="1" fill="black" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="1" cy="1" fill="black" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="2" cy="3" fill="black" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="3" cy="1" fill="black" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="2" cy="1" fill="white" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="1" cy="4" fill="white" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="5" cy="0" fill="white" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="5" cy="2" fill="white" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="5" cy="1" fill="white" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="3" cy="3" fill="white" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="4" cy="1" fill="black" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="5" cy="0" fill="white" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 <g>
-<circle cx="2" cy="4" fill="white" r="0.48" stroke="black" stroke-width="0.045"/>
+<circle cx="2" cy="1" fill="white" r="0.48" stroke="black" stroke-width="0.03"/>
 </g>
 </g>
-<g id="marks"/>
-<g id="triangles"/>
-<g id="circles"/>
-<g id="squares"/>
-<g id="selected"/>
-<g id="dimmed"/>
+<g id="markup-marks"/>
+<g id="markup-triangles"/>
+<g id="markup-circles"/>
+<g id="markup-squares"/>
+<g id="markup-selected"/>
+<g id="markup-dimmed"/>
+<g id="markup-labels"/>
+<g id="markup-lines" marker-end="url(#linehead)" marker-start="url(#linehead)" stroke="black" stroke-width="0.03"/>
+<g id="markup-arrows" marker-end="url(#arrowhead)" stroke="black" stroke-width="0.03"/>
 </g>
 </g>
 <g fill="#6e5840" id="board-labels" transform="translate(0.8, 0.8)">

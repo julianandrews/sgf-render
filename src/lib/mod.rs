@@ -14,7 +14,7 @@ static FONT_SIZE: f64 = 0.5;
 static FONT_WEIGHT: usize = 700;
 
 static LINE_COLOR: &str = "black";
-static LINE_WIDTH: f64 = 0.045;
+static LINE_WIDTH: f64 = 0.03;
 static MARKUP_WIDTH: f64 = 0.1;
 static HOSHI_RADIUS: f64 = 0.09;
 
