@@ -705,7 +705,7 @@ impl GobanRange {
                     .saturating_sub(1);
                 let x_end = points
                     .iter()
-                    .map(|&(x, _)| x + 2)
+                    .map(|&(x, _)| (x + 2).min(goban.size.0))
                     .max()
                     .unwrap_or(goban.size.0);
                 let y_start = points
@@ -716,7 +716,7 @@ impl GobanRange {
                     .saturating_sub(1);
                 let y_end = points
                     .iter()
-                    .map(|&(_, y)| y + 2)
+                    .map(|&(_, y)| (y + 2).min(goban.size.1))
                     .max()
                     .unwrap_or(goban.size.1);
                 Ok((x_start..x_end, y_start..y_end))
