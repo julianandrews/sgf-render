@@ -88,12 +88,12 @@ impl Goban {
         for prop in sgf_node.properties() {
             match prop {
                 SgfProp::B(sgf_parse::Move::Move(point)) => {
-                    if !self.is_tt_pass(point) {
+                    if !self.is_tt_pass(*point) {
                         self.play_stone(Stone::new(point.x, point.y, StoneColor::Black))?;
                     }
                 }
                 SgfProp::W(sgf_parse::Move::Move(point)) => {
-                    if !self.is_tt_pass(point) {
+                    if !self.is_tt_pass(*point) {
                         self.play_stone(Stone::new(point.x, point.y, StoneColor::White))?;
                     }
                 }
@@ -146,11 +146,11 @@ impl Goban {
 
     pub fn add_stone(&mut self, stone: Stone) -> Result<(), GobanError> {
         if stone.x > self.size.0 || stone.y > self.size.1 {
-            Err(GobanError::InvalidMoveError)?;
+            return Err(GobanError::InvalidMoveError);
         }
         let key = (stone.x, stone.y);
         if self.stones.contains_key(&key) {
-            Err(GobanError::InvalidMoveError)?;
+            return Err(GobanError::InvalidMoveError);
         }
         self.stones.insert(key, stone.color);
 
@@ -168,17 +168,17 @@ impl Goban {
         for neighbor in self.neighbors(key) {
             if let Some(color) = self.stones.get(&neighbor) {
                 if *color == opponent_color {
-                    self.process_captures(&neighbor);
+                    self.process_captures(neighbor);
                 }
             }
         }
         // Now remove the played stone if still neccessary
-        self.process_captures(&key);
+        self.process_captures(key);
         self.move_number += 1;
         (*self
             .move_numbers
             .entry((stone.x, stone.y))
-            .or_insert(vec![]))
+            .or_insert_with(Vec::new))
         .push(self.move_number);
 
         Ok(())
@@ -220,14 +220,14 @@ impl Goban {
         neighbors.into_iter()
     }
 
-    fn process_captures(&mut self, start_point: &(u8, u8)) {
-        let group_color = match self.stones.get(start_point) {
+    fn process_captures(&mut self, start_point: (u8, u8)) {
+        let group_color = match self.stones.get(&start_point) {
             Some(color) => color,
             None => return,
         };
         let mut group = HashSet::new();
         let mut to_process = VecDeque::new();
-        to_process.push_back(start_point.clone());
+        to_process.push_back(start_point);
         while let Some(p) = to_process.pop_back() {
             group.insert(p);
             for neighbor in self.neighbors(p) {
@@ -237,7 +237,7 @@ impl Goban {
                 match self.stones.get(&neighbor) {
                     None => return,
                     Some(c) if c == group_color => {
-                        to_process.push_back(neighbor.clone());
+                        to_process.push_back(neighbor);
                     }
                     _ => {}
                 }
@@ -252,7 +252,7 @@ impl Goban {
         }
     }
 
-    fn is_tt_pass(&self, point: &sgf_parse::Point) -> bool {
+    fn is_tt_pass(&self, point: sgf_parse::Point) -> bool {
         point.x == 19 && point.y == 19 && self.size.0 < 20 && self.size.1 < 20
     }
 }
@@ -278,9 +278,9 @@ impl Stone {
 
 fn get_board_size(sgf_node: &SgfNode) -> (u8, u8) {
     match sgf_node.get_property("SZ") {
-        Some(SgfProp::SZ(size)) => size.clone(),
+        Some(SgfProp::SZ(size)) => *size,
         None => (19, 19),
-        _ => unreachable!(),
+        Some(_) => unreachable!(),
     }
 }
 

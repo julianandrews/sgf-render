@@ -53,10 +53,10 @@ pub fn make_svg(goban: &Goban, options: &MakeSvgOptions) -> Result<svg::Document
     let definitions = {
         let clip_path = element::ClipPath::new().set("id", "board-clip").add(
             element::Rectangle::new()
-                .set("x", x_range.start as f64 - 0.5)
-                .set("y", y_range.start as f64 - 0.5)
-                .set("width", width as f64)
-                .set("height", height as f64),
+                .set("x", f64::from(x_range.start) - 0.5)
+                .set("y", f64::from(y_range.start) - 0.5)
+                .set("width", f64::from(width))
+                .set("height", f64::from(height)),
         );
 
         let mut defs = element::Definitions::new()
@@ -69,17 +69,17 @@ pub fn make_svg(goban: &Goban, options: &MakeSvgOptions) -> Result<svg::Document
 
         defs
     };
-    let board_width = width as f64 - 1.0 + 2.0 * BOARD_MARGIN + label_margin;
-    let board_height = height as f64 - 1.0 + 2.0 * BOARD_MARGIN + label_margin;
+    let board_width = f64::from(width) - 1.0 + 2.0 * BOARD_MARGIN + label_margin;
+    let board_height = f64::from(height) - 1.0 + 2.0 * BOARD_MARGIN + label_margin;
 
     let diagram = {
-        let board = draw_board(goban, options).set("clip-path", "url(#board-clip)");
+        let board = build_board(goban, options).set("clip-path", "url(#board-clip)");
         let board_view = {
             let offset = BOARD_MARGIN + label_margin;
             let board_view_transform = format!(
                 "translate({}, {})",
-                offset - x_range.start as f64,
-                offset - y_range.start as f64
+                offset - f64::from(x_range.start),
+                offset - f64::from(y_range.start)
             );
             element::Group::new()
                 .set("id", "board-view")
@@ -125,9 +125,49 @@ pub fn make_svg(goban: &Goban, options: &MakeSvgOptions) -> Result<svg::Document
         .add(diagram))
 }
 
-/// Draws a goban of with squares of unit size.
-fn draw_board(goban: &Goban, options: &MakeSvgOptions) -> element::Group {
-    let mut lines = element::Group::new()
+/// Draws a goban with squares of unit size.
+fn build_board(goban: &Goban, options: &MakeSvgOptions) -> element::Group {
+    let mut group = element::Group::new()
+        .set("id", "goban")
+        .add(build_board_lines_group(goban, options))
+        .add(build_stones_group(goban, options));
+
+    if options.draw_move_numbers {
+        group = group.add(build_move_numbers_group(goban, options));
+    }
+    if options.draw_marks {
+        group = group.add(build_marks_group(goban, options));
+    }
+    if options.draw_triangles {
+        group = group.add(build_triangles_group(goban, options));
+    }
+    if options.draw_circles {
+        group = group.add(build_circles_group(goban, options));
+    }
+    if options.draw_squares {
+        group = group.add(build_squares_group(goban, options));
+    }
+    if options.draw_selected {
+        group = group.add(build_selected_group(goban, options));
+    }
+    if options.draw_dimmed {
+        group = group.add(build_dimmed_group(goban, options));
+    }
+    if options.draw_labels {
+        group = group.add(build_label_group(goban, options));
+    }
+    if options.draw_lines {
+        group = group.add(build_line_group(goban, options));
+    }
+    if options.draw_arrows {
+        group = group.add(build_arrow_group(goban, options));
+    }
+
+    group
+}
+
+fn build_board_lines_group(goban: &Goban, _options: &MakeSvgOptions) -> element::Group {
+    let mut group = element::Group::new()
         .set("id", "lines")
         .set("stroke", LINE_COLOR)
         .set("stroke-width", LINE_WIDTH)
@@ -135,7 +175,7 @@ fn draw_board(goban: &Goban, options: &MakeSvgOptions) -> element::Group {
 
     // Draw lines
     for x in 0..goban.size.0 as usize {
-        lines = lines.add(
+        group = group.add(
             element::Line::new()
                 .set("x1", x)
                 .set("y1", 0)
@@ -144,7 +184,7 @@ fn draw_board(goban: &Goban, options: &MakeSvgOptions) -> element::Group {
         );
     }
     for y in 0..goban.size.1 as usize {
-        lines = lines.add(
+        group = group.add(
             element::Line::new()
                 .set("x1", 0)
                 .set("y1", y)
@@ -166,151 +206,143 @@ fn draw_board(goban: &Goban, options: &MakeSvgOptions) -> element::Group {
                 .set("r", HOSHI_RADIUS),
         );
     }
-    lines = lines.add(hoshi);
+    group.add(hoshi)
+}
 
-    // Draw stones
-    let mut stones = element::Group::new()
+fn build_stones_group(goban: &Goban, options: &MakeSvgOptions) -> element::Group {
+    let mut group = element::Group::new()
         .set("id", "stones")
         .set("stroke", "none");
     for stone in goban.stones() {
-        stones = stones.add(draw_stone(stone, options.style));
+        group = group.add(draw_stone(stone, options.style));
     }
+    group
+}
 
-    // Draw optional markup
+fn build_move_numbers_group(goban: &Goban, options: &MakeSvgOptions) -> element::Group {
     let mut group = element::Group::new()
-        .set("id", "goban")
-        .add(lines)
-        .add(stones);
-
-    // Draw move numbers
-    let mut move_numbers = element::Group::new()
         .set("id", "move-numbers")
         .set("text-anchor", "middle");
-    if options.draw_move_numbers {
-        // TODO: Indicate older moves on the side.
-        for (point, nums) in &goban.move_numbers {
-            let n = *nums
-                .last()
-                .expect("Move numbers should never be an empty vector");
-            if n >= options.first_move_number {
-                let stone_color = goban.stones.get(&point).map(|&s| s);
-                let starting_num = (n - options.first_move_number) % 99 + 1;
-                move_numbers = move_numbers.add(draw_move_number(
-                    point.0,
-                    point.1,
-                    starting_num,
-                    stone_color,
-                    options.style,
-                ));
-            }
-        }
-        group = group.add(move_numbers);
-    }
-
-    // Draw Marks
-    if options.draw_marks {
-        let mut marks = element::Group::new().set("id", "markup-marks");
-        for point in goban.marks.iter() {
-            let stone_color = goban.stones.get(&point).map(|&s| s);
-            marks = marks.add(draw_mark(point.0, point.1, stone_color, options.style));
-        }
-        group = group.add(marks);
-    }
-    // Draw Triangles
-    if options.draw_triangles {
-        let mut triangles = element::Group::new().set("id", "markup-triangles");
-        for point in goban.triangles.iter() {
-            let stone_color = goban.stones.get(&point).map(|&s| s);
-            triangles = triangles.add(draw_triangle(point.0, point.1, stone_color, options.style));
-        }
-        group = group.add(triangles);
-    }
-    // Draw Circles
-    if options.draw_circles {
-        let mut circles = element::Group::new().set("id", "markup-circles");
-        for point in goban.circles.iter() {
-            let stone_color = goban.stones.get(&point).map(|&s| s);
-            circles = circles.add(draw_circle(point.0, point.1, stone_color, options.style));
-        }
-        group = group.add(circles);
-    }
-    // Draw Squares
-    if options.draw_squares {
-        let mut squares = element::Group::new().set("id", "markup-squares");
-        for point in goban.squares.iter() {
-            let stone_color = goban.stones.get(&point).map(|&s| s);
-            squares = squares.add(draw_square(point.0, point.1, stone_color, options.style));
-        }
-        group = group.add(squares);
-    }
-    // Draw selected
-    if options.draw_selected {
-        let mut selected = element::Group::new().set("id", "markup-selected");
-        for point in goban.selected.iter() {
-            let stone_color = goban.stones.get(&point).map(|&s| s);
-            selected = selected.add(draw_selected(point.0, point.1, stone_color, options.style));
-        }
-        group = group.add(selected);
-    }
-    // Draw dimmed
-    if options.draw_dimmed {
-        let mut dimmed = element::Group::new().set("id", "markup-dimmed");
-        for point in goban.dimmed.iter() {
-            dimmed = dimmed.add(dim_square(point.0, point.1));
-        }
-        group = group.add(dimmed);
-    }
-    // Draw labels
-    if options.draw_labels {
-        let mut labels = element::Group::new().set("id", "markup-labels");
-        for (point, text) in goban.labels.iter() {
-            let stone_color = goban.stones.get(&point).map(|&s| s);
-            labels = labels.add(draw_label(
+    for (point, nums) in &goban.move_numbers {
+        let n = *nums
+            .last()
+            .expect("Move numbers should never be an empty vector");
+        if n >= options.first_move_number {
+            let stone_color = goban.stones.get(&point).copied();
+            let starting_num = (n - options.first_move_number) % 99 + 1;
+            group = group.add(draw_move_number(
                 point.0,
                 point.1,
-                text,
+                starting_num,
                 stone_color,
                 options.style,
             ));
         }
-        group = group.add(labels);
     }
-    // Draw lines
-    let mut lines = element::Group::new()
+    group
+}
+
+fn build_marks_group(goban: &Goban, options: &MakeSvgOptions) -> element::Group {
+    let mut group = element::Group::new().set("id", "markup-marks");
+    for point in &goban.marks {
+        let stone_color = goban.stones.get(&point).copied();
+        group = group.add(draw_mark(point.0, point.1, stone_color, options.style));
+    }
+    group
+}
+
+fn build_triangles_group(goban: &Goban, options: &MakeSvgOptions) -> element::Group {
+    let mut group = element::Group::new().set("id", "markup-triangles");
+    for point in &goban.triangles {
+        let stone_color = goban.stones.get(&point).copied();
+        group = group.add(draw_triangle(point.0, point.1, stone_color, options.style));
+    }
+    group
+}
+
+fn build_circles_group(goban: &Goban, options: &MakeSvgOptions) -> element::Group {
+    let mut group = element::Group::new().set("id", "markup-circles");
+    for point in &goban.circles {
+        let stone_color = goban.stones.get(&point).copied();
+        group = group.add(draw_circle(point.0, point.1, stone_color, options.style));
+    }
+    group
+}
+
+fn build_squares_group(goban: &Goban, options: &MakeSvgOptions) -> element::Group {
+    let mut group = element::Group::new().set("id", "markup-squares");
+    for point in &goban.squares {
+        let stone_color = goban.stones.get(&point).copied();
+        group = group.add(draw_square(point.0, point.1, stone_color, options.style));
+    }
+    group
+}
+
+fn build_selected_group(goban: &Goban, options: &MakeSvgOptions) -> element::Group {
+    let mut group = element::Group::new().set("id", "markup-selected");
+    for point in &goban.selected {
+        let stone_color = goban.stones.get(&point).copied();
+        group = group.add(draw_selected(point.0, point.1, stone_color, options.style));
+    }
+    group
+}
+
+fn build_dimmed_group(goban: &Goban, _options: &MakeSvgOptions) -> element::Group {
+    let mut group = element::Group::new().set("id", "markup-dimmed");
+    for point in &goban.dimmed {
+        group = group.add(dim_square(point.0, point.1));
+    }
+    group
+}
+
+fn build_label_group(goban: &Goban, options: &MakeSvgOptions) -> element::Group {
+    let mut group = element::Group::new().set("id", "markup-labels");
+    for (point, text) in &goban.labels {
+        let stone_color = goban.stones.get(&point).copied();
+        group = group.add(draw_label(
+            point.0,
+            point.1,
+            text,
+            stone_color,
+            options.style,
+        ));
+    }
+    group
+}
+
+fn build_line_group(goban: &Goban, _options: &MakeSvgOptions) -> element::Group {
+    let mut group = element::Group::new()
         .set("id", "markup-lines")
         .set("stroke", "black")
         .set("stroke-width", LINE_WIDTH)
         .set("marker-start", "url(#linehead)")
         .set("marker-end", "url(#linehead)");
-    if options.draw_lines {
-        for &(p1, p2) in goban.lines.iter() {
-            lines = lines.add(
-                element::Line::new()
-                    .set("x1", p1.0)
-                    .set("x2", p2.0)
-                    .set("y1", p1.1)
-                    .set("y2", p2.1),
-            );
-        }
-        group = group.add(lines);
+    for &(p1, p2) in &goban.lines {
+        group = group.add(
+            element::Line::new()
+                .set("x1", p1.0)
+                .set("x2", p2.0)
+                .set("y1", p1.1)
+                .set("y2", p2.1),
+        );
     }
-    // Draw arrows
-    let mut arrows = element::Group::new()
+    group
+}
+
+fn build_arrow_group(goban: &Goban, _options: &MakeSvgOptions) -> element::Group {
+    let mut group = element::Group::new()
         .set("id", "markup-arrows")
         .set("stroke", "black")
         .set("stroke-width", LINE_WIDTH)
         .set("marker-end", "url(#arrowhead)");
-    if options.draw_arrows {
-        for &(p1, p2) in goban.arrows.iter() {
-            arrows = arrows.add(
-                element::Line::new()
-                    .set("x1", p1.0)
-                    .set("x2", p2.0)
-                    .set("y1", p1.1)
-                    .set("y2", p2.1),
-            );
-        }
-        group = group.add(arrows);
+    for &(p1, p2) in &goban.arrows {
+        group = group.add(
+            element::Line::new()
+                .set("x1", p1.0)
+                .set("x2", p2.0)
+                .set("y1", p1.1)
+                .set("y2", p2.1),
+        );
     }
 
     group
@@ -318,8 +350,8 @@ fn draw_board(goban: &Goban, options: &MakeSvgOptions) -> element::Group {
 
 /// Draw labels for the provided ranges.
 ///
-/// Assumes lines are a unit apart, offset by BOARD_MARGIN.
-/// Respects LABEL_MARGIN.
+/// Assumes lines are a unit apart, offset by `BOARD_MARGIN`.
+/// Respects `LABEL_MARGIN`.
 fn draw_board_labels(x_range: Range<u8>, y_range: Range<u8>, style: GobanStyle) -> element::Group {
     let mut row_labels = element::Group::new().set("text-anchor", "middle");
     let start = x_range.start;
@@ -327,7 +359,7 @@ fn draw_board_labels(x_range: Range<u8>, y_range: Range<u8>, style: GobanStyle) 
         let text = svg::node::Text::new(label_text(x));
         row_labels = row_labels.add(
             element::Text::new()
-                .set("x", (x - start) as f64 + BOARD_MARGIN)
+                .set("x", f64::from(x - start) + BOARD_MARGIN)
                 .set("y", 0.0)
                 .add(text),
         );
@@ -339,7 +371,7 @@ fn draw_board_labels(x_range: Range<u8>, y_range: Range<u8>, style: GobanStyle) 
         column_labels = column_labels.add(
             element::Text::new()
                 .set("x", 0.0)
-                .set("y", (end - y - 1) as f64 + BOARD_MARGIN)
+                .set("y", f64::from(end - y - 1) + BOARD_MARGIN)
                 .set("dy", "0.35em")
                 .add(text),
         );
@@ -363,11 +395,11 @@ fn label_text(x: u8) -> String {
 }
 
 fn draw_stone(stone: Stone, style: GobanStyle) -> impl svg::node::Node {
-    let stone_group = match style {
+    match style {
         GobanStyle::Fancy => {
             let shadow = element::Circle::new()
-                .set("cx", stone.x as f64 + 0.025)
-                .set("cy", stone.y as f64 + 0.025)
+                .set("cx", f64::from(stone.x) + 0.025)
+                .set("cy", f64::from(stone.y) + 0.025)
                 .set("r", 0.475)
                 .set("fill", "black")
                 .set("fill-opacity", 0.5);
@@ -376,8 +408,8 @@ fn draw_stone(stone: Stone, style: GobanStyle) -> impl svg::node::Node {
                 StoneColor::White => "url(#white-stone-fill)",
             };
             let stone_element = element::Circle::new()
-                .set("cx", stone.x as f64 - 0.017)
-                .set("cy", stone.y as f64 - 0.017)
+                .set("cx", f64::from(stone.x) - 0.017)
+                .set("cy", f64::from(stone.y) - 0.017)
                 .set("r", 0.475)
                 .set("fill", fill);
             element::Group::new().add(shadow).add(stone_element)
@@ -389,17 +421,15 @@ fn draw_stone(stone: Stone, style: GobanStyle) -> impl svg::node::Node {
             };
             element::Group::new().add(
                 element::Circle::new()
-                    .set("cx", stone.x as f64)
-                    .set("cy", stone.y as f64)
+                    .set("cx", f64::from(stone.x))
+                    .set("cy", f64::from(stone.y))
                     .set("r", 0.48)
                     .set("stroke", "black")
                     .set("stroke-width", LINE_WIDTH)
                     .set("fill", fill),
             )
         }
-    };
-
-    stone_group
+    }
 }
 
 fn draw_move_number(
@@ -411,8 +441,8 @@ fn draw_move_number(
 ) -> impl svg::node::Node {
     let text = svg::node::Text::new(n.to_string());
     let text_element = element::Text::new()
-        .set("x", x as f64)
-        .set("y", y as f64)
+        .set("x", f64::from(x))
+        .set("y", f64::from(y))
         .set("dy", "0.35em")
         .set("fill", style.markup_color(color))
         .add(text);
@@ -421,8 +451,8 @@ fn draw_move_number(
         group = group.add(
             element::Rectangle::new()
                 .set("fill", style.background_fill())
-                .set("x", x as f64 - 0.4)
-                .set("y", y as f64 - 0.4)
+                .set("x", f64::from(x) - 0.4)
+                .set("y", f64::from(y) - 0.4)
                 .set("width", 0.8)
                 .set("height", 0.8),
         );
@@ -437,17 +467,17 @@ fn draw_mark(x: u8, y: u8, color: Option<StoneColor>, style: GobanStyle) -> impl
         .set("stroke-width", MARKUP_WIDTH)
         .add(
             element::Line::new()
-                .set("x1", x as f64 - 0.25)
-                .set("x2", x as f64 + 0.25)
-                .set("y1", y as f64 - 0.25)
-                .set("y2", y as f64 + 0.25),
+                .set("x1", f64::from(x) - 0.25)
+                .set("x2", f64::from(x) + 0.25)
+                .set("y1", f64::from(y) - 0.25)
+                .set("y2", f64::from(y) + 0.25),
         )
         .add(
             element::Line::new()
-                .set("x1", x as f64 - 0.25)
-                .set("x2", x as f64 + 0.25)
-                .set("y1", y as f64 + 0.25)
-                .set("y2", y as f64 - 0.25),
+                .set("x1", f64::from(x) - 0.25)
+                .set("x2", f64::from(x) + 0.25)
+                .set("y1", f64::from(y) + 0.25)
+                .set("y2", f64::from(y) - 0.25),
         )
 }
 
@@ -466,12 +496,12 @@ fn draw_triangle(
             "points",
             format!(
                 "{},{} {},{} {},{}",
-                x as f64,
-                y as f64 - triangle_radius,
-                x as f64 - 0.866 * triangle_radius,
-                y as f64 + 0.5 * triangle_radius,
-                x as f64 + 0.866 * triangle_radius,
-                y as f64 + 0.5 * triangle_radius,
+                f64::from(x),
+                f64::from(y) - triangle_radius,
+                f64::from(x) - 0.866 * triangle_radius,
+                f64::from(y) + 0.5 * triangle_radius,
+                f64::from(x) + 0.866 * triangle_radius,
+                f64::from(y) + 0.5 * triangle_radius,
             ),
         ))
 }
@@ -484,8 +514,8 @@ fn draw_circle(x: u8, y: u8, color: Option<StoneColor>, style: GobanStyle) -> im
         .set("stroke-width", LINE_WIDTH)
         .add(
             element::Circle::new()
-                .set("cx", x as f64)
-                .set("cy", y as f64)
+                .set("cx", f64::from(x))
+                .set("cy", f64::from(y))
                 .set("r", radius),
         )
 }
@@ -498,8 +528,8 @@ fn draw_square(x: u8, y: u8, color: Option<StoneColor>, style: GobanStyle) -> im
         .set("stroke-width", LINE_WIDTH)
         .add(
             element::Rectangle::new()
-                .set("x", x as f64 - 0.5 * width)
-                .set("y", y as f64 - 0.5 * width)
+                .set("x", f64::from(x) - 0.5 * width)
+                .set("y", f64::from(y) - 0.5 * width)
                 .set("width", width)
                 .set("height", width),
         )
@@ -518,8 +548,8 @@ fn draw_selected(
         .set("stroke-width", LINE_WIDTH)
         .add(
             element::Rectangle::new()
-                .set("x", x as f64 - 0.5 * width)
-                .set("y", y as f64 - 0.5 * width)
+                .set("x", f64::from(x) - 0.5 * width)
+                .set("y", f64::from(y) - 0.5 * width)
                 .set("width", width)
                 .set("height", width),
         )
@@ -534,8 +564,8 @@ fn dim_square(x: u8, y: u8) -> impl svg::node::Node {
         .set("shape-rendering", "crispEdges")
         .add(
             element::Rectangle::new()
-                .set("x", x as f64 - 0.5 * width)
-                .set("y", y as f64 - 0.5 * width)
+                .set("x", f64::from(x) - 0.5 * width)
+                .set("y", f64::from(y) - 0.5 * width)
                 .set("width", width)
                 .set("height", width),
         )
@@ -550,8 +580,8 @@ fn draw_label(
 ) -> impl svg::node::Node {
     let text = svg::node::Text::new(text.chars().take(2).collect::<String>());
     let text_element = element::Text::new()
-        .set("x", x as f64)
-        .set("y", y as f64)
+        .set("x", f64::from(x))
+        .set("y", f64::from(y))
         .set("text-anchor", "middle")
         .set("dy", "0.35em")
         .set("fill", style.markup_color(color))
@@ -561,8 +591,8 @@ fn draw_label(
         group = group.add(
             element::Rectangle::new()
                 .set("fill", style.background_fill())
-                .set("x", x as f64 - 0.4)
-                .set("y", y as f64 - 0.4)
+                .set("x", f64::from(x) - 0.4)
+                .set("y", f64::from(y) - 0.4)
                 .set("width", 0.8)
                 .set("height", 0.8),
         );
@@ -578,28 +608,28 @@ pub enum GobanStyle {
 }
 
 impl GobanStyle {
-    fn label_color(&self) -> String {
+    fn label_color(self) -> String {
         match self {
             Self::Fancy | Self::Simple => "#6e5840".to_string(),
             Self::Minimalist => "black".to_string(),
         }
     }
 
-    fn background_fill(&self) -> String {
+    fn background_fill(self) -> String {
         match self {
             Self::Fancy | Self::Simple => "#cfa87e".to_string(),
             Self::Minimalist => "white".to_string(),
         }
     }
 
-    fn markup_color(&self, color: Option<StoneColor>) -> String {
+    fn markup_color(self, color: Option<StoneColor>) -> String {
         match color {
             None | Some(StoneColor::White) => "black".to_string(),
             Some(StoneColor::Black) => "white".to_string(),
         }
     }
 
-    fn selected_color(&self, color: Option<StoneColor>) -> String {
+    fn selected_color(self, color: Option<StoneColor>) -> String {
         match self {
             Self::Minimalist => match color {
                 Some(StoneColor::Black) => "white".to_string(),
@@ -609,7 +639,7 @@ impl GobanStyle {
         }
     }
 
-    fn arrowhead(&self) -> element::Marker {
+    fn arrowhead(self) -> element::Marker {
         element::Marker::new()
             .set("markerWidth", 7)
             .set("markerHeight", 5)
@@ -619,7 +649,7 @@ impl GobanStyle {
             .add(element::Polygon::new().set("points", "0 0, 7 2.5, 0 5"))
     }
 
-    fn linehead(&self) -> element::Marker {
+    fn linehead(self) -> element::Marker {
         element::Marker::new()
             .set("markerWidth", 4)
             .set("markerHeight", 4)
@@ -628,7 +658,7 @@ impl GobanStyle {
             .add(element::Circle::new().set("cx", 2).set("cy", 2).set("r", 2))
     }
 
-    fn defs(&self) -> Vec<impl svg::node::Node> {
+    fn defs(self) -> Vec<impl svg::node::Node> {
         match self {
             Self::Fancy => {
                 let black_stone_fill = element::RadialGradient::new()
@@ -666,8 +696,7 @@ impl GobanStyle {
                     );
                 vec![black_stone_fill, white_stone_fill]
             }
-            Self::Simple => vec![],
-            Self::Minimalist => vec![],
+            Self::Simple | Self::Minimalist => vec![],
         }
     }
 }

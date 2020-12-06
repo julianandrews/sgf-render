@@ -5,10 +5,7 @@ const DEFAULT_NODE_NUM: u64 = 1;
 const DEFAULT_FIRST_MOVE_NUM: u64 = 1;
 const DEFAULT_WIDTH: u32 = 800;
 
-pub fn parse_args(
-    opts: &getopts::Options,
-    args: &Vec<String>,
-) -> Result<SgfRenderArgs, UsageError> {
+pub fn parse(opts: &getopts::Options, args: &[String]) -> Result<SgfRenderArgs, UsageError> {
     let matches = opts
         .parse(&args[1..])
         .map_err(|_| UsageError::FailedToParse)?;
@@ -19,15 +16,15 @@ pub fn parse_args(
     let outfile = matches.opt_str("o").map(PathBuf::from);
     let node_number = matches
         .opt_str("n")
-        .map(|c| c.parse())
-        .unwrap_or(Ok(DEFAULT_NODE_NUM))
+        .map_or(Ok(DEFAULT_NODE_NUM), |c| c.parse())
         .map_err(|_| UsageError::InvalidNodeNumber)?;
     let draw_board_labels = !matches.opt_present("no-board-labels");
-    let viewbox_width = matches
-        .opt_str("w")
-        .map(|c| c.parse::<u32>())
-        .unwrap_or(Ok(DEFAULT_WIDTH))
-        .map_err(|_| UsageError::InvalidWidth)? as f64;
+    let viewbox_width = f64::from(
+        matches
+            .opt_str("w")
+            .map_or(Ok(DEFAULT_WIDTH), |c| c.parse::<u32>())
+            .map_err(|_| UsageError::InvalidWidth)?,
+    );
     let print_help = matches.opt_present("h");
     let goban_range = {
         if matches.opt_present("shrink-wrap") && matches.opt_present("r") {
@@ -45,7 +42,7 @@ pub fn parse_args(
     };
     let style = match matches
         .opt_str("style")
-        .unwrap_or("simple".to_string())
+        .unwrap_or_else(|| "simple".to_string())
         .as_str()
     {
         "simple" => Ok(GobanStyle::Simple),
@@ -56,8 +53,7 @@ pub fn parse_args(
     let draw_move_numbers = matches.opt_present("move-numbers");
     let first_move_number = matches
         .opt_str("first-move-number")
-        .map(|c| c.parse())
-        .unwrap_or(Ok(DEFAULT_FIRST_MOVE_NUM))
+        .map_or(Ok(DEFAULT_FIRST_MOVE_NUM), |c| c.parse())
         .map_err(|_| UsageError::InvalidFirstMoveNumber)?;
 
     // There isn't really a clean way to draw both markup and move numbers that I can see.
@@ -212,12 +208,9 @@ impl std::fmt::Display for UsageError {
 impl ::std::error::Error for UsageError {}
 
 fn parse_point_pair(s: &str) -> Result<GobanRange, UsageError> {
-    let parse_byte = |b: u8| {
-        if b < b'a' || b > b'z' {
-            Err(UsageError::InvalidRange)
-        } else {
-            Ok(b - b'a')
-        }
+    let parse_byte = |b: u8| match b {
+        b'a'..=b'z' => Ok(b - b'a'),
+        _ => Err(UsageError::InvalidRange),
     };
 
     let s = s.as_bytes();

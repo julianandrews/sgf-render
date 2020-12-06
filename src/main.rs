@@ -11,7 +11,7 @@ use svg::node::element::SVG;
 fn main() {
     let args: Vec<String> = std::env::args().collect();
     let opts = args::build_opts();
-    let parsed_args = match args::parse_args(&opts, &args) {
+    let parsed_args = match args::parse(&opts, &args) {
         Ok(args) => args,
         Err(error) => {
             eprintln!("{}", error);
@@ -41,7 +41,7 @@ fn main() {
     };
 
     let result: Result<(), Box<dyn Error>> = match parsed_args.outfile {
-        Some(filename) => write_to_file(&filename, &document).into(),
+        Some(filename) => write_to_file(&filename, &document),
         None => svg::write(std::io::stdout(), &document).map_err(|e| e.into()),
     };
     if let Err(e) = result {
@@ -76,14 +76,14 @@ fn get_sgf_root(infile: &Option<PathBuf>) -> Result<sgf_parse::SgfNode, Box<dyn 
     collection
         .into_iter()
         .next()
-        .ok_or(Box::new(SgfRenderError::NoSgfNodes))
+        .ok_or_else(|| SgfRenderError::NoSgfNodes.into())
 }
 
 fn write_to_file(outfile: &std::path::PathBuf, document: &SVG) -> Result<(), Box<dyn Error>> {
     match outfile.extension().and_then(std::ffi::OsStr::to_str) {
         Some("svg") => svg::save(&outfile, document)?,
         Some("png") => save_png(&outfile, document)?,
-        _ => Err(SgfRenderError::UnsupportedFileExtension)?,
+        _ => return Err(SgfRenderError::UnsupportedFileExtension.into()),
     }
     Ok(())
 }
@@ -98,7 +98,7 @@ fn save_png(outfile: &PathBuf, document: &SVG) -> Result<(), Box<dyn Error>> {
         &s,
         &usvg::Options {
             fontdb,
-            ..Default::default()
+            ..usvg::Options::default()
         },
     )?;
     let img =
