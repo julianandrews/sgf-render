@@ -1,4 +1,4 @@
-use sgf_parse::{SgfNode, SgfProp};
+use sgf_parse::{go, SgfNode};
 use std::collections::{HashMap, HashSet, VecDeque};
 
 pub struct Goban {
@@ -55,7 +55,7 @@ impl Goban {
         }
     }
 
-    pub fn from_sgf_node(sgf_node: &SgfNode) -> Result<Self, Box<dyn std::error::Error>> {
+    pub fn from_sgf_node(sgf_node: &SgfNode<go::Prop>) -> Result<Self, Box<dyn std::error::Error>> {
         let board_size = get_board_size(&sgf_node);
         let mut goban = Goban::new(board_size);
         goban.process_node(&sgf_node)?;
@@ -75,7 +75,10 @@ impl Goban {
             .into_iter()
     }
 
-    pub fn process_node(&mut self, sgf_node: &SgfNode) -> Result<(), Box<dyn std::error::Error>> {
+    pub fn process_node(
+        &mut self,
+        sgf_node: &SgfNode<go::Prop>,
+    ) -> Result<(), Box<dyn std::error::Error>> {
         self.marks.clear();
         self.triangles.clear();
         self.circles.clear();
@@ -87,51 +90,53 @@ impl Goban {
         self.arrows.clear();
         for prop in sgf_node.properties() {
             match prop {
-                SgfProp::B(sgf_parse::Move::Move(point)) => {
+                go::Prop::B(go::Move::Move(point)) => {
                     if !self.is_tt_pass(*point) {
                         self.play_stone(Stone::new(point.x, point.y, StoneColor::Black))?;
                     }
                 }
-                SgfProp::W(sgf_parse::Move::Move(point)) => {
+                go::Prop::W(go::Move::Move(point)) => {
                     if !self.is_tt_pass(*point) {
                         self.play_stone(Stone::new(point.x, point.y, StoneColor::White))?;
                     }
                 }
-                SgfProp::AB(points) => {
+                go::Prop::AB(points) => {
                     for point in points.iter() {
                         self.add_stone(Stone::new(point.x, point.y, StoneColor::Black))?;
                     }
                 }
-                SgfProp::AW(points) => {
+                go::Prop::AW(points) => {
                     for point in points.iter() {
                         self.add_stone(Stone::new(point.x, point.y, StoneColor::White))?;
                     }
                 }
-                SgfProp::AE(points) => {
+                go::Prop::AE(points) => {
                     for point in points.iter() {
                         self.clear_point((point.x, point.y));
                     }
                 }
-                SgfProp::MN(num) => self.set_move_number(*num as u64),
-                SgfProp::MA(points) => self.marks = points.iter().map(|p| (p.x, p.y)).collect(),
-                SgfProp::TR(points) => self.triangles = points.iter().map(|p| (p.x, p.y)).collect(),
-                SgfProp::CR(points) => self.circles = points.iter().map(|p| (p.x, p.y)).collect(),
-                SgfProp::SQ(points) => self.squares = points.iter().map(|p| (p.x, p.y)).collect(),
-                SgfProp::SL(points) => self.selected = points.iter().map(|p| (p.x, p.y)).collect(),
-                SgfProp::DD(points) => self.dimmed = points.iter().map(|p| (p.x, p.y)).collect(),
-                SgfProp::LB(labels) => {
+                go::Prop::MN(num) => self.set_move_number(*num as u64),
+                go::Prop::MA(points) => self.marks = points.iter().map(|p| (p.x, p.y)).collect(),
+                go::Prop::TR(points) => {
+                    self.triangles = points.iter().map(|p| (p.x, p.y)).collect()
+                }
+                go::Prop::CR(points) => self.circles = points.iter().map(|p| (p.x, p.y)).collect(),
+                go::Prop::SQ(points) => self.squares = points.iter().map(|p| (p.x, p.y)).collect(),
+                go::Prop::SL(points) => self.selected = points.iter().map(|p| (p.x, p.y)).collect(),
+                go::Prop::DD(points) => self.dimmed = points.iter().map(|p| (p.x, p.y)).collect(),
+                go::Prop::LB(labels) => {
                     self.labels = labels
                         .iter()
                         .map(|(p, t)| ((p.x, p.y), t.to_string()))
                         .collect()
                 }
-                SgfProp::LN(pairs) => {
+                go::Prop::LN(pairs) => {
                     self.lines = pairs
                         .iter()
                         .map(|(p1, p2)| ((p1.x, p1.y), (p2.x, p2.y)))
                         .collect()
                 }
-                SgfProp::AR(pairs) => {
+                go::Prop::AR(pairs) => {
                     self.arrows = pairs
                         .iter()
                         .map(|(p1, p2)| ((p1.x, p1.y), (p2.x, p2.y)))
@@ -252,7 +257,7 @@ impl Goban {
         }
     }
 
-    fn is_tt_pass(&self, point: sgf_parse::Point) -> bool {
+    fn is_tt_pass(&self, point: go::Point) -> bool {
         point.x == 19 && point.y == 19 && self.size.0 < 20 && self.size.1 < 20
     }
 }
@@ -276,9 +281,9 @@ impl Stone {
     }
 }
 
-fn get_board_size(sgf_node: &SgfNode) -> (u8, u8) {
+fn get_board_size(sgf_node: &SgfNode<go::Prop>) -> (u8, u8) {
     match sgf_node.get_property("SZ") {
-        Some(SgfProp::SZ(size)) => *size,
+        Some(go::Prop::SZ(size)) => *size,
         None => (19, 19),
         Some(_) => unreachable!(),
     }

@@ -1,11 +1,9 @@
-#![feature(str_split_once)]
-
 mod args;
 mod lib;
 
 use lib::Goban;
 use std::error::Error;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use svg::node::element::SVG;
 
 fn main() {
@@ -65,21 +63,23 @@ fn load_goban(infile: &Option<PathBuf>, node_number: u64) -> Result<Goban, Box<d
     Ok(goban)
 }
 
-fn get_sgf_root(infile: &Option<PathBuf>) -> Result<sgf_parse::SgfNode, Box<dyn Error>> {
+fn get_sgf_root(
+    infile: &Option<PathBuf>,
+) -> Result<sgf_parse::SgfNode<sgf_parse::go::Prop>, Box<dyn Error>> {
     let mut reader: Box<dyn std::io::Read> = match infile {
         Some(filename) => Box::new(std::io::BufReader::new(std::fs::File::open(&filename)?)),
         None => Box::new(std::io::stdin()),
     };
     let mut text = String::new();
     reader.read_to_string(&mut text)?;
-    let collection = sgf_parse::parse(&text)?;
+    let collection = sgf_parse::go::parse(&text)?;
     collection
         .into_iter()
         .next()
         .ok_or_else(|| SgfRenderError::NoSgfNodes.into())
 }
 
-fn write_to_file(outfile: &std::path::PathBuf, document: &SVG) -> Result<(), Box<dyn Error>> {
+fn write_to_file(outfile: &Path, document: &SVG) -> Result<(), Box<dyn Error>> {
     match outfile.extension().and_then(std::ffi::OsStr::to_str) {
         Some("svg") => svg::save(&outfile, document)?,
         Some("png") => save_png(&outfile, document)?,
@@ -89,7 +89,7 @@ fn write_to_file(outfile: &std::path::PathBuf, document: &SVG) -> Result<(), Box
 }
 
 #[cfg(feature = "png")]
-fn save_png(outfile: &PathBuf, document: &SVG) -> Result<(), Box<dyn Error>> {
+fn save_png(outfile: &Path, document: &SVG) -> Result<(), Box<dyn Error>> {
     let s = document.to_string();
     let mut fontdb = usvg::fontdb::Database::new();
     let font_data = include_bytes!("../data/Roboto-Bold.ttf").to_vec();
@@ -101,23 +101,27 @@ fn save_png(outfile: &PathBuf, document: &SVG) -> Result<(), Box<dyn Error>> {
             ..usvg::Options::default()
         },
     )?;
-    let img =
-        resvg::render(&tree, usvg::FitTo::Original, None).ok_or(SgfRenderError::PNGRenderFailed)?;
-    img.save_png(outfile)?;
+    let pixmap_size = tree.svg_node().size.to_screen_size();
+    let mut pixmap = tiny_skia::Pixmap::new(pixmap_size.width(), pixmap_size.height()).unwrap();
+    resvg::render(&tree, usvg::FitTo::Original, pixmap.as_mut())
+        .ok_or(SgfRenderError::PNGRenderFailed)?;
+    pixmap.save_png(outfile)?;
     Ok(())
 }
 
 #[cfg(not(feature = "png"))]
-fn save_png(_outfile: &PathBuf, _document: &SVG) -> Result<(), Box<dyn Error>> {
-    Err(SgfRenderError::NoPngSupport)?
+fn save_png(_outfile: &Path, _document: &SVG) -> Result<(), Box<dyn Error>> {
+    Err(SgfRenderError::NoPngSupport.into())
 }
 
 #[derive(Debug)]
 enum SgfRenderError {
     NoSgfNodes,
     InsufficientSgfNodes,
-    PNGRenderFailed,
     UnsupportedFileExtension,
+    #[cfg(feature = "png")]
+    PNGRenderFailed,
+    #[cfg(not(feature = "png"))]
     NoPngSupport,
 }
 
@@ -126,8 +130,10 @@ impl std::fmt::Display for SgfRenderError {
         match self {
             Self::NoSgfNodes => write!(f, "No sgf nodes found in input."),
             Self::InsufficientSgfNodes => write!(f, "Insufficient SGF nodes for move number."),
-            Self::PNGRenderFailed => write!(f, "Rendering png failed."),
             Self::UnsupportedFileExtension => write!(f, "Unsupported file extension."),
+            #[cfg(feature = "png")]
+            Self::PNGRenderFailed => write!(f, "Rendering png failed."),
+            #[cfg(not(feature = "png"))]
             Self::NoPngSupport => write!(f, "Compiled without png support."),
         }
     }
