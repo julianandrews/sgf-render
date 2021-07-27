@@ -16,7 +16,7 @@ png = ["resvg", "usvg", "tiny-skia"]
 
 [dependencies]
 getopts = "0.2.21"
-sgf-parse = "3.0.0"
+sgf-parse = "3.1.1"
 svg = "0.9.2"
 
 resvg = { version = "0.14.1", features = ["text"], optional = true }
