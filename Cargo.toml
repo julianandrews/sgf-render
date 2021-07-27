@@ -1,6 +1,6 @@
 [package]
 name = "sgf-render"
-version = "1.3.2"
+version = "1.3.3"
 authors = ["Julian Andrews <jandrews271@gmail.com>"]
 edition = "2018"
 license = "MIT"
