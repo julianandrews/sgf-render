@@ -1,7 +1,7 @@
 mod args;
 mod lib;
 
-use lib::Goban;
+use lib::{Goban, NodeDescription};
 use std::error::Error;
 use std::path::{Path, PathBuf};
 use svg::node::element::SVG;
@@ -22,7 +22,7 @@ fn main() {
         return;
     }
 
-    let goban = match load_goban(&parsed_args.infile, parsed_args.node_number) {
+    let goban = match load_goban(&parsed_args.infile, parsed_args.node_description) {
         Ok(goban) => goban,
         Err(e) => {
             eprintln!("Failed to load SGF node: {}", e);
@@ -48,16 +48,29 @@ fn main() {
     }
 }
 
-fn load_goban(infile: &Option<PathBuf>, node_number: u64) -> Result<Goban, Box<dyn Error>> {
+fn load_goban(infile: &Option<PathBuf>, node: NodeDescription) -> Result<Goban, Box<dyn Error>> {
     let mut sgf_node = &get_sgf_root(infile)?;
 
     let mut goban = Goban::from_sgf_node(&sgf_node)?;
-    for _ in 1..node_number {
-        sgf_node = sgf_node
-            .children()
-            .next()
-            .ok_or(SgfRenderError::InsufficientSgfNodes)?;
-        goban.process_node(sgf_node)?;
+    match node {
+        NodeDescription::Number(node_number) => {
+            for _ in 1..node_number {
+                sgf_node = sgf_node
+                    .children()
+                    .next()
+                    .ok_or(SgfRenderError::InsufficientSgfNodes)?;
+                goban.process_node(sgf_node)?;
+            }
+        }
+        NodeDescription::Last => {
+            while !sgf_node.children.is_empty() {
+                sgf_node = sgf_node
+                    .children()
+                    .next()
+                    .ok_or(SgfRenderError::InsufficientSgfNodes)?;
+                goban.process_node(sgf_node)?;
+            }
+        }
     }
 
     Ok(goban)

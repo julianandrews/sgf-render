@@ -18,6 +18,12 @@ static LINE_WIDTH: f64 = 0.03;
 static MARKUP_WIDTH: f64 = 0.1;
 static HOSHI_RADIUS: f64 = 0.09;
 
+#[derive(Debug, PartialEq, Eq, Clone, Copy)]
+pub enum NodeDescription {
+    Number(u64),
+    Last,
+}
+
 #[derive(Debug)]
 pub struct MakeSvgOptions {
     pub goban_range: GobanRange,

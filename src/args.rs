@@ -1,4 +1,4 @@
-use crate::lib::{GobanRange, GobanStyle, MakeSvgOptions};
+use crate::lib::{GobanRange, GobanStyle, MakeSvgOptions, NodeDescription};
 use std::path::PathBuf;
 
 const DEFAULT_NODE_NUM: u64 = 1;
@@ -14,10 +14,14 @@ pub fn parse(opts: &getopts::Options, args: &[String]) -> Result<SgfRenderArgs, 
     }
     let infile = matches.free.first().map(PathBuf::from);
     let outfile = matches.opt_str("o").map(PathBuf::from);
-    let node_number = matches
-        .opt_str("n")
-        .map_or(Ok(DEFAULT_NODE_NUM), |c| c.parse())
-        .map_err(|_| UsageError::InvalidNodeNumber)?;
+    let node_description = match matches.opt_str("n").as_deref() {
+        Some("last") => NodeDescription::Last,
+        Some(s) => {
+            let node_number = s.parse().map_err(|_| UsageError::InvalidNodeNumber)?;
+            NodeDescription::Number(node_number)
+        }
+        None => NodeDescription::Number(DEFAULT_NODE_NUM),
+    };
     let draw_board_labels = !matches.opt_present("no-board-labels");
     let viewbox_width = f64::from(
         matches
@@ -88,7 +92,7 @@ pub fn parse(opts: &getopts::Options, args: &[String]) -> Result<SgfRenderArgs, 
     Ok(SgfRenderArgs {
         infile,
         outfile,
-        node_number,
+        node_description,
         options,
         print_help,
     })
@@ -111,8 +115,8 @@ pub fn build_opts() -> getopts::Options {
         "n",
         "node-num",
         &format!(
-            "Node number to render (default {}). Note that SGFs \
-            may have nodes without moves.",
+            "Node number to render (default {}) or 'last' to render the last \
+            node. Note that SGFs may have nodes without moves.",
             DEFAULT_NODE_NUM,
         ),
         "NUM",
@@ -173,7 +177,7 @@ pub fn build_opts() -> getopts::Options {
 pub struct SgfRenderArgs {
     pub infile: Option<PathBuf>,
     pub outfile: Option<PathBuf>,
-    pub node_number: u64,
+    pub node_description: NodeDescription,
     pub options: MakeSvgOptions,
     pub print_help: bool,
 }

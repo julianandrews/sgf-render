@@ -286,13 +286,13 @@ dependencies = [
 
 [[package]]
 name = "sgf-parse"
-version = "3.1.1"
+version = "4.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ee7fad4fdfe06a5070830a2ecb7f9e3dc5a0eb4ca95e60ac08687d9db2a939e5"
+checksum = "2268ba396ed960c618d341e868803561962ea848e0fa935bc6b7c9d1643d7da1"
 
 [[package]]
 name = "sgf-render"
-version = "1.3.3"
+version = "1.4.0"
 dependencies = [
  "getopts",
  "resvg",
@@ -325,9 +325,9 @@ checksum = "ae524f056d7d770e174287294f562e95044c68e88dec909a00d2094805db9d75"
 
 [[package]]
 name = "svg"
-version = "0.9.2"
+version = "0.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fa661b18f861c4511c2f2d9665838e367f6dcefda65e0ade2384b7915344a832"
+checksum = "e72d8b19ab05827afefcca66bf47040c1e66a0901eb814784c77d4ec118bd309"
 
 [[package]]
 name = "svgfilters"
