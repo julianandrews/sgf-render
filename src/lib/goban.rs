@@ -1,5 +1,8 @@
-use sgf_parse::{go, SgfNode};
 use std::collections::{HashMap, HashSet, VecDeque};
+
+use sgf_parse::{go, SgfNode};
+
+use super::{MakeSvgError, NodeDescription, NodePathStep};
 
 pub struct Goban {
     pub size: (u8, u8),
@@ -19,12 +22,6 @@ pub struct Goban {
     pub labels: HashMap<(u8, u8), String>,
 }
 
-#[derive(Debug, PartialEq, Eq, Clone, Copy)]
-pub enum NodeDescription {
-    Number(u64),
-    Last,
-}
-
 impl Goban {
     const DEFAULT_HOSHIS: [(u8, u8); 0] = [];
     const NINE_HOSHIS: [(u8, u8); 4] = [(2, 2), (2, 6), (6, 2), (6, 6)];
@@ -42,26 +39,39 @@ impl Goban {
     ];
 
     pub fn from_node_in_collection(
-        node_description: NodeDescription,
+        node_description: &NodeDescription,
         collection: &[SgfNode<go::Prop>],
-    ) -> Result<Self, GobanError> {
+    ) -> Result<Self, MakeSvgError> {
         let mut sgf_node = collection
             .iter()
             .next()
-            .ok_or(GobanError::InsufficientSgfNodes)?;
+            .ok_or(MakeSvgError::InsufficientSgfNodes)?;
 
         let board_size = get_board_size(sgf_node);
         let mut goban = Goban::new(board_size);
         goban.process_node(sgf_node)?;
 
         match node_description {
-            NodeDescription::Number(node_number) => {
-                for _ in 0..node_number {
-                    sgf_node = sgf_node
-                        .children()
-                        .next()
-                        .ok_or(GobanError::InsufficientSgfNodes)?;
-                    goban.process_node(sgf_node)?;
+            NodeDescription::Path(steps) => {
+                for step in steps {
+                    match step {
+                        NodePathStep::Advance(n) => {
+                            for _ in 0..*n {
+                                sgf_node = sgf_node
+                                    .children()
+                                    .next()
+                                    .ok_or(MakeSvgError::InsufficientSgfNodes)?;
+                                goban.process_node(sgf_node)?;
+                            }
+                        }
+                        NodePathStep::Variation(n) => {
+                            sgf_node = sgf_node
+                                .children()
+                                .nth(*n)
+                                .ok_or(MakeSvgError::MissingVariation)?;
+                            goban.process_node(sgf_node)?;
+                        }
+                    }
                 }
             }
             NodeDescription::Last => {
@@ -69,7 +79,7 @@ impl Goban {
                     sgf_node = sgf_node
                         .children()
                         .next()
-                        .ok_or(GobanError::InsufficientSgfNodes)?;
+                        .ok_or(MakeSvgError::InsufficientSgfNodes)?;
                     goban.process_node(sgf_node)?;
                 }
             }
@@ -120,7 +130,7 @@ impl Goban {
         }
     }
 
-    fn process_node(&mut self, sgf_node: &SgfNode<go::Prop>) -> Result<(), GobanError> {
+    fn process_node(&mut self, sgf_node: &SgfNode<go::Prop>) -> Result<(), MakeSvgError> {
         self.marks.clear();
         self.triangles.clear();
         self.circles.clear();
@@ -191,20 +201,20 @@ impl Goban {
         Ok(())
     }
 
-    fn add_stone(&mut self, stone: Stone) -> Result<(), GobanError> {
+    fn add_stone(&mut self, stone: Stone) -> Result<(), MakeSvgError> {
         if stone.x > self.size.0 || stone.y > self.size.1 {
-            return Err(GobanError::InvalidMoveError);
+            return Err(MakeSvgError::InvalidMoveError);
         }
         let key = (stone.x, stone.y);
         if self.stones.contains_key(&key) {
-            return Err(GobanError::InvalidMoveError);
+            return Err(MakeSvgError::InvalidMoveError);
         }
         self.stones.insert(key, stone.color);
 
         Ok(())
     }
 
-    fn play_stone(&mut self, stone: Stone) -> Result<(), GobanError> {
+    fn play_stone(&mut self, stone: Stone) -> Result<(), MakeSvgError> {
         self.add_stone(stone)?;
         let opponent_color = match stone.color {
             StoneColor::Black => StoneColor::White,
@@ -321,20 +331,3 @@ fn get_board_size(sgf_node: &SgfNode<go::Prop>) -> (u8, u8) {
         Some(_) => unreachable!(),
     }
 }
-
-#[derive(Debug)]
-pub enum GobanError {
-    InsufficientSgfNodes,
-    InvalidMoveError,
-}
-
-impl std::fmt::Display for GobanError {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        match self {
-            GobanError::InvalidMoveError => write!(f, "Invalid move"),
-            GobanError::InsufficientSgfNodes => write!(f, "Insufficient SGF nodes found"),
-        }
-    }
-}
-
-impl std::error::Error for GobanError {}

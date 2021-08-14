@@ -1,7 +1,10 @@
-use super::{BoardSide, GobanRange, MakeSvgOptions, NodeDescription, GENERATED_STYLES};
+use super::{
+    BoardSide, GobanRange, MakeSvgOptions, NodeDescription, NodeDescriptionError, NodePathStep,
+    GENERATED_STYLES,
+};
 use std::path::PathBuf;
 
-const DEFAULT_NODE_NUM: u64 = 0;
+const DEFAULT_NODE_NUM: usize = 0;
 const DEFAULT_FIRST_MOVE_NUM: u64 = 1;
 const DEFAULT_WIDTH: u32 = 800;
 
@@ -15,7 +18,7 @@ pub fn parse(opts: &getopts::Options, args: &[String]) -> Result<SgfRenderArgs, 
     let infile = matches.free.first().map(PathBuf::from);
     let outfile = matches.opt_str("o").map(PathBuf::from);
     let print_help = matches.opt_present("h");
-    let options = parse_make_svg_options(&matches)?;
+    let options = extract_make_svg_options(&matches)?;
 
     Ok(SgfRenderArgs {
         infile,
@@ -25,14 +28,10 @@ pub fn parse(opts: &getopts::Options, args: &[String]) -> Result<SgfRenderArgs, 
     })
 }
 
-pub fn parse_make_svg_options(matches: &getopts::Matches) -> Result<MakeSvgOptions, UsageError> {
+pub fn extract_make_svg_options(matches: &getopts::Matches) -> Result<MakeSvgOptions, UsageError> {
     let node_description = match matches.opt_str("n").as_deref() {
-        Some("last") => NodeDescription::Last,
-        Some(s) => {
-            let node_number = s.parse().map_err(|_| UsageError::InvalidNodeNumber)?;
-            NodeDescription::Number(node_number)
-        }
-        None => NodeDescription::Number(DEFAULT_NODE_NUM),
+        Some(s) => s.parse().map_err(UsageError::InvalidNodeDescription)?,
+        None => NodeDescription::Path(vec![NodePathStep::Advance(DEFAULT_NODE_NUM)]),
     };
     let draw_board_labels = !matches.opt_present("no-board-labels");
     let label_sides = {
@@ -141,17 +140,17 @@ pub fn build_opts() -> getopts::Options {
         "n",
         "node",
         &format!(
-            "Node to render (default {}) or 'last' to render the last \
-            node. Note that SGFs may have nodes without moves.",
+            "Node to render. For simple use provide a number or `last` to render the last \
+            node. See the README for more detail (default {}).",
             DEFAULT_NODE_NUM,
         ),
-        "NUM",
+        "PATH_SPEC",
     );
     opts.optopt(
         "w",
         "width",
         &format!(
-            "Width of the output image in pixels (default {})",
+            "Width of the output image in pixels (default {}).",
             DEFAULT_WIDTH,
         ),
         "WIDTH",
@@ -159,18 +158,18 @@ pub fn build_opts() -> getopts::Options {
     opts.optflag(
         "s",
         "shrink-wrap",
-        "Draw only enough of the board to hold all the stones (with 1 space padding)",
+        "Draw only enough of the board to hold all the stones (with 1 space padding).",
     );
     opts.optopt(
         "r",
         "range",
-        "Range to draw as a pair of corners (e.g. 'cc-ff')",
+        "Range to draw as a pair of corners (e.g. 'cc-ff').",
         "RANGE",
     );
     opts.optopt(
         "",
         "style",
-        "Style to use. One of 'simple', 'fancy' or 'minimalist'",
+        "Style to use. One of 'simple', 'fancy' or 'minimalist'.",
         "STYLE",
     );
     opts.optopt(
@@ -223,7 +222,7 @@ pub struct SgfRenderArgs {
 pub enum UsageError {
     FailedToParse,
     TooManyArguments,
-    InvalidNodeNumber,
+    InvalidNodeDescription(NodeDescriptionError),
     InvalidWidth,
     OverspecifiedRange,
     InvalidRange,
@@ -238,7 +237,7 @@ impl std::fmt::Display for UsageError {
         match self {
             UsageError::FailedToParse => write!(f, "Failed to parse arguments."),
             UsageError::TooManyArguments => write!(f, "Too many arguments."),
-            UsageError::InvalidNodeNumber => write!(f, "Invalid node number."),
+            UsageError::InvalidNodeDescription(e) => write!(f, "Invalid node description: {}", e),
             UsageError::InvalidWidth => write!(f, "Invalid width."),
             UsageError::OverspecifiedRange => write!(f, "Specify only '-r' or '-s'"),
             UsageError::InvalidRange => write!(f, "Invalid range."),

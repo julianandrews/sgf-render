@@ -105,7 +105,7 @@ fn {test_name}() {{
         arguments[i + 1] = format!(r"{path}{separator}{{}}", arguments[i + 1]);
     }}
     let matches = args::build_opts().parse(&arguments).unwrap();
-    let options = args::parse_make_svg_options(&matches).unwrap();
+    let options = args::extract_make_svg_options(&matches).unwrap();
     let input = include_str!(r"{path}{separator}input.sgf");
     let expected = include_str!(r"{path}{separator}output.svg");
 

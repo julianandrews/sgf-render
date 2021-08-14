@@ -123,4 +123,4 @@ impl std::fmt::Display for SgfRenderError {
     }
 }
 
-impl Error for SgfRenderError {}
+impl std::error::Error for SgfRenderError {}

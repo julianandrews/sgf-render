@@ -42,25 +42,28 @@ $ ./target/release/sgf-render -h
 ## Usage
 
 ```
-Usage: sgf-render [FILE] [options]
+Usage: target/debug/sgf-render [FILE] [options]
 
 Options:
     -o, --outfile FILE  Output file. SVG and PNG formats supported.
-    -n, --node NUM      Node to render (default 0) or 'last' to render the
-                        last node. Note that SGFs may have nodes without
-                        moves.
-    -w, --width WIDTH   Width of the output image in pixels (default 800)
+    -n, --node PATH_SPEC
+                        Node to render. For simple use provide a number or
+                        `last` to render the last node. See the README for
+                        more detail (default 0).
+    -w, --width WIDTH   Width of the output image in pixels (default 800).
     -s, --shrink-wrap   Draw only enough of the board to hold all the stones
-                        (with 1 space padding)
-    -r, --range RANGE   Range to draw as a pair of corners (e.g. 'cc-ff')
-        --style STYLE   Style to use. One of 'simple', 'fancy' or 'minimalist'
+                        (with 1 space padding).
+    -r, --range RANGE   Range to draw as a pair of corners (e.g. 'cc-ff').
+        --style STYLE   Style to use. One of 'simple', 'fancy' or
+                        'minimalist'.
         --custom-style FILE
                         Custom style to use. Overrides '--style'. See the
                         README for details.
         --move-numbers  Draw move numbers (disables other markup).
         --first-move-number NUM
                         First move number to draw if using --move-numbers
-        --board-labels  Sides to draw board labels on (any of nesw).
+        --label-sides SIDES
+                        Sides to draw board labels on (any of nesw).
         --no-board-labels
                         Don't draw position labels.
         --no-marks      Don't draw SGF marks.
@@ -77,6 +80,21 @@ Options:
 
 If `FILE` isn't provided, `sgf-render` will read from stdin. If `--outfile`
 isn't provided `sgf-render` will print the resulting SVG to stdout.
+
+### Node selection
+
+For the `--node` argument `PATH_SPEC` should be either a comma-separated list
+of steps or 'last'.  A step can be a number which advances that many steps, or
+'v' followed by a number which advances one step down the chosen variation.
+Variations are zero-indexed, so, for instance, 'v0' is equivalent to '1'.
+
+Examples:
+
+0       - Show the root node (usually before the first move).
+7       - Show the 8th node (probably the 7th move) of the main variation.
+5,v1,12 - Advance to the 6th node advance 1 step down the first (non-main)
+          variation at that node, then advance 12 more steps. Show that node.
+last    - Show the last node of the main variation.
 
 ### Custom styles
 

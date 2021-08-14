@@ -1,7 +1,7 @@
 use minidom::Element;
 
 use super::make_svg::NAMESPACE;
-use super::{GobanSVGError, StoneColor};
+use super::{MakeSvgError, StoneColor};
 
 #[derive(Debug, Clone, serde::Deserialize)]
 pub struct GobanStyle {
@@ -79,7 +79,7 @@ impl GobanStyle {
         }
     }
 
-    pub fn defs(&self) -> Result<Vec<Element>, GobanSVGError> {
+    pub fn defs(&self) -> Result<Vec<Element>, MakeSvgError> {
         let linehead = Element::builder("marker", NAMESPACE)
             .attr("id", "linehead")
             .attr("markerWidth", "4")
@@ -111,7 +111,7 @@ impl GobanStyle {
         if let Some(s) = &self.defs {
             // Wrap
             let wrapped = format!("<svg xmlns=\"{}\">{}</svg>", NAMESPACE, s);
-            let wrapper: Element = wrapped.parse().map_err(GobanSVGError::StyleDefError)?;
+            let wrapper: Element = wrapped.parse().map_err(MakeSvgError::StyleDefError)?;
             for child in wrapper.children() {
                 defs.push(child.clone());
             }

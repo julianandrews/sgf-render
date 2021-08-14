@@ -1,7 +1,7 @@
 use std::collections::HashSet;
 use std::ops::Range;
 
-use super::{Goban, GobanSVGError};
+use super::{Goban, MakeSvgError};
 
 #[derive(Debug, Clone)]
 pub enum GobanRange {
@@ -11,7 +11,7 @@ pub enum GobanRange {
 }
 
 impl GobanRange {
-    pub fn get_ranges(&self, goban: &Goban) -> Result<(Range<u8>, Range<u8>), GobanSVGError> {
+    pub fn get_ranges(&self, goban: &Goban) -> Result<(Range<u8>, Range<u8>), MakeSvgError> {
         match self {
             Self::FullBoard => Ok((0..goban.size.0, 0..goban.size.1)),
             Self::ShrinkWrap => {
@@ -82,7 +82,7 @@ impl GobanRange {
             }
             Self::Ranged(a, b) => {
                 if a.end > goban.size.0 || b.end > goban.size.1 {
-                    Err(GobanSVGError::InvalidRange)
+                    Err(MakeSvgError::InvalidRange)
                 } else {
                     Ok((a.clone(), b.clone()))
                 }

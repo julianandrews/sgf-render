@@ -3,7 +3,7 @@ use std::ops::Range;
 
 use minidom::Element;
 
-use super::{Goban, GobanRange, GobanSVGError, GobanStyle, NodeDescription, Stone, StoneColor};
+use super::{Goban, GobanRange, GobanStyle, MakeSvgError, NodeDescription, Stone, StoneColor};
 
 pub static NAMESPACE: &str = "http://www.w3.org/2000/svg";
 
@@ -67,14 +67,14 @@ fn get_margins(label_sides: &HashSet<BoardSide>) -> (f64, f64, f64, f64) {
     (top, right, bottom, left)
 }
 
-pub fn make_svg(sgf: &str, options: &MakeSvgOptions) -> Result<Element, GobanSVGError> {
+pub fn make_svg(sgf: &str, options: &MakeSvgOptions) -> Result<Element, MakeSvgError> {
     let collection = sgf_parse::go::parse(sgf)?;
-    let goban = Goban::from_node_in_collection(options.node_description, &collection)?;
+    let goban = Goban::from_node_in_collection(&options.node_description, &collection)?;
     let (x_range, y_range) = options.goban_range.get_ranges(&goban)?;
     let width = x_range.end - x_range.start;
     let height = y_range.end - y_range.start;
     if options.draw_board_labels && !options.label_sides.is_empty() && width > 25 || height > 99 {
-        return Err(GobanSVGError::UnlabellableRange);
+        return Err(MakeSvgError::UnlabellableRange);
     }
     let (top_margin, right_margin, bottom_margin, left_margin) = if options.draw_board_labels {
         get_margins(&options.label_sides)
