@@ -1,9 +1,8 @@
 mod args;
 mod lib;
 
-use lib::{Goban, NodeDescription};
 use std::error::Error;
-use std::path::{Path, PathBuf};
+use std::path::Path;
 use svg::node::element::SVG;
 
 fn main() {
@@ -22,7 +21,7 @@ fn main() {
         return;
     }
 
-    let goban = match load_goban(&parsed_args.infile, parsed_args.node_description) {
+    let goban = match load_goban(parsed_args.infile, parsed_args.node_description) {
         Ok(goban) => goban,
         Err(e) => {
             eprintln!("Failed to load SGF node: {}", e);
@@ -30,55 +29,24 @@ fn main() {
         }
     };
 
-    let document = match lib::make_svg(&goban, &parsed_args.options) {
-        Ok(document) => document,
+    let svg = match lib::make_svg(&goban, &parsed_args.options) {
+        Ok(svg) => svg,
         Err(e) => {
             eprintln!("Failed to generate SVG: {}", e);
             std::process::exit(1);
         }
     };
 
-    let result: Result<(), Box<dyn Error>> = match parsed_args.outfile {
-        Some(filename) => write_to_file(&filename, &document),
-        None => svg::write(std::io::stdout(), &document).map_err(|e| e.into()),
-    };
-    if let Err(e) = result {
+    if let Err(e) = write_output(&svg, parsed_args.outfile) {
         eprintln!("Failed to write output: {}", e);
         std::process::exit(1);
     }
 }
 
-fn load_goban(infile: &Option<PathBuf>, node: NodeDescription) -> Result<Goban, Box<dyn Error>> {
-    let mut sgf_node = &get_sgf_root(infile)?;
-
-    let mut goban = Goban::from_sgf_node(&sgf_node)?;
-    match node {
-        NodeDescription::Number(node_number) => {
-            for _ in 1..node_number {
-                sgf_node = sgf_node
-                    .children()
-                    .next()
-                    .ok_or(SgfRenderError::InsufficientSgfNodes)?;
-                goban.process_node(sgf_node)?;
-            }
-        }
-        NodeDescription::Last => {
-            while !sgf_node.children.is_empty() {
-                sgf_node = sgf_node
-                    .children()
-                    .next()
-                    .ok_or(SgfRenderError::InsufficientSgfNodes)?;
-                goban.process_node(sgf_node)?;
-            }
-        }
-    }
-
-    Ok(goban)
-}
-
-fn get_sgf_root(
-    infile: &Option<PathBuf>,
-) -> Result<sgf_parse::SgfNode<sgf_parse::go::Prop>, Box<dyn Error>> {
+fn load_goban<P: AsRef<Path>>(
+    infile: Option<P>,
+    node_description: lib::NodeDescription,
+) -> Result<lib::Goban, Box<dyn Error>> {
     let mut reader: Box<dyn std::io::Read> = match infile {
         Some(filename) => Box::new(std::io::BufReader::new(std::fs::File::open(&filename)?)),
         None => Box::new(std::io::stdin()),
@@ -86,16 +54,20 @@ fn get_sgf_root(
     let mut text = String::new();
     reader.read_to_string(&mut text)?;
     let collection = sgf_parse::go::parse(&text)?;
-    collection
-        .into_iter()
-        .next()
-        .ok_or_else(|| SgfRenderError::NoSgfNodes.into())
+    lib::Goban::from_node_in_collection(node_description, &collection)
+}
+
+fn write_output<P: AsRef<Path>>(svg: &SVG, outfile: Option<P>) -> Result<(), Box<dyn Error>> {
+    match outfile {
+        Some(filename) => write_to_file(filename.as_ref(), svg),
+        None => svg::write(std::io::stdout(), svg).map_err(|e| e.into()),
+    }
 }
 
 fn write_to_file(outfile: &Path, document: &SVG) -> Result<(), Box<dyn Error>> {
     match outfile.extension().and_then(std::ffi::OsStr::to_str) {
-        Some("svg") => svg::save(&outfile, document)?,
-        Some("png") => save_png(&outfile, document)?,
+        Some("svg") => svg::save(outfile, document)?,
+        Some("png") => save_png(outfile, document)?,
         _ => return Err(SgfRenderError::UnsupportedFileExtension.into()),
     }
     Ok(())
@@ -129,8 +101,6 @@ fn save_png(_outfile: &Path, _document: &SVG) -> Result<(), Box<dyn Error>> {
 
 #[derive(Debug)]
 enum SgfRenderError {
-    NoSgfNodes,
-    InsufficientSgfNodes,
     UnsupportedFileExtension,
     #[cfg(feature = "png")]
     PNGRenderFailed,
@@ -141,8 +111,6 @@ enum SgfRenderError {
 impl std::fmt::Display for SgfRenderError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::NoSgfNodes => write!(f, "No sgf nodes found in input."),
-            Self::InsufficientSgfNodes => write!(f, "Insufficient SGF nodes for move number."),
             Self::UnsupportedFileExtension => write!(f, "Unsupported file extension."),
             #[cfg(feature = "png")]
             Self::PNGRenderFailed => write!(f, "Rendering png failed."),

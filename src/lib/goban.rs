@@ -19,6 +19,12 @@ pub struct Goban {
     pub labels: HashMap<(u8, u8), String>,
 }
 
+#[derive(Debug, PartialEq, Eq, Clone, Copy)]
+pub enum NodeDescription {
+    Number(u64),
+    Last,
+}
+
 impl Goban {
     const DEFAULT_HOSHIS: [(u8, u8); 0] = [];
     const NINE_HOSHIS: [(u8, u8); 4] = [(2, 2), (2, 6), (6, 2), (6, 6)];
@@ -35,7 +41,64 @@ impl Goban {
         (15, 15),
     ];
 
-    pub fn new(board_size: (u8, u8)) -> Self {
+    pub fn from_node_in_collection(
+        node_description: NodeDescription,
+        collection: &[SgfNode<go::Prop>],
+    ) -> Result<Self, Box<dyn std::error::Error>> {
+        let mut sgf_node = collection
+            .iter()
+            .next()
+            .ok_or(GobanError::InsufficientSgfNodes)?;
+
+        let board_size = get_board_size(sgf_node);
+        let mut goban = Goban::new(board_size);
+        goban.process_node(sgf_node)?;
+
+        match node_description {
+            NodeDescription::Number(node_number) => {
+                for _ in 1..node_number {
+                    sgf_node = sgf_node
+                        .children()
+                        .next()
+                        .ok_or(GobanError::InsufficientSgfNodes)?;
+                    goban.process_node(sgf_node)?;
+                }
+            }
+            NodeDescription::Last => {
+                while !sgf_node.children.is_empty() {
+                    sgf_node = sgf_node
+                        .children()
+                        .next()
+                        .ok_or(GobanError::InsufficientSgfNodes)?;
+                    goban.process_node(sgf_node)?;
+                }
+            }
+        }
+        Ok(goban)
+    }
+
+    pub fn stones(&self) -> impl Iterator<Item = Stone> {
+        self.stones
+            .iter()
+            .map(|(point, color)| Stone {
+                x: point.0,
+                y: point.1,
+                color: *color,
+            })
+            .collect::<Vec<Stone>>()
+            .into_iter()
+    }
+
+    pub fn hoshi_points(&self) -> impl Iterator<Item = &(u8, u8)> {
+        match self.size {
+            (9, 9) => Self::NINE_HOSHIS.iter(),
+            (13, 13) => Self::THIRTEEN_HOSHIS.iter(),
+            (19, 19) => Self::NINETEEN_HOSHIS.iter(),
+            _ => Self::DEFAULT_HOSHIS.iter(),
+        }
+    }
+
+    fn new(board_size: (u8, u8)) -> Self {
         Self {
             size: board_size,
             stones: HashMap::new(),
@@ -55,27 +118,7 @@ impl Goban {
         }
     }
 
-    pub fn from_sgf_node(sgf_node: &SgfNode<go::Prop>) -> Result<Self, Box<dyn std::error::Error>> {
-        let board_size = get_board_size(&sgf_node);
-        let mut goban = Goban::new(board_size);
-        goban.process_node(&sgf_node)?;
-
-        Ok(goban)
-    }
-
-    pub fn stones(&self) -> impl Iterator<Item = Stone> {
-        self.stones
-            .iter()
-            .map(|(point, color)| Stone {
-                x: point.0,
-                y: point.1,
-                color: *color,
-            })
-            .collect::<Vec<Stone>>()
-            .into_iter()
-    }
-
-    pub fn process_node(
+    fn process_node(
         &mut self,
         sgf_node: &SgfNode<go::Prop>,
     ) -> Result<(), Box<dyn std::error::Error>> {
@@ -149,7 +192,7 @@ impl Goban {
         Ok(())
     }
 
-    pub fn add_stone(&mut self, stone: Stone) -> Result<(), GobanError> {
+    fn add_stone(&mut self, stone: Stone) -> Result<(), GobanError> {
         if stone.x > self.size.0 || stone.y > self.size.1 {
             return Err(GobanError::InvalidMoveError);
         }
@@ -162,7 +205,7 @@ impl Goban {
         Ok(())
     }
 
-    pub fn play_stone(&mut self, stone: Stone) -> Result<(), GobanError> {
+    fn play_stone(&mut self, stone: Stone) -> Result<(), GobanError> {
         self.add_stone(stone)?;
         let opponent_color = match stone.color {
             StoneColor::Black => StoneColor::White,
@@ -189,21 +232,12 @@ impl Goban {
         Ok(())
     }
 
-    pub fn clear_point(&mut self, point: (u8, u8)) {
+    fn clear_point(&mut self, point: (u8, u8)) {
         self.stones.remove(&point);
     }
 
-    pub fn set_move_number(&mut self, num: u64) {
+    fn set_move_number(&mut self, num: u64) {
         self.move_number = num;
-    }
-
-    pub fn hoshi_points(&self) -> impl Iterator<Item = &(u8, u8)> {
-        match self.size {
-            (9, 9) => Self::NINE_HOSHIS.iter(),
-            (13, 13) => Self::THIRTEEN_HOSHIS.iter(),
-            (19, 19) => Self::NINETEEN_HOSHIS.iter(),
-            _ => Self::DEFAULT_HOSHIS.iter(),
-        }
     }
 
     fn neighbors(&self, point: (u8, u8)) -> impl Iterator<Item = (u8, u8)> {
@@ -291,6 +325,7 @@ fn get_board_size(sgf_node: &SgfNode<go::Prop>) -> (u8, u8) {
 
 #[derive(Debug)]
 pub enum GobanError {
+    InsufficientSgfNodes,
     InvalidMoveError,
 }
 
@@ -298,6 +333,7 @@ impl std::fmt::Display for GobanError {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         match self {
             GobanError::InvalidMoveError => write!(f, "Invalid move"),
+            GobanError::InsufficientSgfNodes => write!(f, "Insufficient SGF nodes found"),
         }
     }
 }
