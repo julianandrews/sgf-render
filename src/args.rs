@@ -72,6 +72,7 @@ pub fn parse(opts: &getopts::Options, args: &[String]) -> Result<SgfRenderArgs, 
     let draw_arrows = !draw_move_numbers && !matches.opt_present("no-arrows");
 
     let options = MakeSvgOptions {
+        node_description,
         goban_range,
         draw_board_labels,
         draw_move_numbers,
@@ -92,7 +93,6 @@ pub fn parse(opts: &getopts::Options, args: &[String]) -> Result<SgfRenderArgs, 
     Ok(SgfRenderArgs {
         infile,
         outfile,
-        node_description,
         options,
         print_help,
     })
@@ -177,7 +177,6 @@ pub fn build_opts() -> getopts::Options {
 pub struct SgfRenderArgs {
     pub infile: Option<PathBuf>,
     pub outfile: Option<PathBuf>,
-    pub node_description: NodeDescription,
     pub options: MakeSvgOptions,
     pub print_help: bool,
 }

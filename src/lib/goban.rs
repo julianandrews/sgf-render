@@ -44,7 +44,7 @@ impl Goban {
     pub fn from_node_in_collection(
         node_description: NodeDescription,
         collection: &[SgfNode<go::Prop>],
-    ) -> Result<Self, Box<dyn std::error::Error>> {
+    ) -> Result<Self, GobanError> {
         let mut sgf_node = collection
             .iter()
             .next()
@@ -118,10 +118,7 @@ impl Goban {
         }
     }
 
-    fn process_node(
-        &mut self,
-        sgf_node: &SgfNode<go::Prop>,
-    ) -> Result<(), Box<dyn std::error::Error>> {
+    fn process_node(&mut self, sgf_node: &SgfNode<go::Prop>) -> Result<(), GobanError> {
         self.marks.clear();
         self.triangles.clear();
         self.circles.clear();

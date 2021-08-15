@@ -1,7 +1,7 @@
 use std::ops::Range;
 use svg::node::element;
 
-use super::{Goban, GobanRange, GobanSVGError, GobanStyle, Stone, StoneColor};
+use super::{Goban, GobanRange, GobanSVGError, GobanStyle, NodeDescription, Stone, StoneColor};
 
 static BOARD_MARGIN: f64 = 0.64;
 static LABEL_MARGIN: f64 = 0.8;
@@ -17,6 +17,7 @@ static HOSHI_RADIUS: f64 = 0.09;
 
 #[derive(Debug)]
 pub struct MakeSvgOptions {
+    pub node_description: NodeDescription,
     pub goban_range: GobanRange,
     pub viewbox_width: f64,
     pub draw_board_labels: bool,
@@ -34,8 +35,10 @@ pub struct MakeSvgOptions {
     pub style: GobanStyle,
 }
 
-pub fn make_svg(goban: &Goban, options: &MakeSvgOptions) -> Result<svg::Document, GobanSVGError> {
-    let (x_range, y_range) = options.goban_range.get_ranges(goban)?;
+pub fn make_svg(sgf: &str, options: &MakeSvgOptions) -> Result<svg::Document, GobanSVGError> {
+    let collection = sgf_parse::go::parse(&sgf)?;
+    let goban = Goban::from_node_in_collection(options.node_description, &collection)?;
+    let (x_range, y_range) = options.goban_range.get_ranges(&goban)?;
     let width = x_range.end - x_range.start;
     let height = y_range.end - y_range.start;
     let label_margin = if options.draw_board_labels {
@@ -70,7 +73,7 @@ pub fn make_svg(goban: &Goban, options: &MakeSvgOptions) -> Result<svg::Document
     let board_height = f64::from(height) - 1.0 + 2.0 * BOARD_MARGIN + label_margin;
 
     let diagram = {
-        let board = build_board(goban, options).set("clip-path", "url(#board-clip)");
+        let board = build_board(&goban, options).set("clip-path", "url(#board-clip)");
         let board_view = {
             let offset = BOARD_MARGIN + label_margin;
             let board_view_transform = format!(

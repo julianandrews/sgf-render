@@ -21,15 +21,15 @@ fn main() {
         return;
     }
 
-    let goban = match load_goban(parsed_args.infile, parsed_args.node_description) {
+    let input = match read_input(parsed_args.infile) {
         Ok(goban) => goban,
         Err(e) => {
-            eprintln!("Failed to load SGF node: {}", e);
+            eprintln!("Failed to read input: {}", e);
             std::process::exit(1);
         }
     };
 
-    let svg = match lib::make_svg(&goban, &parsed_args.options) {
+    let svg = match lib::make_svg(&input, &parsed_args.options) {
         Ok(svg) => svg,
         Err(e) => {
             eprintln!("Failed to generate SVG: {}", e);
@@ -43,18 +43,14 @@ fn main() {
     }
 }
 
-fn load_goban<P: AsRef<Path>>(
-    infile: Option<P>,
-    node_description: lib::NodeDescription,
-) -> Result<lib::Goban, Box<dyn Error>> {
+fn read_input<P: AsRef<Path>>(infile: Option<P>) -> Result<String, Box<dyn Error>> {
     let mut reader: Box<dyn std::io::Read> = match infile {
         Some(filename) => Box::new(std::io::BufReader::new(std::fs::File::open(&filename)?)),
         None => Box::new(std::io::stdin()),
     };
-    let mut text = String::new();
-    reader.read_to_string(&mut text)?;
-    let collection = sgf_parse::go::parse(&text)?;
-    lib::Goban::from_node_in_collection(node_description, &collection)
+    let mut input = String::new();
+    reader.read_to_string(&mut input)?;
+    Ok(input)
 }
 
 fn write_output<P: AsRef<Path>>(svg: &SVG, outfile: Option<P>) -> Result<(), Box<dyn Error>> {
