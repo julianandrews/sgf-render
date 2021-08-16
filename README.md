@@ -1,5 +1,7 @@
 # Sgf Render
 
+![Continuous integration](https://github.com/julianandrews/sgf-render/workflows/Continuous%20integration/badge.svg)
+
 ![Cho Chikun Elementary, Problem 45](demo/prob45.svg).
 
 CLI to generate SVG or PNG diagrams of Go games from
