@@ -3,7 +3,7 @@ use std::ops::Range;
 
 use super::{Goban, GobanSVGError};
 
-#[derive(Debug)]
+#[derive(Debug, serde::Deserialize)]
 pub enum GobanRange {
     ShrinkWrap,
     FullBoard,

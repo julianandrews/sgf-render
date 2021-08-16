@@ -19,7 +19,7 @@ pub struct Goban {
     pub labels: HashMap<(u8, u8), String>,
 }
 
-#[derive(Debug, PartialEq, Eq, Clone, Copy)]
+#[derive(Debug, PartialEq, Eq, Clone, Copy, serde::Deserialize)]
 pub enum NodeDescription {
     Number(u64),
     Last,
@@ -78,15 +78,17 @@ impl Goban {
     }
 
     pub fn stones(&self) -> impl Iterator<Item = Stone> {
-        self.stones
+        let mut stones = self
+            .stones
             .iter()
             .map(|(point, color)| Stone {
                 x: point.0,
                 y: point.1,
                 color: *color,
             })
-            .collect::<Vec<Stone>>()
-            .into_iter()
+            .collect::<Vec<Stone>>();
+        stones.sort_by_key(|stone| (stone.y, stone.x));
+        stones.into_iter()
     }
 
     pub fn hoshi_points(&self) -> impl Iterator<Item = &(u8, u8)> {

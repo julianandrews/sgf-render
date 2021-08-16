@@ -1,0 +1,16 @@
+node_description = { Number = 0 }
+goban_range = "ShrinkWrap"
+viewbox_width = 800
+draw_board_labels = true
+draw_move_numbers = false
+draw_marks = false
+draw_triangles = false
+draw_circles = false
+draw_squares = false
+draw_selected = false
+draw_dimmed = false
+draw_labels = false
+draw_lines = false
+draw_arrows = false
+first_move_number = 0
+style = "Simple"

@@ -9,6 +9,11 @@ repository = "https://github.com/julianandrews/sgf-render/"
 readme = "README.md"
 description = "A renderer for SGF diagrams."
 categories = ["command-line-utilities", "multimedia::images", "rendering", "visualization"]
+build = "build.rs"
+
+[lib]
+name = "sgf_render"
+path = "src/lib/mod.rs"
 
 [features]
 default = ["png"]
@@ -18,6 +23,8 @@ png = ["resvg", "usvg", "tiny-skia"]
 getopts = "0.2.21"
 sgf-parse = "4.0.0"
 svg = "0.10.0"
+toml = "0.5"
+serde = { version = "1.0", features = ["derive"] }
 
 resvg = { version = "0.14.1", features = ["text"], optional = true }
 usvg = { version = "0.14.1", optional = true }

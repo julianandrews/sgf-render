@@ -73,7 +73,7 @@ fn write_to_file(outfile: &Path, document: &SVG) -> Result<(), Box<dyn Error>> {
 fn save_png(outfile: &Path, document: &SVG) -> Result<(), Box<dyn Error>> {
     let s = document.to_string();
     let mut fontdb = usvg::fontdb::Database::new();
-    let font_data = include_bytes!("../data/Roboto-Bold.ttf").to_vec();
+    let font_data = include_bytes!("../resources/Roboto-Bold.ttf").to_vec();
     fontdb.load_font_data(font_data);
     let tree = usvg::Tree::from_str(
         &s,

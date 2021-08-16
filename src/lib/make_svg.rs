@@ -15,7 +15,8 @@ static LINE_WIDTH: f64 = 0.03;
 static MARKUP_WIDTH: f64 = 0.1;
 static HOSHI_RADIUS: f64 = 0.09;
 
-#[derive(Debug)]
+#[derive(Debug, serde::Deserialize)]
+#[serde(default)]
 pub struct MakeSvgOptions {
     pub node_description: NodeDescription,
     pub goban_range: GobanRange,
@@ -599,4 +600,27 @@ fn draw_label(
     }
 
     group.add(text_element)
+}
+
+impl Default for MakeSvgOptions {
+    fn default() -> Self {
+        MakeSvgOptions {
+            node_description: NodeDescription::Number(0),
+            goban_range: GobanRange::FullBoard,
+            viewbox_width: 800.0,
+            draw_board_labels: true,
+            draw_move_numbers: false,
+            draw_marks: true,
+            draw_triangles: true,
+            draw_circles: true,
+            draw_squares: true,
+            draw_selected: true,
+            draw_dimmed: true,
+            draw_labels: true,
+            draw_lines: true,
+            draw_arrows: true,
+            first_move_number: 0,
+            style: GobanStyle::Simple,
+        }
+    }
 }

@@ -2,7 +2,7 @@ use svg::node::element;
 
 use super::StoneColor;
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, serde::Deserialize)]
 pub enum GobanStyle {
     Fancy,
     Simple,
