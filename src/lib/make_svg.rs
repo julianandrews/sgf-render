@@ -20,6 +20,7 @@ static HOSHI_RADIUS: f64 = 0.09;
 pub struct MakeSvgOptions {
     pub node_description: NodeDescription,
     pub goban_range: GobanRange,
+    pub style: GobanStyle,
     pub viewbox_width: f64,
     pub draw_board_labels: bool,
     pub draw_move_numbers: bool,
@@ -33,11 +34,10 @@ pub struct MakeSvgOptions {
     pub draw_lines: bool,
     pub draw_arrows: bool,
     pub first_move_number: u64,
-    pub style: GobanStyle,
 }
 
 pub fn make_svg(sgf: &str, options: &MakeSvgOptions) -> Result<svg::Document, GobanSVGError> {
-    let collection = sgf_parse::go::parse(&sgf)?;
+    let collection = sgf_parse::go::parse(sgf)?;
     let goban = Goban::from_node_in_collection(options.node_description, &collection)?;
     let (x_range, y_range) = options.goban_range.get_ranges(&goban)?;
     let width = x_range.end - x_range.start;

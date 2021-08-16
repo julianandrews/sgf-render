@@ -74,6 +74,8 @@ pub fn parse(opts: &getopts::Options, args: &[String]) -> Result<SgfRenderArgs, 
     let options = MakeSvgOptions {
         node_description,
         goban_range,
+        style,
+        viewbox_width,
         draw_board_labels,
         draw_move_numbers,
         draw_marks,
@@ -86,8 +88,6 @@ pub fn parse(opts: &getopts::Options, args: &[String]) -> Result<SgfRenderArgs, 
         draw_lines,
         draw_arrows,
         first_move_number,
-        viewbox_width,
-        style,
     };
 
     Ok(SgfRenderArgs {
