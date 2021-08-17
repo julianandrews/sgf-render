@@ -45,8 +45,9 @@ Usage: sgf-render [FILE] [options]
 
 Options:
     -o, --outfile FILE  Output file. SVG and PNG formats supported.
-    -n, --node-num NUM  Node number to render (default 1). Note that SGFs may
-                        have nodes without moves.
+    -n, --node-num NUM  Node number to render (default 1) or 'last' to render
+                        the last node. Note that SGFs may have nodes without
+                        moves.
     -w, --width WIDTH   Width of the output image in pixels (default 800)
     -s, --shrink-wrap   Draw only enough of the board to hold all the stones
                         (with 1 space padding)
