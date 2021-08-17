@@ -224,7 +224,9 @@ fn build_move_numbers_group(goban: &Goban, options: &MakeSvgOptions) -> element:
     let mut group = element::Group::new()
         .set("id", "move-numbers")
         .set("text-anchor", "middle");
-    for (point, nums) in &goban.move_numbers {
+    let mut move_numbers: Vec<_> = goban.move_numbers.iter().collect();
+    move_numbers.sort_by_key(|(_, nums)| nums.iter().max());
+    for (point, nums) in &move_numbers {
         let n = *nums
             .last()
             .expect("Move numbers should never be an empty vector");
@@ -619,7 +621,7 @@ impl Default for MakeSvgOptions {
             draw_labels: true,
             draw_lines: true,
             draw_arrows: true,
-            first_move_number: 0,
+            first_move_number: 1,
             style: GobanStyle::Simple,
         }
     }
