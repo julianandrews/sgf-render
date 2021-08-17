@@ -1,0 +1,3 @@
+# sgf-render input.sgf -n 120 --style fancy -o output.svg
+node_description = { Number = 120 }
+style = "Fancy"

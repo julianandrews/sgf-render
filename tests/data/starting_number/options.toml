@@ -1,6 +1,7 @@
-# sgf-render input.sgf -n 120 --move-numbers -o output.svg
+# sgf-render input.sgf -n 120 --move-numbers --first-move-number 80 -o output.svg
 node_description = { Number = 120 }
 draw_move_numbers = true
+first_move_number = 80
 # draw_move_numbers automatically disables all the markup.
 draw_marks = false
 draw_triangles = false

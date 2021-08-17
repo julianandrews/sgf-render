@@ -247,7 +247,9 @@ fn build_move_numbers_group(goban: &Goban, options: &MakeSvgOptions) -> element:
 
 fn build_marks_group(goban: &Goban, options: &MakeSvgOptions) -> element::Group {
     let mut group = element::Group::new().set("id", "markup-marks");
-    for point in &goban.marks {
+    let mut marks: Vec<_> = goban.marks.iter().collect();
+    marks.sort();
+    for point in marks {
         let stone_color = goban.stones.get(point).copied();
         group = group.add(draw_mark(point.0, point.1, stone_color, options.style));
     }
@@ -256,7 +258,9 @@ fn build_marks_group(goban: &Goban, options: &MakeSvgOptions) -> element::Group 
 
 fn build_triangles_group(goban: &Goban, options: &MakeSvgOptions) -> element::Group {
     let mut group = element::Group::new().set("id", "markup-triangles");
-    for point in &goban.triangles {
+    let mut triangles: Vec<_> = goban.triangles.iter().collect();
+    triangles.sort();
+    for point in triangles {
         let stone_color = goban.stones.get(point).copied();
         group = group.add(draw_triangle(point.0, point.1, stone_color, options.style));
     }
@@ -265,7 +269,9 @@ fn build_triangles_group(goban: &Goban, options: &MakeSvgOptions) -> element::Gr
 
 fn build_circles_group(goban: &Goban, options: &MakeSvgOptions) -> element::Group {
     let mut group = element::Group::new().set("id", "markup-circles");
-    for point in &goban.circles {
+    let mut circles: Vec<_> = goban.circles.iter().collect();
+    circles.sort();
+    for point in circles {
         let stone_color = goban.stones.get(point).copied();
         group = group.add(draw_circle(point.0, point.1, stone_color, options.style));
     }
@@ -274,7 +280,9 @@ fn build_circles_group(goban: &Goban, options: &MakeSvgOptions) -> element::Grou
 
 fn build_squares_group(goban: &Goban, options: &MakeSvgOptions) -> element::Group {
     let mut group = element::Group::new().set("id", "markup-squares");
-    for point in &goban.squares {
+    let mut squares: Vec<_> = goban.squares.iter().collect();
+    squares.sort();
+    for point in squares {
         let stone_color = goban.stones.get(point).copied();
         group = group.add(draw_square(point.0, point.1, stone_color, options.style));
     }
@@ -283,7 +291,9 @@ fn build_squares_group(goban: &Goban, options: &MakeSvgOptions) -> element::Grou
 
 fn build_selected_group(goban: &Goban, options: &MakeSvgOptions) -> element::Group {
     let mut group = element::Group::new().set("id", "markup-selected");
-    for point in &goban.selected {
+    let mut selected: Vec<_> = goban.selected.iter().collect();
+    selected.sort();
+    for point in selected {
         let stone_color = goban.stones.get(point).copied();
         group = group.add(draw_selected(point.0, point.1, stone_color, options.style));
     }
@@ -292,7 +302,9 @@ fn build_selected_group(goban: &Goban, options: &MakeSvgOptions) -> element::Gro
 
 fn build_dimmed_group(goban: &Goban, _options: &MakeSvgOptions) -> element::Group {
     let mut group = element::Group::new().set("id", "markup-dimmed");
-    for point in &goban.dimmed {
+    let mut dimmed: Vec<_> = goban.dimmed.iter().collect();
+    dimmed.sort();
+    for point in dimmed {
         group = group.add(dim_square(point.0, point.1));
     }
     group
@@ -300,7 +312,9 @@ fn build_dimmed_group(goban: &Goban, _options: &MakeSvgOptions) -> element::Grou
 
 fn build_label_group(goban: &Goban, options: &MakeSvgOptions) -> element::Group {
     let mut group = element::Group::new().set("id", "markup-labels");
-    for (point, text) in &goban.labels {
+    let mut labels: Vec<_> = goban.labels.iter().collect();
+    labels.sort();
+    for (point, text) in labels {
         let stone_color = goban.stones.get(point).copied();
         group = group.add(draw_label(
             point.0,
@@ -320,7 +334,9 @@ fn build_line_group(goban: &Goban, _options: &MakeSvgOptions) -> element::Group 
         .set("stroke-width", LINE_WIDTH)
         .set("marker-start", "url(#linehead)")
         .set("marker-end", "url(#linehead)");
-    for &(p1, p2) in &goban.lines {
+    let mut lines: Vec<_> = goban.lines.iter().collect();
+    lines.sort();
+    for &(p1, p2) in lines {
         group = group.add(
             element::Line::new()
                 .set("x1", p1.0)
@@ -338,7 +354,9 @@ fn build_arrow_group(goban: &Goban, _options: &MakeSvgOptions) -> element::Group
         .set("stroke", "black")
         .set("stroke-width", LINE_WIDTH)
         .set("marker-end", "url(#arrowhead)");
-    for &(p1, p2) in &goban.arrows {
+    let mut arrows: Vec<_> = goban.arrows.iter().collect();
+    arrows.sort();
+    for &(p1, p2) in arrows {
         group = group.add(
             element::Line::new()
                 .set("x1", p1.0)

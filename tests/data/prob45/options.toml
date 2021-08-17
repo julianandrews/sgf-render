@@ -1,1 +1,2 @@
+# sgf-render input.sgf --shrink-wrap -o output.svg
 goban_range = "ShrinkWrap"
