@@ -19,7 +19,7 @@ pub struct Goban {
     pub labels: HashMap<(u8, u8), String>,
 }
 
-#[derive(Debug, PartialEq, Eq, Clone, Copy, serde::Deserialize)]
+#[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub enum NodeDescription {
     Number(u64),
     Last,

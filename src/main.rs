@@ -1,9 +1,10 @@
-mod args;
 mod lib;
 
 use std::error::Error;
 use std::path::Path;
 use svg::node::element::SVG;
+
+use lib::args;
 
 fn main() {
     let args: Vec<String> = std::env::args().collect();

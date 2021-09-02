@@ -1,2 +1,0 @@
-# sgf-render input.sgf -n 120 -o output.svg
-node_description = { Number = 120 }

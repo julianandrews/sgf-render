@@ -21,10 +21,12 @@ png = ["resvg", "usvg", "tiny-skia"]
 
 [dependencies]
 getopts = "0.2.21"
+lazy_static = "1.4.0"
 sgf-parse = "4.0.0"
 svg = "0.10.0"
 toml = "0.5"
 serde = { version = "1.0", features = ["derive"] }
+shell-words = "1.0.0"
 
 resvg = { version = "0.14.1", features = ["text"], optional = true }
 usvg = { version = "0.14.1", optional = true }

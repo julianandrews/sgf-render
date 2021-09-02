@@ -1,0 +1,23 @@
+line_color = "black"
+line_width = 0.03
+hoshi_radius = 0.09
+background_fill = "#cfa87e"
+label_color = "#6e5840"
+black_stone_fill = "url(#black-stone-fill)"
+white_stone_fill = "url(#white-stone-fill)"
+markup_stroke_width = 0.1
+black_stone_markup_color = "white"
+white_stone_markup_color = "black"
+empty_markup_color = "black"
+black_stone_selected_color = "blue"
+white_stone_selected_color = "blue"
+empty_selected_color = "blue"
+defs = """<radialGradient cx="35%" cy="35%" id="black-stone-fill">
+<stop offset="0%" stop-color="#666"/>
+<stop offset="100%" stop-color="black"/>
+</radialGradient>
+<radialgradient cx="35%" cy="35%" id="white-stone-fill">
+<stop offset="0%" stop-color="#eee"/>
+<stop offset="30%" stop-color="#ddd"/>
+<stop offset="100%" stop-color="#bbb"/>
+</radialgradient>"""

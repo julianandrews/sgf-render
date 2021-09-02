@@ -1,2 +1,0 @@
-# sgf-render input.sgf -n last -o output.svg
-node_description = "Last"

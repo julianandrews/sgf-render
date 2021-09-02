@@ -1,0 +1,16 @@
+line_color = "black"
+line_width = 0.03
+hoshi_radius = 0.09
+background_fill = "white"
+label_color = "black"
+black_stone_fill = "black"
+white_stone_fill = "white"
+black_stone_stroke = "black"
+white_stone_stroke = "black"
+markup_stroke_width = 0.1
+black_stone_markup_color = "white"
+white_stone_markup_color = "black"
+empty_markup_color = "black"
+black_stone_selected_color = "white"
+white_stone_selected_color = "black"
+empty_selected_color = "black"

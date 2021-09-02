@@ -1,3 +1,0 @@
-# sgf-render input.sgf -n 120 --range ac-je -o output.svg
-node_description = { Number = 120 }
-goban_range = { Ranged = { 0 = { start = 0, end = 10}, 1 = {start = 2, end = 5 } } }

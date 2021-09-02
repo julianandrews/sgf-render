@@ -1,2 +1,0 @@
-# sgf-render input.sgf --width 200 -o output.svg
-viewbox_width = 200

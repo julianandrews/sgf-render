@@ -1,3 +1,0 @@
-# sgf-render input.sgf -n 120 --style minimalist -o output.svg
-node_description = { Number = 120 }
-style = "Minimalist"

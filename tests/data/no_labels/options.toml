@@ -1,3 +1,0 @@
-# sgf-render input.sgf --shrink-wrap --no-board-labels -o output.svg
-goban_range = "ShrinkWrap"
-draw_board_labels = false

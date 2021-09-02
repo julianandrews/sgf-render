@@ -1,4 +1,4 @@
-use crate::lib::{GobanRange, GobanStyle, MakeSvgOptions, NodeDescription};
+use super::{GobanRange, MakeSvgOptions, NodeDescription, GENERATED_STYLES};
 use std::path::PathBuf;
 
 const DEFAULT_NODE_NUM: u64 = 1;
@@ -14,6 +14,18 @@ pub fn parse(opts: &getopts::Options, args: &[String]) -> Result<SgfRenderArgs, 
     }
     let infile = matches.free.first().map(PathBuf::from);
     let outfile = matches.opt_str("o").map(PathBuf::from);
+    let print_help = matches.opt_present("h");
+    let options = parse_make_svg_options(&matches)?;
+
+    Ok(SgfRenderArgs {
+        infile,
+        outfile,
+        options,
+        print_help,
+    })
+}
+
+pub fn parse_make_svg_options(matches: &getopts::Matches) -> Result<MakeSvgOptions, UsageError> {
     let node_description = match matches.opt_str("n").as_deref() {
         Some("last") => NodeDescription::Last,
         Some(s) => {
@@ -29,7 +41,6 @@ pub fn parse(opts: &getopts::Options, args: &[String]) -> Result<SgfRenderArgs, 
             .map_or(Ok(DEFAULT_WIDTH), |c| c.parse::<u32>())
             .map_err(|_| UsageError::InvalidWidth)?,
     );
-    let print_help = matches.opt_present("h");
     let goban_range = {
         if matches.opt_present("shrink-wrap") && matches.opt_present("r") {
             return Err(UsageError::OverspecifiedRange);
@@ -44,16 +55,15 @@ pub fn parse(opts: &getopts::Options, args: &[String]) -> Result<SgfRenderArgs, 
             }
         }
     };
-    let style = match matches
-        .opt_str("style")
-        .unwrap_or_else(|| "simple".to_string())
-        .as_str()
-    {
-        "simple" => Ok(GobanStyle::Simple),
-        "fancy" => Ok(GobanStyle::Fancy),
-        "minimalist" => Ok(GobanStyle::Minimalist),
-        _ => Err(UsageError::InvalidStyle),
-    }?;
+    let style = {
+        let name = matches
+            .opt_str("style")
+            .unwrap_or_else(|| "simple".to_string());
+        GENERATED_STYLES
+            .get(name.as_str())
+            .ok_or(UsageError::InvalidStyle)?
+            .clone()
+    };
     let draw_move_numbers = matches.opt_present("move-numbers");
     let first_move_number = matches
         .opt_str("first-move-number")
@@ -71,7 +81,7 @@ pub fn parse(opts: &getopts::Options, args: &[String]) -> Result<SgfRenderArgs, 
     let draw_lines = !draw_move_numbers && !matches.opt_present("no-lines");
     let draw_arrows = !draw_move_numbers && !matches.opt_present("no-arrows");
 
-    let options = MakeSvgOptions {
+    Ok(MakeSvgOptions {
         node_description,
         goban_range,
         style,
@@ -88,13 +98,6 @@ pub fn parse(opts: &getopts::Options, args: &[String]) -> Result<SgfRenderArgs, 
         draw_lines,
         draw_arrows,
         first_move_number,
-    };
-
-    Ok(SgfRenderArgs {
-        infile,
-        outfile,
-        options,
-        print_help,
     })
 }
 
@@ -151,6 +154,11 @@ pub fn build_opts() -> getopts::Options {
         "",
         "move-numbers",
         "Draw move numbers (disables other markup).",
+    );
+    opts.optflag(
+        "",
+        "board-labels",
+        "Sides to draw board labels on (any of nesw).",
     );
     opts.optflag("", "no-board-labels", "Don't draw position labels.");
     opts.optflag("", "no-marks", "Don't draw SGF marks.");
