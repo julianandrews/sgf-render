@@ -232,7 +232,7 @@ fn build_move_numbers_group(goban: &Goban, options: &MakeSvgOptions) -> Element 
             .expect("Move numbers should never be an empty vector");
         if n >= options.first_move_number {
             let stone_color = goban.stones.get(point).copied();
-            let starting_num = (n - options.first_move_number) % 99 + 1;
+            let starting_num = (n - options.first_move_number) + 1;
             group_builder = group_builder.append(draw_move_number(
                 point.0,
                 point.1,

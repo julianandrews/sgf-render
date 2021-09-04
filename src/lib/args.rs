@@ -1,7 +1,7 @@
 use super::{GobanRange, MakeSvgOptions, NodeDescription, GENERATED_STYLES};
 use std::path::PathBuf;
 
-const DEFAULT_NODE_NUM: u64 = 1;
+const DEFAULT_NODE_NUM: u64 = 0;
 const DEFAULT_FIRST_MOVE_NUM: u64 = 1;
 const DEFAULT_WIDTH: u32 = 800;
 

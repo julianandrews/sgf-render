@@ -56,7 +56,7 @@ impl Goban {
 
         match node_description {
             NodeDescription::Number(node_number) => {
-                for _ in 1..node_number {
+                for _ in 0..node_number {
                     sgf_node = sgf_node
                         .children()
                         .next()
