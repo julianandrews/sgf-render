@@ -56,7 +56,7 @@ fn write_style(outfile: &mut fs::File, path: &Path) {
     write!(
         outfile,
         r#"
-        m.insert("{style_name}", toml::from_str(include_str!("{path}")).unwrap());"#,
+        m.insert("{style_name}", toml::from_str(include_str!(r"{path}")).unwrap());"#,
         style_name = style_name,
         path = path.display(),
     )
@@ -92,6 +92,7 @@ use sgf_render::args;
 fn write_test(outfile: &mut fs::File, dir: &fs::DirEntry) {
     let dir = dir.path().canonicalize().unwrap();
     let path = dir.display();
+    let separator = std::path::MAIN_SEPARATOR;
     let test_name = dir.file_name().unwrap().to_string_lossy();
 
     write!(
@@ -99,14 +100,14 @@ fn write_test(outfile: &mut fs::File, dir: &fs::DirEntry) {
         r#"
 #[test]
 fn {test_name}() {{
-    let mut arguments = shell_words::split(include_str!("{path}/options.txt")).unwrap();
+    let mut arguments = shell_words::split(include_str!(r"{path}{separator}options.txt")).unwrap();
     if let Some(i) = arguments.iter().position(|s| s == "--custom-style") {{
-        arguments[i + 1] = format!("{path}/{{}}", arguments[i + 1]);
+        arguments[i + 1] = format!(r"{path}{separator}{{}}", arguments[i + 1]);
     }}
     let matches = args::build_opts().parse(&arguments).unwrap();
     let options = args::parse_make_svg_options(&matches).unwrap();
-    let input = include_str!("{path}/input.sgf");
-    let expected = include_str!("{path}/output.svg");
+    let input = include_str!(r"{path}{separator}input.sgf");
+    let expected = include_str!(r"{path}{separator}output.svg");
 
     let svg = make_svg(input, &options).unwrap();
     let mut buffer: Vec<u8> = vec![];
@@ -118,6 +119,7 @@ fn {test_name}() {{
         "#,
         test_name = test_name,
         path = path,
+        separator = separator,
     )
     .unwrap();
 }
