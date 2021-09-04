@@ -55,10 +55,11 @@ fn read_input<P: AsRef<Path>>(infile: Option<P>) -> Result<String, Box<dyn Error
 }
 
 fn write_output<P: AsRef<Path>>(svg: &Element, outfile: Option<P>) -> Result<(), Box<dyn Error>> {
-    Ok(match outfile {
+    match outfile {
         Some(filename) => write_to_file(filename.as_ref(), svg)?,
         None => svg.write_to(&mut std::io::stdout())?,
-    })
+    }
+    Ok(())
 }
 
 fn write_to_file(outfile: &Path, svg: &Element) -> Result<(), Box<dyn Error>> {
@@ -82,7 +83,7 @@ fn save_png(outfile: &Path, svg: &Element) -> Result<(), Box<dyn Error>> {
     let font_data = include_bytes!("../resources/Roboto-Bold.ttf").to_vec();
     fontdb.load_font_data(font_data);
     let tree = usvg::Tree::from_str(
-        &s,
+        s,
         &usvg::Options {
             fontdb,
             ..usvg::Options::default()
