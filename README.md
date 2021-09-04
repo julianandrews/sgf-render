@@ -42,12 +42,12 @@ $ ./target/release/sgf-render -h
 ## Usage
 
 ```
-Usage: target/debug/sgf-render [FILE] [options]
+Usage: sgf-render [FILE] [options]
 
 Options:
     -o, --outfile FILE  Output file. SVG and PNG formats supported.
-    -n, --node-num NUM  Node number to render (default 1) or 'last' to render
-                        the last node. Note that SGFs may have nodes without
+    -n, --node NUM      Node to render (default 0) or 'last' to render the
+                        last node. Note that SGFs may have nodes without
                         moves.
     -w, --width WIDTH   Width of the output image in pixels (default 800)
     -s, --shrink-wrap   Draw only enough of the board to hold all the stones
@@ -55,8 +55,8 @@ Options:
     -r, --range RANGE   Range to draw as a pair of corners (e.g. 'cc-ff')
         --style STYLE   Style to use. One of 'simple', 'fancy' or 'minimalist'
         --custom-style FILE
-                        Custom style to use. Overrides '--style'. See the README
-                        for details.
+                        Custom style to use. Overrides '--style'. See the
+                        README for details.
         --move-numbers  Draw move numbers (disables other markup).
         --first-move-number NUM
                         First move number to draw if using --move-numbers

@@ -123,9 +123,9 @@ pub fn build_opts() -> getopts::Options {
     );
     opts.optopt(
         "n",
-        "node-num",
+        "node",
         &format!(
-            "Node number to render (default {}) or 'last' to render the last \
+            "Node to render (default {}) or 'last' to render the last \
             node. Note that SGFs may have nodes without moves.",
             DEFAULT_NODE_NUM,
         ),
