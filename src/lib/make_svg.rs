@@ -1,5 +1,7 @@
-use minidom::Element;
+use std::collections::HashSet;
 use std::ops::Range;
+
+use minidom::Element;
 
 use super::{Goban, GobanRange, GobanSVGError, GobanStyle, NodeDescription, Stone, StoneColor};
 
@@ -19,6 +21,7 @@ pub struct MakeSvgOptions {
     pub style: GobanStyle,
     pub viewbox_width: f64,
     pub draw_board_labels: bool,
+    pub label_sides: HashSet<BoardSide>,
     pub draw_move_numbers: bool,
     pub draw_marks: bool,
     pub draw_triangles: bool,
@@ -32,19 +35,51 @@ pub struct MakeSvgOptions {
     pub first_move_number: u64,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum BoardSide {
+    North,
+    East,
+    South,
+    West,
+}
+
+fn get_margins(label_sides: &HashSet<BoardSide>) -> (f64, f64, f64, f64) {
+    let top = if label_sides.contains(&BoardSide::North) {
+        LABEL_MARGIN
+    } else {
+        0.0
+    };
+    let right = if label_sides.contains(&BoardSide::East) {
+        LABEL_MARGIN
+    } else {
+        0.0
+    };
+    let bottom = if label_sides.contains(&BoardSide::South) {
+        LABEL_MARGIN
+    } else {
+        0.0
+    };
+    let left = if label_sides.contains(&BoardSide::West) {
+        LABEL_MARGIN
+    } else {
+        0.0
+    };
+    (top, right, bottom, left)
+}
+
 pub fn make_svg(sgf: &str, options: &MakeSvgOptions) -> Result<Element, GobanSVGError> {
     let collection = sgf_parse::go::parse(sgf)?;
     let goban = Goban::from_node_in_collection(options.node_description, &collection)?;
     let (x_range, y_range) = options.goban_range.get_ranges(&goban)?;
     let width = x_range.end - x_range.start;
     let height = y_range.end - y_range.start;
-    let label_margin = if options.draw_board_labels {
-        if width > 25 || height > 99 {
-            return Err(GobanSVGError::UnlabellableRange);
-        }
-        LABEL_MARGIN
+    if options.draw_board_labels && !options.label_sides.is_empty() && width > 25 || height > 99 {
+        return Err(GobanSVGError::UnlabellableRange);
+    }
+    let (top_margin, right_margin, bottom_margin, left_margin) = if options.draw_board_labels {
+        get_margins(&options.label_sides)
     } else {
-        0.0
+        (0.0, 0.0, 0.0, 0.0)
     };
 
     let definitions = {
@@ -64,17 +99,16 @@ pub fn make_svg(sgf: &str, options: &MakeSvgOptions) -> Result<Element, GobanSVG
             .append_all(options.style.defs()?)
             .build()
     };
-    let board_width = f64::from(width) - 1.0 + 2.0 * BOARD_MARGIN + label_margin;
-    let board_height = f64::from(height) - 1.0 + 2.0 * BOARD_MARGIN + label_margin;
+    let board_width = f64::from(width) - 1.0 + 2.0 * BOARD_MARGIN + left_margin + right_margin;
+    let board_height = f64::from(height) - 1.0 + 2.0 * BOARD_MARGIN + top_margin + bottom_margin;
 
     let diagram = {
         let board = build_board(&goban, options);
         let board_view = {
-            let offset = BOARD_MARGIN + label_margin;
             let board_view_transform = format!(
                 "translate({}, {})",
-                offset - f64::from(x_range.start),
-                offset - f64::from(y_range.start)
+                BOARD_MARGIN + left_margin - f64::from(x_range.start),
+                BOARD_MARGIN + top_margin - f64::from(y_range.start)
             );
             Element::builder("g", NAMESPACE)
                 .attr("id", "board-view")
@@ -94,7 +128,7 @@ pub fn make_svg(sgf: &str, options: &MakeSvgOptions) -> Result<Element, GobanSVG
             diagram_builder = diagram_builder.append(draw_board_labels(
                 x_range,
                 goban.size.1 - height - y_range.start + 1..goban.size.1 - y_range.start + 1,
-                &options.style,
+                options,
             ));
         }
 
@@ -378,11 +412,18 @@ fn build_arrow_group(goban: &Goban, options: &MakeSvgOptions) -> Element {
 ///
 /// Assumes lines are a unit apart, offset by `BOARD_MARGIN`.
 /// Respects `LABEL_MARGIN`.
-fn draw_board_labels(x_range: Range<u8>, y_range: Range<u8>, style: &GobanStyle) -> Element {
-    let row_labels = {
+fn draw_board_labels(x_range: Range<u8>, y_range: Range<u8>, options: &MakeSvgOptions) -> Element {
+    let (top_margin, _, _, left_margin) = get_margins(&options.label_sides);
+    let transform = format!("translate({}, {})", left_margin, top_margin);
+    let mut group_builder = Element::builder("g", NAMESPACE)
+        .attr("id", "board-labels")
+        .attr("fill", options.style.label_color())
+        .attr("transform", transform);
+
+    if options.label_sides.contains(&BoardSide::North) {
         let mut builder = Element::builder("g", NAMESPACE).attr("text-anchor", "middle");
         let start = x_range.start;
-        for x in x_range {
+        for x in x_range.clone() {
             builder = builder.append(
                 Element::builder("text", NAMESPACE)
                     .attr("x", (f64::from(x - start) + BOARD_MARGIN).to_string())
@@ -391,12 +432,12 @@ fn draw_board_labels(x_range: Range<u8>, y_range: Range<u8>, style: &GobanStyle)
                     .build(),
             );
         }
-        builder.build()
+        group_builder = group_builder.append(builder);
     };
-    let column_labels = {
+    if options.label_sides.contains(&BoardSide::West) {
         let mut builder = Element::builder("g", NAMESPACE).attr("text-anchor", "end");
         let end = y_range.end;
-        for y in y_range {
+        for y in y_range.clone() {
             builder = builder.append(
                 Element::builder("text", NAMESPACE)
                     .attr("x", "0.0")
@@ -406,17 +447,42 @@ fn draw_board_labels(x_range: Range<u8>, y_range: Range<u8>, style: &GobanStyle)
                     .build(),
             );
         }
-        builder.build()
+        group_builder = group_builder.append(builder);
+    };
+    if options.label_sides.contains(&BoardSide::South) {
+        let mut builder = Element::builder("g", NAMESPACE).attr("text-anchor", "middle");
+        let start = x_range.start;
+        let y = f64::from(y_range.end - y_range.start + 1) - BOARD_MARGIN;
+        for x in x_range.clone() {
+            builder = builder.append(
+                Element::builder("text", NAMESPACE)
+                    .attr("x", (f64::from(x - start) + BOARD_MARGIN).to_string())
+                    .attr("y", y.to_string())
+                    .attr("alignment-baseline", "hanging")
+                    .append(label_text(x))
+                    .build(),
+            );
+        }
+        group_builder = group_builder.append(builder);
+    };
+    if options.label_sides.contains(&BoardSide::East) {
+        let mut builder = Element::builder("g", NAMESPACE).attr("text-anchor", "start");
+        let end = y_range.end;
+        let x = f64::from(x_range.end - x_range.start + 1) - BOARD_MARGIN;
+        for y in y_range {
+            builder = builder.append(
+                Element::builder("text", NAMESPACE)
+                    .attr("x", x.to_string())
+                    .attr("y", (f64::from(end - y - 1) + BOARD_MARGIN).to_string())
+                    .attr("dy", "0.35em")
+                    .append(y.to_string())
+                    .build(),
+            );
+        }
+        group_builder = group_builder.append(builder);
     };
 
-    let transform = format!("translate({}, {})", LABEL_MARGIN, LABEL_MARGIN);
-    Element::builder("g", NAMESPACE)
-        .attr("id", "board-labels")
-        .attr("fill", style.label_color())
-        .attr("transform", transform)
-        .append(row_labels)
-        .append(column_labels)
-        .build()
+    group_builder.build()
 }
 
 fn label_text(x: u8) -> String {

@@ -11,4 +11,4 @@ pub use generated_styles::GENERATED_STYLES;
 pub use goban::{Goban, NodeDescription, Stone, StoneColor};
 pub use goban_range::GobanRange;
 pub use goban_style::GobanStyle;
-pub use make_svg::{make_svg, MakeSvgOptions};
+pub use make_svg::{make_svg, BoardSide, MakeSvgOptions};

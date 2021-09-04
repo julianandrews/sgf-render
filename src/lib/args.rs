@@ -1,4 +1,4 @@
-use super::{GobanRange, MakeSvgOptions, NodeDescription, GENERATED_STYLES};
+use super::{BoardSide, GobanRange, MakeSvgOptions, NodeDescription, GENERATED_STYLES};
 use std::path::PathBuf;
 
 const DEFAULT_NODE_NUM: u64 = 0;
@@ -35,6 +35,21 @@ pub fn parse_make_svg_options(matches: &getopts::Matches) -> Result<MakeSvgOptio
         None => NodeDescription::Number(DEFAULT_NODE_NUM),
     };
     let draw_board_labels = !matches.opt_present("no-board-labels");
+    let label_sides = {
+        let s = matches
+            .opt_str("label-sides")
+            .unwrap_or_else(|| "nw".to_owned())
+            .to_lowercase();
+        s.chars()
+            .map(|c| match c {
+                'n' => Ok(BoardSide::North),
+                'e' => Ok(BoardSide::East),
+                's' => Ok(BoardSide::South),
+                'w' => Ok(BoardSide::West),
+                _ => Err(UsageError::InvalidBoardSides),
+            })
+            .collect::<Result<_, _>>()?
+    };
     let viewbox_width = f64::from(
         matches
             .opt_str("w")
@@ -94,6 +109,7 @@ pub fn parse_make_svg_options(matches: &getopts::Matches) -> Result<MakeSvgOptio
         style,
         viewbox_width,
         draw_board_labels,
+        label_sides,
         draw_move_numbers,
         draw_marks,
         draw_triangles,
@@ -174,10 +190,11 @@ pub fn build_opts() -> getopts::Options {
         "First move number to draw if using --move-numbers",
         "NUM",
     );
-    opts.optflag(
+    opts.optopt(
         "",
-        "board-labels",
+        "label-sides",
         "Sides to draw board labels on (any of nesw).",
+        "SIDES",
     );
     opts.optflag("", "no-board-labels", "Don't draw position labels.");
     opts.optflag("", "no-marks", "Don't draw SGF marks.");
@@ -213,6 +230,7 @@ pub enum UsageError {
     InvalidStyle,
     InvalidStyleFile(Box<dyn std::error::Error>),
     InvalidFirstMoveNumber,
+    InvalidBoardSides,
 }
 
 impl std::fmt::Display for UsageError {
@@ -227,6 +245,7 @@ impl std::fmt::Display for UsageError {
             UsageError::InvalidStyle => write!(f, "Invalid style."),
             UsageError::InvalidStyleFile(e) => write!(f, "Failed to read style file: {}", e),
             UsageError::InvalidFirstMoveNumber => write!(f, "Invalid first move number."),
+            UsageError::InvalidBoardSides => write!(f, "Invalid board sides."),
         }
     }
 }
