@@ -1,0 +1,14 @@
+line_color = "#B4D2E7"
+line_width = 0.03
+hoshi_radius = 0.09
+background_fill = "#241909"
+label_color = "#16DB93"
+black_stone_fill = "#006D77"
+white_stone_fill = "#DD7596"
+markup_stroke_width = 0.1
+black_stone_markup_color = "#B4D2E7"
+white_stone_markup_color = "#241909"
+empty_markup_color = "#B4D2E7"
+black_stone_selected_color = "#B4D2E7"
+white_stone_selected_color = "#241909"
+empty_selected_color = "#241909"

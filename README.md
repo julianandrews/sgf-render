@@ -14,6 +14,7 @@ moves](https://raw.githubusercontent.com/julianandrews/sgf-render/master/demo/si
 [markup](https://raw.githubusercontent.com/julianandrews/sgf-render/master/demo/markup.svg),
 and
 [several](https://raw.githubusercontent.com/julianandrews/sgf-render/master/demo/minimalist-numbered.svg)
+[customizable](https://raw.githubusercontent.com/julianandrews/sgf-render/master/demo/wacky.svg)
 [styles](https://raw.githubusercontent.com/julianandrews/sgf-render/master/demo/prob45-fancy.svg).
 
 ## Installation
@@ -41,7 +42,7 @@ $ ./target/release/sgf-render -h
 ## Usage
 
 ```
-Usage: sgf-render [FILE] [options]
+Usage: target/debug/sgf-render [FILE] [options]
 
 Options:
     -o, --outfile FILE  Output file. SVG and PNG formats supported.
@@ -53,7 +54,13 @@ Options:
                         (with 1 space padding)
     -r, --range RANGE   Range to draw as a pair of corners (e.g. 'cc-ff')
         --style STYLE   Style to use. One of 'simple', 'fancy' or 'minimalist'
+        --custom-style FILE
+                        Custom style to use. Overrides '--style'. See the README
+                        for details.
         --move-numbers  Draw move numbers (disables other markup).
+        --first-move-number NUM
+                        First move number to draw if using --move-numbers
+        --board-labels  Sides to draw board labels on (any of nesw).
         --no-board-labels
                         Don't draw position labels.
         --no-marks      Don't draw SGF marks.
@@ -65,13 +72,39 @@ Options:
         --no-labels     Don't draw SGF labels.
         --no-lines      Don't draw SGF lines.
         --no-arrows     Don't draw SGF arrows.
-        --first-move-number NUM
-                        First move number to draw if using --move-numbers
     -h, --help          Display this help and exit
 ```
 
 If `FILE` isn't provided, `sgf-render` will read from stdin. If `--outfile`
 isn't provided `sgf-render` will print the resulting SVG to stdout.
+
+### Custom styles
+
+You can use the `--custom-style` flag to specify a file with custom style
+configuration in TOML format. As an example here's the style config for the
+`simple` style:
+
+```
+line_color = "black"
+line_width = 0.03
+hoshi_radius = 0.09
+background_fill = "#cfa87e"
+label_color = "#6e5840"
+black_stone_fill = "black"
+white_stone_fill = "white"
+black_stone_stroke = "black"
+white_stone_stroke = "black"
+markup_stroke_width = 0.1
+black_stone_markup_color = "white"
+white_stone_markup_color = "black"
+empty_markup_color = "black"
+black_stone_selected_color = "blue"
+white_stone_selected_color = "blue"
+empty_selected_color = "blue"
+```
+
+You can see a couple other examples in the source code package under
+`resources/styles/`
 
 ## Contributing
 Pull requests are welcome! For major changes, please open an issue first to

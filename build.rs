@@ -99,11 +99,13 @@ fn write_test(outfile: &mut fs::File, dir: &fs::DirEntry) {
         r#"
 #[test]
 fn {test_name}() {{
-    let arguments = shell_words::split(include_str!("{path}/options.txt")).unwrap();
+    let mut arguments = shell_words::split(include_str!("{path}/options.txt")).unwrap();
+    if let Some(i) = arguments.iter().position(|s| s == "--custom-style") {{
+        arguments[i + 1] = format!("{path}/{{}}", arguments[i + 1]);
+    }}
     let matches = args::build_opts().parse(&arguments).unwrap();
     let options = args::parse_make_svg_options(&matches).unwrap();
     let input = include_str!("{path}/input.sgf");
-    // let options = toml::from_str(include_str!("{path}/options.toml")).unwrap();
     let expected = include_str!("{path}/output.svg");
 
     let svg = make_svg(input, &options).unwrap();

@@ -55,14 +55,21 @@ pub fn parse_make_svg_options(matches: &getopts::Matches) -> Result<MakeSvgOptio
             }
         }
     };
-    let style = {
-        let name = matches
-            .opt_str("style")
-            .unwrap_or_else(|| "simple".to_string());
-        GENERATED_STYLES
-            .get(name.as_str())
-            .ok_or(UsageError::InvalidStyle)?
-            .clone()
+    let style = match matches.opt_str("custom-style") {
+        Some(filename) => {
+            let data = std::fs::read_to_string(filename)
+                .map_err(|e| UsageError::InvalidStyleFile(e.into()))?;
+            toml::from_str(&data).map_err(|e| UsageError::InvalidStyleFile(e.into()))?
+        }
+        None => {
+            let name = matches
+                .opt_str("style")
+                .unwrap_or_else(|| "simple".to_string());
+            GENERATED_STYLES
+                .get(name.as_str())
+                .ok_or(UsageError::InvalidStyle)?
+                .clone()
+        }
     };
     let draw_move_numbers = matches.opt_present("move-numbers");
     let first_move_number = matches
@@ -150,10 +157,22 @@ pub fn build_opts() -> getopts::Options {
         "Style to use. One of 'simple', 'fancy' or 'minimalist'",
         "STYLE",
     );
+    opts.optopt(
+        "",
+        "custom-style",
+        "Custom style to use. Overrides '--style'. See the README for details.",
+        "FILE",
+    );
     opts.optflag(
         "",
         "move-numbers",
         "Draw move numbers (disables other markup).",
+    );
+    opts.optopt(
+        "",
+        "first-move-number",
+        "First move number to draw if using --move-numbers",
+        "NUM",
     );
     opts.optflag(
         "",
@@ -170,12 +189,6 @@ pub fn build_opts() -> getopts::Options {
     opts.optflag("", "no-labels", "Don't draw SGF labels.");
     opts.optflag("", "no-lines", "Don't draw SGF lines.");
     opts.optflag("", "no-arrows", "Don't draw SGF arrows.");
-    opts.optopt(
-        "",
-        "first-move-number",
-        "First move number to draw if using --move-numbers",
-        "NUM",
-    );
     opts.optflag("h", "help", "Display this help and exit");
 
     opts
@@ -198,6 +211,7 @@ pub enum UsageError {
     OverspecifiedRange,
     InvalidRange,
     InvalidStyle,
+    InvalidStyleFile(Box<dyn std::error::Error>),
     InvalidFirstMoveNumber,
 }
 
@@ -211,6 +225,7 @@ impl std::fmt::Display for UsageError {
             UsageError::OverspecifiedRange => write!(f, "Specify only '-r' or '-s'"),
             UsageError::InvalidRange => write!(f, "Invalid range."),
             UsageError::InvalidStyle => write!(f, "Invalid style."),
+            UsageError::InvalidStyleFile(e) => write!(f, "Failed to read style file: {}", e),
             UsageError::InvalidFirstMoveNumber => write!(f, "Invalid first move number."),
         }
     }
