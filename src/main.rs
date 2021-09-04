@@ -1,8 +1,8 @@
 mod lib;
 
+use minidom::Element;
 use std::error::Error;
 use std::path::Path;
-use svg::node::element::SVG;
 
 use lib::args;
 
@@ -54,25 +54,30 @@ fn read_input<P: AsRef<Path>>(infile: Option<P>) -> Result<String, Box<dyn Error
     Ok(input)
 }
 
-fn write_output<P: AsRef<Path>>(svg: &SVG, outfile: Option<P>) -> Result<(), Box<dyn Error>> {
-    match outfile {
-        Some(filename) => write_to_file(filename.as_ref(), svg),
-        None => svg::write(std::io::stdout(), svg).map_err(|e| e.into()),
-    }
+fn write_output<P: AsRef<Path>>(svg: &Element, outfile: Option<P>) -> Result<(), Box<dyn Error>> {
+    Ok(match outfile {
+        Some(filename) => write_to_file(filename.as_ref(), svg)?,
+        None => svg.write_to(&mut std::io::stdout())?,
+    })
 }
 
-fn write_to_file(outfile: &Path, document: &SVG) -> Result<(), Box<dyn Error>> {
+fn write_to_file(outfile: &Path, svg: &Element) -> Result<(), Box<dyn Error>> {
     match outfile.extension().and_then(std::ffi::OsStr::to_str) {
-        Some("svg") => svg::save(outfile, document)?,
-        Some("png") => save_png(outfile, document)?,
+        Some("svg") => {
+            let mut file = std::fs::File::open(outfile)?;
+            svg.write_to(&mut file)?;
+        }
+        Some("png") => save_png(outfile, svg)?,
         _ => return Err(SgfRenderError::UnsupportedFileExtension.into()),
     }
     Ok(())
 }
 
 #[cfg(feature = "png")]
-fn save_png(outfile: &Path, document: &SVG) -> Result<(), Box<dyn Error>> {
-    let s = document.to_string();
+fn save_png(outfile: &Path, svg: &Element) -> Result<(), Box<dyn Error>> {
+    let mut buffer: Vec<u8> = vec![];
+    svg.write_to(&mut buffer)?;
+    let s = std::str::from_utf8(&buffer)?;
     let mut fontdb = usvg::fontdb::Database::new();
     let font_data = include_bytes!("../resources/Roboto-Bold.ttf").to_vec();
     fontdb.load_font_data(font_data);

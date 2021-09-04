@@ -108,7 +108,7 @@ fn {test_name}() {{
 
     let svg = make_svg(input, &options).unwrap();
     let mut buffer: Vec<u8> = vec![];
-    svg::write(&mut buffer, &svg).unwrap();
+    svg.write_to(&mut buffer).unwrap();
     let result = std::str::from_utf8(&buffer).unwrap();
 
     assert_eq!(result, expected);

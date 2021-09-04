@@ -1,6 +1,6 @@
 [package]
 name = "sgf-render"
-version = "1.4.1"
+version = "2.0.0"
 authors = ["Julian Andrews <jandrews271@gmail.com>"]
 edition = "2018"
 license = "MIT"
@@ -22,8 +22,8 @@ png = ["resvg", "usvg", "tiny-skia"]
 [dependencies]
 getopts = "0.2.21"
 lazy_static = "1.4.0"
+minidom = "0.13.0"
 sgf-parse = "4.0.0"
-svg = "0.10.0"
 toml = "0.5"
 serde = { version = "1.0", features = ["derive"] }
 shell-words = "1.0.0"

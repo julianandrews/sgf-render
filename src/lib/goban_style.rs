@@ -1,5 +1,6 @@
-use svg::node::element;
+use minidom::Element;
 
+use super::make_svg::NAMESPACE;
 use super::StoneColor;
 
 #[derive(Debug, Clone, serde::Deserialize)]
@@ -78,26 +79,37 @@ impl GobanStyle {
         }
     }
 
-    pub fn add_defs(&self, mut defs: element::Definitions) -> element::Definitions {
-        let arrowhead = element::Marker::new()
-            .set("id", "arrowhead")
-            .set("markerWidth", 7)
-            .set("markerHeight", 5)
-            .set("refX", 7)
-            .set("refY", 2.5)
-            .set("orient", "auto")
-            .add(element::Polygon::new().set("points", "0 0, 7 2.5, 0 5"));
-        let linehead = element::Marker::new()
-            .set("id", "linehead")
-            .set("markerWidth", 4)
-            .set("markerHeight", 4)
-            .set("refX", 2)
-            .set("refY", 2)
-            .add(element::Circle::new().set("cx", 2).set("cy", 2).set("r", 2));
-        defs = defs.add(linehead).add(arrowhead);
+    pub fn defs(&self) -> Vec<Element> {
+        let linehead = Element::builder("marker", NAMESPACE)
+            .attr("id", "linehead")
+            .attr("markerWidth", "4")
+            .attr("markerHeight", "4")
+            .attr("refX", "2")
+            .attr("refY", "2")
+            .append(
+                Element::builder("circle", NAMESPACE)
+                    .attr("cx", "2")
+                    .attr("cy", "2")
+                    .attr("r", "2")
+                    .build(),
+            )
+            .build();
+        let arrowhead = Element::builder("marker", NAMESPACE)
+            .attr("id", "arrowhead")
+            .attr("markerWidth", "7")
+            .attr("markerHeight", "5")
+            .attr("refX", "7")
+            .attr("refY", "2.5")
+            .attr("orient", "auto")
+            .append(
+                Element::builder("polygon", NAMESPACE)
+                    .attr("points", "0 0, 7 2.5, 0 5")
+                    .build(),
+            )
+            .build();
         if let Some(_s) = &self.defs {
             todo!();
         }
-        defs
+        vec![linehead, arrowhead]
     }
 }
