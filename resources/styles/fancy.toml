@@ -16,8 +16,8 @@ defs = """<radialGradient cx="35%" cy="35%" id="black-stone-fill">
 <stop offset="0%" stop-color="#666"/>
 <stop offset="100%" stop-color="black"/>
 </radialGradient>
-<radialgradient cx="35%" cy="35%" id="white-stone-fill">
+<radialGradient cx="35%" cy="35%" id="white-stone-fill">
 <stop offset="0%" stop-color="#eee"/>
 <stop offset="30%" stop-color="#ddd"/>
 <stop offset="100%" stop-color="#bbb"/>
-</radialgradient>"""
+</radialGradient>"""

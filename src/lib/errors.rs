@@ -5,6 +5,7 @@ use sgf_parse::SgfParseError;
 pub enum GobanSVGError {
     GobanError(GobanError),
     ParseError(SgfParseError),
+    StyleDefError(minidom::Error),
     InvalidRange,
     UnlabellableRange,
 }
@@ -14,6 +15,7 @@ impl std::fmt::Display for GobanSVGError {
         match self {
             Self::GobanError(e) => write!(f, "{}", e),
             Self::ParseError(e) => write!(f, "{}", e),
+            Self::StyleDefError(e) => write!(f, "Invalid defs in style: {}", e),
             Self::InvalidRange => write!(f, "Invalid range to render in goban."),
             Self::UnlabellableRange => write!(f, "Range too large for use with labels."),
         }

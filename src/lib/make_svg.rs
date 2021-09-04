@@ -61,7 +61,7 @@ pub fn make_svg(sgf: &str, options: &MakeSvgOptions) -> Result<Element, GobanSVG
             .build();
         Element::builder("defs", NAMESPACE)
             .append(clip_path)
-            .append_all(options.style.defs())
+            .append_all(options.style.defs()?)
             .build()
     };
     let board_width = f64::from(width) - 1.0 + 2.0 * BOARD_MARGIN + label_margin;
