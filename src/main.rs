@@ -64,7 +64,7 @@ fn write_output<P: AsRef<Path>>(svg: &Element, outfile: Option<P>) -> Result<(),
 fn write_to_file(outfile: &Path, svg: &Element) -> Result<(), Box<dyn Error>> {
     match outfile.extension().and_then(std::ffi::OsStr::to_str) {
         Some("svg") => {
-            let mut file = std::fs::File::open(outfile)?;
+            let mut file = std::fs::File::create(outfile)?;
             svg.write_to(&mut file)?;
         }
         Some("png") => save_png(outfile, svg)?,
