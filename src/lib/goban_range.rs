@@ -28,28 +28,56 @@ impl GobanRange {
                     .chain(goban.arrows.iter().flat_map(|&(p1, p2)| vec![p1, p2]))
                     // Don't necessarily include dimmed points!
                     .collect();
-                let x_start = points
-                    .iter()
-                    .map(|&(x, _)| x)
-                    .min()
-                    .unwrap_or(0)
-                    .saturating_sub(1);
-                let x_end = points
-                    .iter()
-                    .map(|&(x, _)| (x + 2).min(goban.size.0))
-                    .max()
-                    .unwrap_or(goban.size.0);
-                let y_start = points
-                    .iter()
-                    .map(|&(_, y)| y)
-                    .min()
-                    .unwrap_or(0)
-                    .saturating_sub(1);
-                let y_end = points
-                    .iter()
-                    .map(|&(_, y)| (y + 2).min(goban.size.1))
-                    .max()
-                    .unwrap_or(goban.size.1);
+                let x_start = {
+                    let p = points
+                        .iter()
+                        .map(|&(x, _)| x)
+                        .min()
+                        .unwrap_or(0)
+                        .saturating_sub(1);
+                    if p == 1 {
+                        0 // Include nearby board edge.
+                    } else {
+                        p
+                    }
+                };
+                let x_end = {
+                    let p = points
+                        .iter()
+                        .map(|&(x, _)| (x + 2).min(goban.size.0))
+                        .max()
+                        .unwrap_or(goban.size.0);
+                    if p == goban.size.0 - 1 {
+                        goban.size.0 // Include nearby board edge.
+                    } else {
+                        p
+                    }
+                };
+                let y_start = {
+                    let p = points
+                        .iter()
+                        .map(|&(_, y)| y)
+                        .min()
+                        .unwrap_or(0)
+                        .saturating_sub(1);
+                    if p == 1 {
+                        0 // Include nearby board edge.
+                    } else {
+                        p
+                    }
+                };
+                let y_end = {
+                    let p = points
+                        .iter()
+                        .map(|&(_, y)| (y + 2).min(goban.size.1))
+                        .max()
+                        .unwrap_or(goban.size.1);
+                    if p == goban.size.1 - 1 {
+                        goban.size.1 // Include nearby board edge.
+                    } else {
+                        p
+                    }
+                };
                 Ok((x_start..x_end, y_start..y_end))
             }
             Self::Ranged(a, b) => {
