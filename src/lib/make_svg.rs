@@ -43,30 +43,6 @@ pub enum BoardSide {
     West,
 }
 
-fn get_margins(label_sides: &HashSet<BoardSide>) -> (f64, f64, f64, f64) {
-    let top = if label_sides.contains(&BoardSide::North) {
-        LABEL_MARGIN
-    } else {
-        0.0
-    };
-    let right = if label_sides.contains(&BoardSide::East) {
-        LABEL_MARGIN
-    } else {
-        0.0
-    };
-    let bottom = if label_sides.contains(&BoardSide::South) {
-        LABEL_MARGIN
-    } else {
-        0.0
-    };
-    let left = if label_sides.contains(&BoardSide::West) {
-        LABEL_MARGIN
-    } else {
-        0.0
-    };
-    (top, right, bottom, left)
-}
-
 pub fn make_svg(sgf: &str, options: &MakeSvgOptions) -> Result<Element, MakeSvgError> {
     let collection = sgf_parse::go::parse(sgf)?;
     let goban = Goban::from_node_in_collection(&options.node_description, &collection)?;
@@ -87,8 +63,8 @@ pub fn make_svg(sgf: &str, options: &MakeSvgOptions) -> Result<Element, MakeSvgE
             .attr("id", "board-clip")
             .append(
                 Element::builder("rect", NAMESPACE)
-                    .attr("x", (f64::from(x_range.start) - 0.5).to_string())
-                    .attr("y", (f64::from(y_range.start) - 0.5).to_string())
+                    .attr("x", format_float(f64::from(x_range.start) - 0.5))
+                    .attr("y", format_float(f64::from(y_range.start) - 0.5))
                     .attr("width", width.to_string())
                     .attr("height", height.to_string())
                     .build(),
@@ -107,8 +83,8 @@ pub fn make_svg(sgf: &str, options: &MakeSvgOptions) -> Result<Element, MakeSvgE
         let board_view = {
             let board_view_transform = format!(
                 "translate({}, {})",
-                BOARD_MARGIN + left_margin - f64::from(x_range.start),
-                BOARD_MARGIN + top_margin - f64::from(y_range.start)
+                format_float(BOARD_MARGIN + left_margin - f64::from(x_range.start)),
+                format_float(BOARD_MARGIN + top_margin - f64::from(y_range.start))
             );
             Element::builder("g", NAMESPACE)
                 .attr("id", "board-view")
@@ -117,7 +93,7 @@ pub fn make_svg(sgf: &str, options: &MakeSvgOptions) -> Result<Element, MakeSvgE
                 .build()
         };
 
-        let scale = options.viewbox_width / board_width;
+        let scale = format_float(options.viewbox_width / board_width);
         let transform = format!("scale({}, {})", scale, scale);
         let mut diagram_builder = Element::builder("g", NAMESPACE)
             .attr("id", "diagram")
@@ -144,7 +120,11 @@ pub fn make_svg(sgf: &str, options: &MakeSvgOptions) -> Result<Element, MakeSvgE
         .build();
 
     let viewbox_height = options.viewbox_width * board_height / board_width;
-    let viewbox_attr = format!("0 0 {} {}", options.viewbox_width, viewbox_height);
+    let viewbox_attr = format!(
+        "0 0 {} {}",
+        format_float(options.viewbox_width),
+        format_float(viewbox_height)
+    );
     let svg = Element::builder("svg", NAMESPACE)
         .attr("viewBox", viewbox_attr)
         .attr("width", options.viewbox_width.to_string())
@@ -204,7 +184,7 @@ fn build_board_lines_group(goban: &Goban, options: &MakeSvgOptions) -> Element {
     let mut group_builder = Element::builder("g", NAMESPACE)
         .attr("id", "lines")
         .attr("stroke", options.style.line_color())
-        .attr("stroke-width", options.style.line_width().to_string())
+        .attr("stroke-width", format_float(options.style.line_width()))
         .attr("stroke-linecap", "square");
 
     // Draw lines
@@ -212,7 +192,7 @@ fn build_board_lines_group(goban: &Goban, options: &MakeSvgOptions) -> Element {
         group_builder = group_builder.append(
             Element::builder("line", NAMESPACE)
                 .attr("x1", x.to_string())
-                .attr("y1", 0.to_string())
+                .attr("y1", "0")
                 .attr("x2", x.to_string())
                 .attr("y2", (goban.size.1 - 1).to_string()),
         );
@@ -238,7 +218,7 @@ fn build_board_lines_group(goban: &Goban, options: &MakeSvgOptions) -> Element {
             Element::builder("circle", NAMESPACE)
                 .attr("cx", x.to_string())
                 .attr("cy", y.to_string())
-                .attr("r", hoshi_radius.to_string()),
+                .attr("r", format_float(hoshi_radius)),
         );
     }
     group_builder.append(hoshi).build()
@@ -370,7 +350,7 @@ fn build_line_group(goban: &Goban, options: &MakeSvgOptions) -> Element {
     let mut group_builder = Element::builder("g", NAMESPACE)
         .attr("id", "markup-lines")
         .attr("stroke", "black")
-        .attr("stroke-width", options.style.line_width().to_string())
+        .attr("stroke-width", format_float(options.style.line_width()))
         .attr("marker-start", "url(#linehead)")
         .attr("marker-end", "url(#linehead)");
     let mut lines: Vec<_> = goban.lines.iter().collect();
@@ -391,7 +371,7 @@ fn build_arrow_group(goban: &Goban, options: &MakeSvgOptions) -> Element {
     let mut group_builder = Element::builder("g", NAMESPACE)
         .attr("id", "markup-arrows")
         .attr("stroke", "black")
-        .attr("stroke-width", options.style.line_width().to_string())
+        .attr("stroke-width", format_float(options.style.line_width()))
         .attr("marker-end", "url(#arrowhead)");
     let mut arrows: Vec<_> = goban.arrows.iter().collect();
     arrows.sort();
@@ -414,7 +394,11 @@ fn build_arrow_group(goban: &Goban, options: &MakeSvgOptions) -> Element {
 /// Respects `LABEL_MARGIN`.
 fn draw_board_labels(x_range: Range<u8>, y_range: Range<u8>, options: &MakeSvgOptions) -> Element {
     let (top_margin, _, _, left_margin) = get_margins(&options.label_sides);
-    let transform = format!("translate({}, {})", left_margin, top_margin);
+    let transform = format!(
+        "translate({}, {})",
+        format_float(left_margin),
+        format_float(top_margin)
+    );
     let mut group_builder = Element::builder("g", NAMESPACE)
         .attr("id", "board-labels")
         .attr("fill", options.style.label_color())
@@ -426,8 +410,8 @@ fn draw_board_labels(x_range: Range<u8>, y_range: Range<u8>, options: &MakeSvgOp
         for x in x_range.clone() {
             builder = builder.append(
                 Element::builder("text", NAMESPACE)
-                    .attr("x", (f64::from(x - start) + BOARD_MARGIN).to_string())
-                    .attr("y", "0.0")
+                    .attr("x", format_float(f64::from(x - start) + BOARD_MARGIN))
+                    .attr("y", "0")
                     .append(label_text(x))
                     .build(),
             );
@@ -440,8 +424,8 @@ fn draw_board_labels(x_range: Range<u8>, y_range: Range<u8>, options: &MakeSvgOp
         for y in y_range.clone() {
             builder = builder.append(
                 Element::builder("text", NAMESPACE)
-                    .attr("x", "0.0")
-                    .attr("y", (f64::from(end - y - 1) + BOARD_MARGIN).to_string())
+                    .attr("x", "0")
+                    .attr("y", format_float(f64::from(end - y - 1) + BOARD_MARGIN))
                     .attr("dy", "0.35em")
                     .append(y.to_string())
                     .build(),
@@ -456,8 +440,8 @@ fn draw_board_labels(x_range: Range<u8>, y_range: Range<u8>, options: &MakeSvgOp
         for x in x_range.clone() {
             builder = builder.append(
                 Element::builder("text", NAMESPACE)
-                    .attr("x", (f64::from(x - start) + BOARD_MARGIN).to_string())
-                    .attr("y", y.to_string())
+                    .attr("x", format_float(f64::from(x - start) + BOARD_MARGIN))
+                    .attr("y", format_float(y))
                     .attr("alignment-baseline", "hanging")
                     .append(label_text(x))
                     .build(),
@@ -472,8 +456,8 @@ fn draw_board_labels(x_range: Range<u8>, y_range: Range<u8>, options: &MakeSvgOp
         for y in y_range {
             builder = builder.append(
                 Element::builder("text", NAMESPACE)
-                    .attr("x", x.to_string())
-                    .attr("y", (f64::from(end - y - 1) + BOARD_MARGIN).to_string())
+                    .attr("x", format_float(x))
+                    .attr("y", format_float(f64::from(end - y - 1) + BOARD_MARGIN))
                     .attr("dy", "0.35em")
                     .append(y.to_string())
                     .build(),
@@ -495,13 +479,13 @@ fn label_text(x: u8) -> String {
 
 fn draw_stone(stone: Stone, style: &GobanStyle) -> Element {
     let mut circle_builder = Element::builder("circle", NAMESPACE)
-        .attr("cx", f64::from(stone.x).to_string())
-        .attr("cy", f64::from(stone.y).to_string())
+        .attr("cx", stone.x)
+        .attr("cy", stone.y)
         .attr("r", "0.48");
     if let Some(stroke) = style.stone_stroke(stone.color) {
         circle_builder = circle_builder
             .attr("stroke", stroke)
-            .attr("stroke-width", style.line_width().to_string())
+            .attr("stroke-width", format_float(style.line_width()))
     }
     if let Some(fill) = style.stone_fill(stone.color) {
         circle_builder = circle_builder.attr("fill", fill);
@@ -518,8 +502,8 @@ fn draw_move_number(
 ) -> Element {
     // let text = svg::node::Text::new(n.to_string());
     let text_element = Element::builder("text", NAMESPACE)
-        .attr("x", x.to_string())
-        .attr("y", y.to_string())
+        .attr("x", x)
+        .attr("y", y)
         .attr("dy", "0.35em")
         .attr("fill", style.markup_color(color))
         .append(n.to_string());
@@ -528,8 +512,8 @@ fn draw_move_number(
         group_builder = group_builder.append(
             Element::builder("rect", NAMESPACE)
                 .attr("fill", style.background_fill())
-                .attr("x", (f64::from(x) - 0.4).to_string())
-                .attr("y", (f64::from(y) - 0.4).to_string())
+                .attr("x", format_float(f64::from(x) - 0.4))
+                .attr("y", format_float(f64::from(y) - 0.4))
                 .attr("width", "0.8")
                 .attr("height", "0.8"),
         );
@@ -544,17 +528,17 @@ fn draw_mark(x: u8, y: u8, color: Option<StoneColor>, style: &GobanStyle) -> Ele
         .attr("stroke-width", style.markup_stroke_width().to_string())
         .append(
             Element::builder("line", NAMESPACE)
-                .attr("x1", (f64::from(x) - 0.25).to_string())
-                .attr("x2", (f64::from(x) + 0.25).to_string())
-                .attr("y1", (f64::from(y) - 0.25).to_string())
-                .attr("y2", (f64::from(y) + 0.25).to_string()),
+                .attr("x1", format_float(f64::from(x) - 0.25))
+                .attr("x2", format_float(f64::from(x) + 0.25))
+                .attr("y1", format_float(f64::from(y) - 0.25))
+                .attr("y2", format_float(f64::from(y) + 0.25)),
         )
         .append(
             Element::builder("line", NAMESPACE)
-                .attr("x1", (f64::from(x) - 0.25).to_string())
-                .attr("x2", (f64::from(x) + 0.25).to_string())
-                .attr("y1", (f64::from(y) + 0.25).to_string())
-                .attr("y2", (f64::from(y) - 0.25).to_string()),
+                .attr("x1", format_float(f64::from(x) - 0.25))
+                .attr("x2", format_float(f64::from(x) + 0.25))
+                .attr("y1", format_float(f64::from(y) + 0.25))
+                .attr("y2", format_float(f64::from(y) - 0.25)),
         )
         .build()
 }
@@ -563,17 +547,17 @@ fn draw_triangle(x: u8, y: u8, color: Option<StoneColor>, style: &GobanStyle) ->
     let triangle_radius = 0.45;
     let points = format!(
         "{},{} {},{} {},{}",
-        f64::from(x),
-        f64::from(y) - triangle_radius,
-        f64::from(x) - 0.866 * triangle_radius,
-        f64::from(y) + 0.5 * triangle_radius,
-        f64::from(x) + 0.866 * triangle_radius,
-        f64::from(y) + 0.5 * triangle_radius,
+        x,
+        format_float(f64::from(y) - triangle_radius),
+        format_float(f64::from(x) - 0.866 * triangle_radius),
+        format_float(f64::from(y) + 0.5 * triangle_radius),
+        format_float(f64::from(x) + 0.866 * triangle_radius),
+        format_float(f64::from(y) + 0.5 * triangle_radius),
     );
     Element::builder("g", NAMESPACE)
         .attr("stroke", style.markup_color(color))
         .attr("fill", "none")
-        .attr("stroke-width", style.line_width().to_string())
+        .attr("stroke-width", format_float(style.line_width()))
         .append(Element::builder("polygon", NAMESPACE).attr("points", points))
         .build()
 }
@@ -583,12 +567,12 @@ fn draw_circle(x: u8, y: u8, color: Option<StoneColor>, style: &GobanStyle) -> E
     Element::builder("g", NAMESPACE)
         .attr("stroke", style.markup_color(color))
         .attr("fill", "none")
-        .attr("stroke-width", style.line_width().to_string())
+        .attr("stroke-width", format_float(style.line_width()))
         .append(
             Element::builder("circle", NAMESPACE)
-                .attr("cx", f64::from(x).to_string())
-                .attr("cy", f64::from(y).to_string())
-                .attr("r", radius.to_string()),
+                .attr("cx", x)
+                .attr("cy", y)
+                .attr("r", format_float(radius)),
         )
         .build()
 }
@@ -598,13 +582,13 @@ fn draw_square(x: u8, y: u8, color: Option<StoneColor>, style: &GobanStyle) -> E
     Element::builder("g", NAMESPACE)
         .attr("stroke", style.markup_color(color))
         .attr("fill", "none")
-        .attr("stroke-width", style.line_width().to_string())
+        .attr("stroke-width", format_float(style.line_width()))
         .append(
             Element::builder("rect", NAMESPACE)
-                .attr("x", (f64::from(x) - 0.5 * width).to_string())
-                .attr("y", (f64::from(y) - 0.5 * width).to_string())
-                .attr("width", width.to_string())
-                .attr("height", width.to_string()),
+                .attr("x", format_float(f64::from(x) - 0.5 * width))
+                .attr("y", format_float(f64::from(y) - 0.5 * width))
+                .attr("width", format_float(width))
+                .attr("height", format_float(width)),
         )
         .build()
 }
@@ -626,7 +610,6 @@ fn draw_selected(x: u8, y: u8, color: Option<StoneColor>, style: &GobanStyle) ->
 }
 
 fn dim_square(x: u8, y: u8) -> Element {
-    let width = 1.00;
     Element::builder("g", NAMESPACE)
         .attr("stroke", "none")
         .attr("fill", "black")
@@ -634,10 +617,10 @@ fn dim_square(x: u8, y: u8) -> Element {
         .attr("shape-rendering", "crispEdges")
         .append(
             Element::builder("rect", NAMESPACE)
-                .attr("x", (f64::from(x) - 0.5 * width).to_string())
-                .attr("y", (f64::from(y) - 0.5 * width).to_string())
-                .attr("width", width.to_string())
-                .attr("height", width.to_string()),
+                .attr("x", format_float(f64::from(x) - 0.5))
+                .attr("y", format_float(f64::from(y) - 0.5))
+                .attr("width", "1")
+                .attr("height", "1"),
         )
         .build()
 }
@@ -645,8 +628,8 @@ fn dim_square(x: u8, y: u8) -> Element {
 fn draw_label(x: u8, y: u8, text: &str, color: Option<StoneColor>, style: &GobanStyle) -> Element {
     let text = text.chars().take(2).collect::<String>();
     let text_element = Element::builder("text", NAMESPACE)
-        .attr("x", f64::from(x).to_string())
-        .attr("y", f64::from(y).to_string())
+        .attr("x", x)
+        .attr("y", y)
         .attr("text-anchor", "middle")
         .attr("dy", "0.35em")
         .attr("fill", style.markup_color(color))
@@ -656,12 +639,43 @@ fn draw_label(x: u8, y: u8, text: &str, color: Option<StoneColor>, style: &Goban
         group_builder = group_builder.append(
             Element::builder("rect", NAMESPACE)
                 .attr("fill", style.background_fill())
-                .attr("x", (f64::from(x) - 0.4).to_string())
-                .attr("y", (f64::from(y) - 0.4).to_string())
+                .attr("x", format_float(f64::from(x) - 0.4))
+                .attr("y", format_float(f64::from(y) - 0.4))
                 .attr("width", "0.8")
                 .attr("height", "0.8"),
         );
     }
 
     group_builder.append(text_element).build()
+}
+
+fn get_margins(label_sides: &HashSet<BoardSide>) -> (f64, f64, f64, f64) {
+    let top = if label_sides.contains(&BoardSide::North) {
+        LABEL_MARGIN
+    } else {
+        0.0
+    };
+    let right = if label_sides.contains(&BoardSide::East) {
+        LABEL_MARGIN
+    } else {
+        0.0
+    };
+    let bottom = if label_sides.contains(&BoardSide::South) {
+        LABEL_MARGIN
+    } else {
+        0.0
+    };
+    let left = if label_sides.contains(&BoardSide::West) {
+        LABEL_MARGIN
+    } else {
+        0.0
+    };
+    (top, right, bottom, left)
+}
+
+fn format_float(x: f64) -> String {
+    format!("{:.4}", x)
+        .trim_end_matches('0')
+        .trim_end_matches('.')
+        .to_string()
 }
