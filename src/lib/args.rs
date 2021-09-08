@@ -192,7 +192,7 @@ pub fn build_opts() -> getopts::Options {
     opts.optopt(
         "",
         "label-sides",
-        "Sides to draw board labels on (any of nesw).",
+        "Sides to draw position labels on (any of nesw).",
         "SIDES",
     );
     opts.optflag("", "no-board-labels", "Don't draw position labels.");
