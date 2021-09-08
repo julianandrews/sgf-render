@@ -90,11 +90,12 @@ Variations are zero-indexed, so, for instance, 'v0' is equivalent to '1'.
 
 Examples:
 
-- 0       - Show the root node (usually before the first move).
-- 7       - Show the 8th node (probably the 7th move) of the main variation.
-- 5,v1,12 - Advance to the 6th node advance 1 step down the first (non-main)
-            variation at that node, then advance 12 more steps. Show that node.
-- last    - Show the last node of the main variation.
+- `--node 0`: Show the root node (usually before the first move).
+- `--node 7`: Show the 8th node (probably the 7th move) of the main variation.
+- `--node 5,v1,12`: Advance to the 6th node advance 1 step down the first
+  (non-main) variation at that node, then advance 12 more steps. Show that
+  node.
+- `--node last`: Show the last node of the main variation.
 
 ### Custom styles
 
