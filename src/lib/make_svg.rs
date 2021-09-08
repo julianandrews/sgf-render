@@ -9,6 +9,7 @@ pub static NAMESPACE: &str = "http://www.w3.org/2000/svg";
 
 static BOARD_MARGIN: f64 = 0.64;
 static LABEL_MARGIN: f64 = 0.8;
+static REPEATED_MOVES_MARGIN: f64 = 0.32;
 
 static FONT_FAMILY: &str = "Roboto";
 static FONT_SIZE: f64 = 0.5;
@@ -23,6 +24,7 @@ pub struct MakeSvgOptions {
     pub draw_board_labels: bool,
     pub label_sides: HashSet<BoardSide>,
     pub draw_move_numbers: bool,
+    pub first_move_number: u64,
     pub draw_marks: bool,
     pub draw_triangles: bool,
     pub draw_circles: bool,
@@ -32,7 +34,7 @@ pub struct MakeSvgOptions {
     pub draw_labels: bool,
     pub draw_lines: bool,
     pub draw_arrows: bool,
-    pub first_move_number: u64,
+    pub kifu_mode: bool,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -46,7 +48,7 @@ pub enum BoardSide {
 pub fn make_svg(sgf: &str, options: &MakeSvgOptions) -> Result<Element, MakeSvgError> {
     let collection = sgf_parse::go::parse(sgf)?;
     let goban = Goban::from_node_in_collection(&options.node_description, &collection)?;
-    let (x_range, y_range) = options.goban_range.get_ranges(&goban)?;
+    let (x_range, y_range) = options.goban_range.get_ranges(&goban, options)?;
     let width = x_range.end - x_range.start;
     let height = y_range.end - y_range.start;
     if options.draw_board_labels && !options.label_sides.is_empty() && width > 25 || height > 99 {
@@ -75,10 +77,9 @@ pub fn make_svg(sgf: &str, options: &MakeSvgOptions) -> Result<Element, MakeSvgE
             .append_all(options.style.defs()?)
             .build()
     };
-    let board_width = f64::from(width) - 1.0 + 2.0 * BOARD_MARGIN + left_margin + right_margin;
-    let board_height = f64::from(height) - 1.0 + 2.0 * BOARD_MARGIN + top_margin + bottom_margin;
+    let diagram_width = f64::from(width) - 1.0 + 2.0 * BOARD_MARGIN + left_margin + right_margin;
 
-    let diagram = {
+    let (diagram, diagram_height) = {
         let board = build_board(&goban, options);
         let board_view = {
             let board_view_transform = format!(
@@ -93,7 +94,7 @@ pub fn make_svg(sgf: &str, options: &MakeSvgOptions) -> Result<Element, MakeSvgE
                 .build()
         };
 
-        let scale = format_float(options.viewbox_width / board_width);
+        let scale = format_float(options.viewbox_width / diagram_width);
         let transform = format!("scale({}, {})", scale, scale);
         let mut diagram_builder = Element::builder("g", NAMESPACE)
             .attr("id", "diagram")
@@ -108,7 +109,20 @@ pub fn make_svg(sgf: &str, options: &MakeSvgOptions) -> Result<Element, MakeSvgE
             ));
         }
 
-        diagram_builder.build()
+        let mut diagram_height =
+            f64::from(height) - 1.0 + 2.0 * BOARD_MARGIN + top_margin + bottom_margin;
+        if options.kifu_mode {
+            let (element, element_height) = draw_repeated_stones(
+                &goban,
+                width,
+                diagram_height + REPEATED_MOVES_MARGIN,
+                options,
+            );
+            diagram_builder = diagram_builder.append(element);
+            diagram_height += element_height + REPEATED_MOVES_MARGIN * 2.0;
+        }
+
+        (diagram_builder.build(), diagram_height)
     };
 
     let background = Element::builder("rect", NAMESPACE)
@@ -119,7 +133,7 @@ pub fn make_svg(sgf: &str, options: &MakeSvgOptions) -> Result<Element, MakeSvgE
         .attr("y", "0")
         .build();
 
-    let viewbox_height = options.viewbox_width * board_height / board_width;
+    let viewbox_height = options.viewbox_width * diagram_height / diagram_width;
     let viewbox_attr = format!(
         "0 0 {} {}",
         format_float(options.viewbox_width),
@@ -228,24 +242,39 @@ fn build_stones_group(goban: &Goban, options: &MakeSvgOptions) -> Element {
     let mut group_builder = Element::builder("g", NAMESPACE)
         .attr("id", "stones")
         .attr("stroke", "none");
-    for stone in goban.stones() {
+    for stone in goban.stones(options.kifu_mode) {
         group_builder = group_builder.append(draw_stone(stone, &options.style));
     }
     group_builder.build()
 }
 
 fn build_move_numbers_group(goban: &Goban, options: &MakeSvgOptions) -> Element {
+    let stones = if options.kifu_mode {
+        &goban.first_stones
+    } else {
+        &goban.stones
+    };
     let mut group_builder = Element::builder("g", NAMESPACE)
         .attr("id", "move-numbers")
         .attr("text-anchor", "middle");
     let mut move_numbers: Vec<_> = goban.move_numbers.iter().collect();
-    move_numbers.sort_by_key(|(_, nums)| nums.iter().max());
+    if options.kifu_mode {
+        move_numbers.sort_by_key(|(_, nums)| nums.iter().max());
+    } else {
+        move_numbers.sort_by_key(|(_, nums)| nums.iter().max());
+    }
     for (point, nums) in &move_numbers {
-        let n = *nums
-            .last()
-            .expect("Move numbers should never be an empty vector");
+        let n = if options.kifu_mode {
+            *nums
+                .first()
+                .expect("Move numbers should never be an empty vector")
+        } else {
+            *nums
+                .last()
+                .expect("Move numbers should never be an empty vector")
+        };
         if n >= options.first_move_number {
-            let stone_color = goban.stones.get(point).copied();
+            let stone_color = stones.get(point).copied();
             let starting_num = (n - options.first_move_number) + 1;
             group_builder = group_builder.append(draw_move_number(
                 point.0,
@@ -467,6 +496,68 @@ fn draw_board_labels(x_range: Range<u8>, y_range: Range<u8>, options: &MakeSvgOp
     };
 
     group_builder.build()
+}
+
+fn draw_repeated_stones(
+    goban: &Goban,
+    width: u8,
+    diagram_height: f64,
+    options: &MakeSvgOptions,
+) -> (Element, f64) {
+    let entry_padding = 0.2;
+    let entry_width = 1.9;
+    let entry_height = 0.4;
+    let width = f64::from(width);
+    let (_, _, _, left_margin) = get_margins(&options.label_sides);
+    let columns = ((width - 1.0 - (2.0 * entry_padding)) / entry_width).floor() as usize;
+    let x = BOARD_MARGIN
+        + left_margin
+        + entry_padding
+        + (width - 1.0 - 2.0 * entry_padding - entry_width * f64::from(columns as u32)) / 2.0;
+    let y = diagram_height + entry_padding;
+    let mut text_builder = Element::builder("text", NAMESPACE)
+        .attr("y", format_float(y))
+        .attr("font-size", format_float(entry_height))
+        .attr("fill", options.style.line_color()); // TODO: Evaluate this choice
+    let mut repeated_moves: Vec<_> = goban
+        .move_numbers
+        .values()
+        .filter(|moves| !moves.is_empty())
+        .flat_map(|moves| {
+            let first_move = moves[0];
+            moves.iter().skip(1).map(move |&n| (n, first_move))
+        })
+        .collect();
+    repeated_moves.sort_unstable();
+    let rows = (f64::from(repeated_moves.len() as u32) / f64::from(columns as u32)).ceil();
+    for (i, (move_num, original)) in repeated_moves.iter().enumerate() {
+        let column = f64::from((i % columns) as u32);
+        let mut tspan_builder = Element::builder("tspan", NAMESPACE)
+            .append(format!("{}→{}", move_num, original))
+            .attr("alignment-baseline", "hanging")
+            .attr("x", format_float(x + entry_width * column));
+        if i % columns == 0 && i != 0 {
+            tspan_builder = tspan_builder.attr("dy", format_float(entry_height));
+        }
+        text_builder = text_builder.append(tspan_builder);
+    }
+    let rect_height = 2.0 * entry_padding + entry_height * rows;
+    let group = Element::builder("g", NAMESPACE)
+        .attr("id", "repeated-stones")
+        .append(
+            Element::builder("rect", NAMESPACE)
+                .attr("fill", "white")
+                .attr("stroke", options.style.line_color())
+                .attr("stroke-width", format_float(options.style.line_width()))
+                .attr("x", format_float(BOARD_MARGIN + left_margin))
+                .attr("y", format_float(diagram_height))
+                .attr("width", format_float(width - 1.0))
+                .attr("height", format_float(rect_height)),
+        )
+        .append(text_builder)
+        .build();
+
+    (group, rect_height)
 }
 
 fn label_text(x: u8) -> String {

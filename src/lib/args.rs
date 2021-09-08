@@ -29,9 +29,16 @@ pub fn parse(opts: &getopts::Options, args: &[String]) -> Result<SgfRenderArgs, 
 }
 
 pub fn extract_make_svg_options(matches: &getopts::Matches) -> Result<MakeSvgOptions, UsageError> {
+    let kifu_mode = matches.opt_present("kifu");
     let node_description = match matches.opt_str("n").as_deref() {
         Some(s) => s.parse().map_err(UsageError::InvalidNodeDescription)?,
-        None => NodeDescription::Path(vec![NodePathStep::Advance(DEFAULT_NODE_NUM)]),
+        None => {
+            if kifu_mode {
+                NodeDescription::Last
+            } else {
+                NodeDescription::Path(vec![NodePathStep::Advance(DEFAULT_NODE_NUM)])
+            }
+        }
     };
     let draw_board_labels = !matches.opt_present("no-board-labels");
     let label_sides = {
@@ -85,7 +92,7 @@ pub fn extract_make_svg_options(matches: &getopts::Matches) -> Result<MakeSvgOpt
                 .clone()
         }
     };
-    let draw_move_numbers = matches.opt_present("move-numbers");
+    let draw_move_numbers = matches.opt_present("move-numbers") || kifu_mode;
     let first_move_number = matches
         .opt_str("first-move-number")
         .map_or(Ok(DEFAULT_FIRST_MOVE_NUM), |c| c.parse())
@@ -110,6 +117,7 @@ pub fn extract_make_svg_options(matches: &getopts::Matches) -> Result<MakeSvgOpt
         draw_board_labels,
         label_sides,
         draw_move_numbers,
+        first_move_number,
         draw_marks,
         draw_triangles,
         draw_circles,
@@ -119,7 +127,7 @@ pub fn extract_make_svg_options(matches: &getopts::Matches) -> Result<MakeSvgOpt
         draw_labels,
         draw_lines,
         draw_arrows,
-        first_move_number,
+        kifu_mode,
     })
 }
 
@@ -205,6 +213,7 @@ pub fn build_opts() -> getopts::Options {
     opts.optflag("", "no-labels", "Don't draw SGF labels.");
     opts.optflag("", "no-lines", "Don't draw SGF lines.");
     opts.optflag("", "no-arrows", "Don't draw SGF arrows.");
+    opts.optflag("", "kifu", "Generate a kifu.");
     opts.optflag("h", "help", "Display this help and exit");
 
     opts

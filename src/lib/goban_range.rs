@@ -1,7 +1,7 @@
 use std::collections::HashSet;
 use std::ops::Range;
 
-use super::{Goban, MakeSvgError};
+use super::{Goban, MakeSvgError, MakeSvgOptions};
 
 #[derive(Debug, Clone)]
 pub enum GobanRange {
@@ -11,23 +11,43 @@ pub enum GobanRange {
 }
 
 impl GobanRange {
-    pub fn get_ranges(&self, goban: &Goban) -> Result<(Range<u8>, Range<u8>), MakeSvgError> {
+    pub fn get_ranges(
+        &self,
+        goban: &Goban,
+        options: &MakeSvgOptions,
+    ) -> Result<(Range<u8>, Range<u8>), MakeSvgError> {
         match self {
             Self::FullBoard => Ok((0..goban.size.0, 0..goban.size.1)),
             Self::ShrinkWrap => {
-                let points: HashSet<(u8, u8)> = goban
-                    .stones()
+                let mut points: HashSet<_> = goban
+                    .stones(options.kifu_mode)
                     .map(|s| (s.x, s.y))
-                    .chain(goban.marks.iter().copied())
-                    .chain(goban.triangles.iter().copied())
-                    .chain(goban.circles.iter().copied())
-                    .chain(goban.squares.iter().copied())
-                    .chain(goban.selected.iter().copied())
-                    .chain(goban.labels.keys().copied())
-                    .chain(goban.lines.iter().flat_map(|&(p1, p2)| vec![p1, p2]))
-                    .chain(goban.arrows.iter().flat_map(|&(p1, p2)| vec![p1, p2]))
-                    // Don't necessarily include dimmed points!
                     .collect();
+                if options.draw_marks {
+                    points.extend(goban.marks.iter().copied());
+                }
+                if options.draw_triangles {
+                    points.extend(goban.triangles.iter().copied());
+                }
+                if options.draw_circles {
+                    points.extend(goban.circles.iter().copied());
+                }
+                if options.draw_squares {
+                    points.extend(goban.squares.iter().copied());
+                }
+                if options.draw_selected {
+                    points.extend(goban.selected.iter().copied());
+                }
+                if options.draw_labels {
+                    points.extend(goban.labels.keys().copied());
+                }
+                if options.draw_lines {
+                    points.extend(goban.lines.iter().flat_map(|&(p1, p2)| vec![p1, p2]))
+                }
+                if options.draw_squares {
+                    points.extend(goban.arrows.iter().flat_map(|&(p1, p2)| vec![p1, p2]))
+                }
+                // Don't necessarily include dimmed points!
                 let x_start = {
                     let p = points
                         .iter()

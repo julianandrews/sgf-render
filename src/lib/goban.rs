@@ -7,6 +7,7 @@ use super::{MakeSvgError, NodeDescription, NodePathStep};
 pub struct Goban {
     pub size: (u8, u8),
     pub stones: HashMap<(u8, u8), StoneColor>,
+    pub first_stones: HashMap<(u8, u8), StoneColor>,
     pub move_numbers: HashMap<(u8, u8), Vec<u64>>,
     pub move_number: u64,
     pub black_captures: u64,
@@ -87,9 +88,13 @@ impl Goban {
         Ok(goban)
     }
 
-    pub fn stones(&self) -> impl Iterator<Item = Stone> {
-        let mut stones = self
-            .stones
+    pub fn stones(&self, kifu_mode: bool) -> impl Iterator<Item = Stone> {
+        let stones = if kifu_mode {
+            &self.first_stones
+        } else {
+            &self.stones
+        };
+        let mut stones = stones
             .iter()
             .map(|(point, color)| Stone {
                 x: point.0,
@@ -114,6 +119,7 @@ impl Goban {
         Self {
             size: board_size,
             stones: HashMap::new(),
+            first_stones: HashMap::new(),
             move_numbers: HashMap::new(),
             move_number: 0,
             black_captures: 0,
@@ -210,6 +216,7 @@ impl Goban {
             return Err(MakeSvgError::InvalidMoveError);
         }
         self.stones.insert(key, stone.color);
+        self.first_stones.entry(key).or_insert(stone.color);
 
         Ok(())
     }

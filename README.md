@@ -12,6 +12,7 @@ SVG output is clean and well labeled for easy re-styling or modification.
 Supports [numbered
 moves](https://raw.githubusercontent.com/julianandrews/sgf-render/master/demo/simple-numbered.svg),
 [markup](https://raw.githubusercontent.com/julianandrews/sgf-render/master/demo/markup.svg),
+[kifu output](https://raw.githubusercontent.com/julianandrews/sgf-render/master/demo/kifu.svg),
 and
 [several](https://raw.githubusercontent.com/julianandrews/sgf-render/master/demo/minimalist-numbered.svg)
 [customizable](https://raw.githubusercontent.com/julianandrews/sgf-render/master/demo/wacky.svg)
@@ -75,6 +76,7 @@ Options:
         --no-labels     Don't draw SGF labels.
         --no-lines      Don't draw SGF lines.
         --no-arrows     Don't draw SGF arrows.
+        --kifu          Generate a kifu.
     -h, --help          Display this help and exit
 ```
 
@@ -96,6 +98,20 @@ Examples:
   (non-main) variation at that node, then advance 12 more steps. Show that
   node.
 - `--node last`: Show the last node of the main variation.
+
+### Kifu mode
+
+By default `sgf-render` generates diagrams designed to show the board position
+at a single point in time. Captured stones are removed, and when using
+`--move-numbers` only the last move number at a given point is displayed.
+`--kifu` generates diagrams appropriate for use as a whole game record:
+
+- move numbers are enabled,
+- all other markup is disabled,
+- stones are never removed from the board,
+- if a stone would be placed on an existing stone an annotation is added
+  instead, and
+- `--node` defaults to `last` (can be overridden).
 
 ### Custom styles
 
