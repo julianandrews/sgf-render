@@ -18,6 +18,7 @@ pub fn parse(opts: &getopts::Options, args: &[String]) -> Result<SgfRenderArgs, 
     let infile = matches.free.first().map(PathBuf::from);
     let outfile = matches.opt_str("o").map(PathBuf::from);
     let print_help = matches.opt_present("h");
+    let print_version = matches.opt_present("version");
     let options = extract_make_svg_options(&matches)?;
 
     Ok(SgfRenderArgs {
@@ -25,6 +26,7 @@ pub fn parse(opts: &getopts::Options, args: &[String]) -> Result<SgfRenderArgs, 
         outfile,
         options,
         print_help,
+        print_version,
     })
 }
 
@@ -214,7 +216,8 @@ pub fn build_opts() -> getopts::Options {
     opts.optflag("", "no-lines", "Don't draw SGF lines.");
     opts.optflag("", "no-arrows", "Don't draw SGF arrows.");
     opts.optflag("", "kifu", "Generate a kifu.");
-    opts.optflag("h", "help", "Display this help and exit");
+    opts.optflag("", "version", "Display the version and exit.");
+    opts.optflag("h", "help", "Display this help and exit.");
 
     opts
 }
@@ -224,6 +227,7 @@ pub struct SgfRenderArgs {
     pub infile: Option<PathBuf>,
     pub outfile: Option<PathBuf>,
     pub options: MakeSvgOptions,
+    pub print_version: bool,
     pub print_help: bool,
 }
 

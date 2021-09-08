@@ -4,6 +4,8 @@ use minidom::Element;
 use std::error::Error;
 use std::path::Path;
 
+const VERSION: &str = env!("CARGO_PKG_VERSION");
+
 use lib::args;
 
 fn main() {
@@ -19,6 +21,10 @@ fn main() {
     };
     if parsed_args.print_help {
         args::print_usage(&args[0], &opts);
+        return;
+    }
+    if parsed_args.print_version {
+        println!("sgf-render {}", VERSION);
         return;
     }
 

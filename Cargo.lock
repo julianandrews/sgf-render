@@ -351,7 +351,7 @@ checksum = "2268ba396ed960c618d341e868803561962ea848e0fa935bc6b7c9d1643d7da1"
 
 [[package]]
 name = "sgf-render"
-version = "2.3.0"
+version = "2.3.1"
 dependencies = [
  "getopts",
  "lazy_static",

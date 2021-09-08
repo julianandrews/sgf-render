@@ -43,7 +43,7 @@ $ ./target/release/sgf-render -h
 ## Usage
 
 ```
-Usage: target/debug/sgf-render [FILE] [options]
+Usage: sgf-render [FILE] [options]
 
 Options:
     -o, --outfile FILE  Output file. SVG and PNG formats supported.
@@ -77,7 +77,8 @@ Options:
         --no-lines      Don't draw SGF lines.
         --no-arrows     Don't draw SGF arrows.
         --kifu          Generate a kifu.
-    -h, --help          Display this help and exit
+        --version       Display the version and exit.
+    -h, --help          Display this help and exit.
 ```
 
 If `FILE` isn't provided, `sgf-render` will read from stdin. If `--outfile`
