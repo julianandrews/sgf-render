@@ -86,19 +86,27 @@ isn't provided `sgf-render` will print the resulting SVG to stdout.
 
 ### Node selection
 
-For the `--node` argument `PATH_SPEC` should be either a comma-separated list
-of steps or 'last'.  A step can be a number which advances that many steps, or
-'v' followed by a number which advances one step down the chosen variation.
-Variations are zero-indexed, so, for instance, 'v0' is equivalent to '1'.
+For the `--node` argument `PATH_SPEC` should be a comma-separated list of
+steps.  A step can be a number which advances that many steps, 'v' followed by
+a number which advances one step down the chosen variation, or `last` which
+advances to the last node down the current variation.  Variations are
+zero-indexed, so, for instance, `v0` is equivalent to `1`.
+
+Note that the zeroth node in an SGF usually has no moves, but may have setup
+(which is common for tsumego).  Nodes without moves (with commentary or
+annotations) are possible, but uncommon.
 
 Examples:
 
 - `--node 0`: Show the root node (usually before the first move).
 - `--node 7`: Show the 8th node (probably the 7th move) of the main variation.
+- `--node last`: Show the last node of the main variation.
 - `--node 5,v1,12`: Advance to the 6th node advance 1 step down the first
   (non-main) variation at that node, then advance 12 more steps. Show that
   node.
-- `--node last`: Show the last node of the main variation.
+- `--node 5,v1,last`: Advance to the 6th node advance 1 step down the first
+  (non-main) variation at that node, then advance to the last node. Show that
+  node.
 
 ### Kifu mode
 

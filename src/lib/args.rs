@@ -36,9 +36,13 @@ pub fn extract_make_svg_options(matches: &getopts::Matches) -> Result<MakeSvgOpt
         Some(s) => s.parse().map_err(UsageError::InvalidNodeDescription)?,
         None => {
             if kifu_mode {
-                NodeDescription::Last
+                NodeDescription {
+                    steps: vec![NodePathStep::Last],
+                }
             } else {
-                NodeDescription::Path(vec![NodePathStep::Advance(DEFAULT_NODE_NUM)])
+                NodeDescription {
+                    steps: vec![NodePathStep::Advance(DEFAULT_NODE_NUM)],
+                }
             }
         }
     };

@@ -52,36 +52,32 @@ impl Goban {
         let mut goban = Goban::new(board_size);
         goban.process_node(sgf_node)?;
 
-        match node_description {
-            NodeDescription::Path(steps) => {
-                for step in steps {
-                    match step {
-                        NodePathStep::Advance(n) => {
-                            for _ in 0..*n {
-                                sgf_node = sgf_node
-                                    .children()
-                                    .next()
-                                    .ok_or(MakeSvgError::InsufficientSgfNodes)?;
-                                goban.process_node(sgf_node)?;
-                            }
-                        }
-                        NodePathStep::Variation(n) => {
-                            sgf_node = sgf_node
-                                .children()
-                                .nth(*n)
-                                .ok_or(MakeSvgError::MissingVariation)?;
-                            goban.process_node(sgf_node)?;
-                        }
+        for step in &node_description.steps {
+            match step {
+                NodePathStep::Advance(n) => {
+                    for _ in 0..*n {
+                        sgf_node = sgf_node
+                            .children()
+                            .next()
+                            .ok_or(MakeSvgError::InsufficientSgfNodes)?;
+                        goban.process_node(sgf_node)?;
                     }
                 }
-            }
-            NodeDescription::Last => {
-                while !sgf_node.children.is_empty() {
+                NodePathStep::Variation(n) => {
                     sgf_node = sgf_node
                         .children()
-                        .next()
-                        .ok_or(MakeSvgError::InsufficientSgfNodes)?;
+                        .nth(*n)
+                        .ok_or(MakeSvgError::MissingVariation)?;
                     goban.process_node(sgf_node)?;
+                }
+                NodePathStep::Last => {
+                    while !sgf_node.children.is_empty() {
+                        sgf_node = sgf_node
+                            .children()
+                            .next()
+                            .ok_or(MakeSvgError::InsufficientSgfNodes)?;
+                        goban.process_node(sgf_node)?;
+                    }
                 }
             }
         }

@@ -1,25 +1,25 @@
 #[derive(Debug, PartialEq, Eq, Clone)]
-pub enum NodeDescription {
-    Path(Vec<NodePathStep>),
-    Last,
+pub struct NodeDescription {
+    pub steps: Vec<NodePathStep>,
 }
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub enum NodePathStep {
     Advance(usize),
     Variation(usize),
+    Last,
 }
 
 impl std::str::FromStr for NodeDescription {
     type Err = NodeDescriptionError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        match s {
-            "last" => Ok(NodeDescription::Last),
-            s => {
-                let steps =
-                    s.split(',')
-                        .map(|step| match step.chars().next() {
+        let steps =
+            s.split(',')
+                .map(|step| match step {
+                    "last" => Ok(NodePathStep::Last),
+                    _ => {
+                        match step.chars().next() {
                             Some('v') => Ok(NodePathStep::Variation(step[1..].parse().map_err(
                                 |_| NodeDescriptionError::InvalidVariation(step.to_owned()),
                             )?)),
@@ -27,11 +27,11 @@ impl std::str::FromStr for NodeDescription {
                                 NodeDescriptionError::InvalidAdvance(step.to_owned())
                             })?)),
                             None => Err(NodeDescriptionError::EmptyNodePathStep),
-                        })
-                        .collect::<Result<_, _>>()?;
-                Ok(NodeDescription::Path(steps))
-            }
-        }
+                        }
+                    }
+                })
+                .collect::<Result<_, _>>()?;
+        Ok(NodeDescription { steps })
     }
 }
 
