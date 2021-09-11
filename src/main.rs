@@ -104,7 +104,7 @@ fn save_png(outfile: &Path, svg: &Element) -> Result<(), Box<dyn Error>> {
 }
 
 #[cfg(not(feature = "png"))]
-fn save_png(_outfile: &Path, _document: &SVG) -> Result<(), Box<dyn Error>> {
+fn save_png(_outfile: &Path, _document: &Element) -> Result<(), Box<dyn Error>> {
     Err(SgfRenderError::NoPngSupport.into())
 }
 
