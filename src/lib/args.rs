@@ -25,8 +25,8 @@ pub fn parse(opts: &getopts::Options, args: &[String]) -> Result<SgfRenderArgs, 
         infile,
         outfile,
         options,
-        print_help,
         print_version,
+        print_help,
     })
 }
 

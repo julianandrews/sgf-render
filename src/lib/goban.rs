@@ -5,22 +5,19 @@ use sgf_parse::{go, SgfNode};
 use super::{MakeSvgError, NodeDescription, NodePathStep};
 
 pub struct Goban {
-    pub size: (u8, u8),
-    pub stones: HashMap<(u8, u8), StoneColor>,
-    pub first_stones: HashMap<(u8, u8), StoneColor>,
-    pub move_numbers: HashMap<(u8, u8), Vec<u64>>,
-    pub move_number: u64,
-    pub black_captures: u64,
-    pub white_captures: u64,
-    pub marks: HashSet<(u8, u8)>,
-    pub triangles: HashSet<(u8, u8)>,
-    pub circles: HashSet<(u8, u8)>,
-    pub squares: HashSet<(u8, u8)>,
-    pub selected: HashSet<(u8, u8)>,
-    pub lines: HashSet<((u8, u8), (u8, u8))>,
-    pub arrows: HashSet<((u8, u8), (u8, u8))>,
-    pub dimmed: HashSet<(u8, u8)>,
-    pub labels: HashMap<(u8, u8), String>,
+    size: (u8, u8),
+    stones: HashMap<(u8, u8), StoneColor>,
+    moves: Vec<(u64, Stone)>,
+    move_number: u64,
+    marks: HashSet<(u8, u8)>,
+    triangles: HashSet<(u8, u8)>,
+    circles: HashSet<(u8, u8)>,
+    squares: HashSet<(u8, u8)>,
+    selected: HashSet<(u8, u8)>,
+    lines: HashSet<((u8, u8), (u8, u8))>,
+    arrows: HashSet<((u8, u8), (u8, u8))>,
+    dimmed: HashSet<(u8, u8)>,
+    labels: HashMap<(u8, u8), String>,
 }
 
 impl Goban {
@@ -84,42 +81,77 @@ impl Goban {
         Ok(goban)
     }
 
-    pub fn stones(&self, kifu_mode: bool) -> impl Iterator<Item = Stone> {
-        let stones = if kifu_mode {
-            &self.first_stones
-        } else {
-            &self.stones
-        };
-        let mut stones = stones
-            .iter()
-            .map(|(point, color)| Stone {
-                x: point.0,
-                y: point.1,
-                color: *color,
-            })
-            .collect::<Vec<Stone>>();
-        stones.sort_by_key(|stone| (stone.y, stone.x));
-        stones.into_iter()
+    pub fn stones(&self) -> impl Iterator<Item = Stone> + '_ {
+        self.stones.iter().map(|(point, color)| Stone {
+            x: point.0,
+            y: point.1,
+            color: *color,
+        })
     }
 
-    pub fn hoshi_points(&self) -> impl Iterator<Item = &(u8, u8)> {
+    pub fn stone_color(&self, x: u8, y: u8) -> Option<StoneColor> {
+        self.stones.get(&(x, y)).copied()
+    }
+
+    pub fn moves(&self) -> impl Iterator<Item = (u64, Stone)> + '_ {
+        self.moves.iter().copied()
+    }
+
+    pub fn hoshi_points(&self) -> impl Iterator<Item = (u8, u8)> {
         match self.size {
-            (9, 9) => Self::NINE_HOSHIS.iter(),
-            (13, 13) => Self::THIRTEEN_HOSHIS.iter(),
-            (19, 19) => Self::NINETEEN_HOSHIS.iter(),
-            _ => Self::DEFAULT_HOSHIS.iter(),
+            (9, 9) => Self::NINE_HOSHIS.iter().copied(),
+            (13, 13) => Self::THIRTEEN_HOSHIS.iter().copied(),
+            (19, 19) => Self::NINETEEN_HOSHIS.iter().copied(),
+            _ => Self::DEFAULT_HOSHIS.iter().copied(),
         }
+    }
+
+    pub fn size(&self) -> (u8, u8) {
+        self.size
+    }
+
+    pub fn marks(&self) -> impl Iterator<Item = (u8, u8)> + '_ {
+        self.marks.iter().copied()
+    }
+
+    pub fn triangles(&self) -> impl Iterator<Item = (u8, u8)> + '_ {
+        self.triangles.iter().copied()
+    }
+
+    pub fn circles(&self) -> impl Iterator<Item = (u8, u8)> + '_ {
+        self.circles.iter().copied()
+    }
+
+    pub fn squares(&self) -> impl Iterator<Item = (u8, u8)> + '_ {
+        self.squares.iter().copied()
+    }
+
+    pub fn selected(&self) -> impl Iterator<Item = (u8, u8)> + '_ {
+        self.selected.iter().copied()
+    }
+
+    pub fn dimmed(&self) -> impl Iterator<Item = (u8, u8)> + '_ {
+        self.dimmed.iter().copied()
+    }
+
+    pub fn lines(&self) -> impl Iterator<Item = ((u8, u8), (u8, u8))> + '_ {
+        self.lines.iter().copied()
+    }
+
+    pub fn arrows(&self) -> impl Iterator<Item = ((u8, u8), (u8, u8))> + '_ {
+        self.arrows.iter().copied()
+    }
+
+    pub fn labels(&self) -> impl Iterator<Item = (&(u8, u8), &String)> {
+        self.labels.iter()
     }
 
     fn new(board_size: (u8, u8)) -> Self {
         Self {
             size: board_size,
             stones: HashMap::new(),
-            first_stones: HashMap::new(),
-            move_numbers: HashMap::new(),
+            moves: Vec::new(),
             move_number: 0,
-            black_captures: 0,
-            white_captures: 0,
             marks: HashSet::new(),
             triangles: HashSet::new(),
             circles: HashSet::new(),
@@ -212,7 +244,6 @@ impl Goban {
             return Err(MakeSvgError::InvalidMoveError);
         }
         self.stones.insert(key, stone.color);
-        self.first_stones.entry(key).or_insert(stone.color);
 
         Ok(())
     }
@@ -235,11 +266,7 @@ impl Goban {
         // Now remove the played stone if still neccessary
         self.process_captures(key);
         self.move_number += 1;
-        (*self
-            .move_numbers
-            .entry((stone.x, stone.y))
-            .or_insert_with(Vec::new))
-        .push(self.move_number);
+        self.moves.push((self.move_number, stone));
 
         Ok(())
     }
@@ -293,10 +320,6 @@ impl Goban {
                     _ => {}
                 }
             }
-        }
-        match group_color {
-            StoneColor::Black => self.black_captures += group.len() as u64,
-            StoneColor::White => self.white_captures += group.len() as u64,
         }
         for stone in group {
             self.stones.remove(&stone);

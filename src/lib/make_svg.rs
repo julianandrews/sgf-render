@@ -1,4 +1,4 @@
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 use std::ops::Range;
 
 use minidom::Element;
@@ -102,9 +102,10 @@ pub fn make_svg(sgf: &str, options: &MakeSvgOptions) -> Result<Element, MakeSvgE
             .append(board_view);
 
         if options.draw_board_labels {
+            let goban_size = goban.size();
             diagram_builder = diagram_builder.append(draw_board_labels(
                 x_range,
-                goban.size.1 - height - y_range.start + 1..goban.size.1 - y_range.start + 1,
+                goban_size.1 - height - y_range.start + 1..goban_size.1 - y_range.start + 1,
                 options,
             ));
         }
@@ -202,21 +203,22 @@ fn build_board_lines_group(goban: &Goban, options: &MakeSvgOptions) -> Element {
         .attr("stroke-linecap", "square");
 
     // Draw lines
-    for x in 0..goban.size.0 as usize {
+    let goban_size = goban.size();
+    for x in 0..goban_size.0 as usize {
         group_builder = group_builder.append(
             Element::builder("line", NAMESPACE)
                 .attr("x1", x.to_string())
                 .attr("y1", "0")
                 .attr("x2", x.to_string())
-                .attr("y2", (goban.size.1 - 1).to_string()),
+                .attr("y2", (goban_size.1 - 1).to_string()),
         );
     }
-    for y in 0..goban.size.1 as usize {
+    for y in 0..goban_size.1 as usize {
         group_builder = group_builder.append(
             Element::builder("line", NAMESPACE)
                 .attr("x1", 0.to_string())
                 .attr("y1", y.to_string())
-                .attr("x2", (goban.size.0 - 1).to_string())
+                .attr("x2", (goban_size.0 - 1).to_string())
                 .attr("y2", y.to_string()),
         );
     }
@@ -227,7 +229,7 @@ fn build_board_lines_group(goban: &Goban, options: &MakeSvgOptions) -> Element {
         .attr("id", "hoshi")
         .attr("stroke", "none")
         .attr("fill", options.style.line_color());
-    for &(x, y) in goban.hoshi_points() {
+    for (x, y) in goban.hoshi_points() {
         hoshi = hoshi.append(
             Element::builder("circle", NAMESPACE)
                 .attr("cx", x.to_string())
@@ -242,43 +244,45 @@ fn build_stones_group(goban: &Goban, options: &MakeSvgOptions) -> Element {
     let mut group_builder = Element::builder("g", NAMESPACE)
         .attr("id", "stones")
         .attr("stroke", "none");
-    for stone in goban.stones(options.kifu_mode) {
+    let mut stones: Vec<Stone> = if options.kifu_mode {
+        // TODO: This is only right if starting_move_number is 1 and there are no board edits.
+        // Instead, kifu mode should
+        //  - figure out the board state before the first move number and use that as a base before
+        //    overriding with numbered moves
+        //  - throw an error if there are any setup actions (AB, AW, AE, PL) in the numbered moves
+        //    because it's really unclear how a kifu is supposed to handle/display that!
+        get_move_numbers(goban, options)
+            .into_iter()
+            .map(|(_, stone)| stone)
+            .collect()
+    } else {
+        goban.stones().collect()
+    };
+    stones.sort_by_key(|stone| (stone.y, stone.x));
+    for stone in stones {
         group_builder = group_builder.append(draw_stone(stone, &options.style));
     }
     group_builder.build()
 }
 
 fn build_move_numbers_group(goban: &Goban, options: &MakeSvgOptions) -> Element {
-    let stones = if options.kifu_mode {
-        &goban.first_stones
-    } else {
-        &goban.stones
-    };
     let mut group_builder = Element::builder("g", NAMESPACE)
         .attr("id", "move-numbers")
         .attr("text-anchor", "middle");
-    let mut move_numbers: Vec<_> = goban.move_numbers.iter().collect();
-    if options.kifu_mode {
-        move_numbers.sort_by_key(|(_, nums)| nums.iter().max());
-    } else {
-        move_numbers.sort_by_key(|(_, nums)| nums.iter().max());
-    }
-    for (point, nums) in &move_numbers {
-        let n = if options.kifu_mode {
-            *nums
-                .first()
-                .expect("Move numbers should never be an empty vector")
-        } else {
-            *nums
-                .last()
-                .expect("Move numbers should never be an empty vector")
-        };
+    let move_numbers = get_move_numbers(goban, options);
+    for (n, stone) in move_numbers {
         if n >= options.first_move_number {
-            let stone_color = stones.get(point).copied();
+            let stone_color = if options.kifu_mode {
+                // In kifu mode, the first numbered stone played will be shown.
+                Some(stone.color)
+            } else {
+                // Otherwise, we can look at the board.
+                goban.stone_color(stone.x, stone.y)
+            };
             let starting_num = (n - options.first_move_number) + 1;
             group_builder = group_builder.append(draw_move_number(
-                point.0,
-                point.1,
+                stone.x,
+                stone.y,
                 starting_num,
                 stone_color,
                 &options.style,
@@ -288,12 +292,31 @@ fn build_move_numbers_group(goban: &Goban, options: &MakeSvgOptions) -> Element 
     group_builder.build()
 }
 
+fn get_move_numbers(goban: &Goban, options: &MakeSvgOptions) -> Vec<(u64, Stone)> {
+    let numbered_moves = goban
+        .moves()
+        .skip_while(|(n, _)| n < &options.first_move_number);
+    let mut move_numbers: HashMap<(u8, u8), (u64, Stone)> = HashMap::new();
+    for (n, stone) in numbered_moves {
+        if options.kifu_mode {
+            // In Kifu mode we care about the first numbered stone played.
+            move_numbers.entry((stone.x, stone.y)).or_insert((n, stone));
+        } else {
+            // Otherwise we care about the last numbered stone played.
+            move_numbers.insert((stone.x, stone.y), (n, stone));
+        }
+    }
+    let mut move_numbers: Vec<(u64, Stone)> = move_numbers.values().copied().collect();
+    move_numbers.sort_unstable_by_key(|(n, _)| *n);
+    move_numbers
+}
+
 fn build_marks_group(goban: &Goban, options: &MakeSvgOptions) -> Element {
     let mut group_builder = Element::builder("g", NAMESPACE).attr("id", "markup-marks");
-    let mut marks: Vec<_> = goban.marks.iter().collect();
-    marks.sort();
+    let mut marks: Vec<_> = goban.marks().collect();
+    marks.sort_unstable();
     for point in marks {
-        let stone_color = goban.stones.get(point).copied();
+        let stone_color = goban.stone_color(point.0, point.1);
         group_builder =
             group_builder.append(draw_mark(point.0, point.1, stone_color, &options.style));
     }
@@ -302,10 +325,10 @@ fn build_marks_group(goban: &Goban, options: &MakeSvgOptions) -> Element {
 
 fn build_triangles_group(goban: &Goban, options: &MakeSvgOptions) -> Element {
     let mut group_builder = Element::builder("g", NAMESPACE).attr("id", "markup-triangles");
-    let mut triangles: Vec<_> = goban.triangles.iter().collect();
-    triangles.sort();
+    let mut triangles: Vec<_> = goban.triangles().collect();
+    triangles.sort_unstable();
     for point in triangles {
-        let stone_color = goban.stones.get(point).copied();
+        let stone_color = goban.stone_color(point.0, point.1);
         group_builder =
             group_builder.append(draw_triangle(point.0, point.1, stone_color, &options.style));
     }
@@ -314,10 +337,10 @@ fn build_triangles_group(goban: &Goban, options: &MakeSvgOptions) -> Element {
 
 fn build_circles_group(goban: &Goban, options: &MakeSvgOptions) -> Element {
     let mut group_builder = Element::builder("g", NAMESPACE).attr("id", "markup-circles");
-    let mut circles: Vec<_> = goban.circles.iter().collect();
-    circles.sort();
+    let mut circles: Vec<_> = goban.circles().collect();
+    circles.sort_unstable();
     for point in circles {
-        let stone_color = goban.stones.get(point).copied();
+        let stone_color = goban.stone_color(point.0, point.1);
         group_builder =
             group_builder.append(draw_circle(point.0, point.1, stone_color, &options.style));
     }
@@ -326,10 +349,10 @@ fn build_circles_group(goban: &Goban, options: &MakeSvgOptions) -> Element {
 
 fn build_squares_group(goban: &Goban, options: &MakeSvgOptions) -> Element {
     let mut group_builder = Element::builder("g", NAMESPACE).attr("id", "markup-squares");
-    let mut squares: Vec<_> = goban.squares.iter().collect();
-    squares.sort();
+    let mut squares: Vec<_> = goban.squares().collect();
+    squares.sort_unstable();
     for point in squares {
-        let stone_color = goban.stones.get(point).copied();
+        let stone_color = goban.stone_color(point.0, point.1);
         group_builder =
             group_builder.append(draw_square(point.0, point.1, stone_color, &options.style));
     }
@@ -338,10 +361,10 @@ fn build_squares_group(goban: &Goban, options: &MakeSvgOptions) -> Element {
 
 fn build_selected_group(goban: &Goban, options: &MakeSvgOptions) -> Element {
     let mut group_builder = Element::builder("g", NAMESPACE).attr("id", "markup-selected");
-    let mut selected: Vec<_> = goban.selected.iter().collect();
-    selected.sort();
+    let mut selected: Vec<_> = goban.selected().collect();
+    selected.sort_unstable();
     for point in selected {
-        let stone_color = goban.stones.get(point).copied();
+        let stone_color = goban.stone_color(point.0, point.1);
         group_builder =
             group_builder.append(draw_selected(point.0, point.1, stone_color, &options.style));
     }
@@ -350,8 +373,8 @@ fn build_selected_group(goban: &Goban, options: &MakeSvgOptions) -> Element {
 
 fn build_dimmed_group(goban: &Goban, _options: &MakeSvgOptions) -> Element {
     let mut group_builder = Element::builder("g", NAMESPACE).attr("id", "markup-dimmed");
-    let mut dimmed: Vec<_> = goban.dimmed.iter().collect();
-    dimmed.sort();
+    let mut dimmed: Vec<_> = goban.dimmed().collect();
+    dimmed.sort_unstable();
     for point in dimmed {
         group_builder = group_builder.append(dim_square(point.0, point.1));
     }
@@ -360,10 +383,10 @@ fn build_dimmed_group(goban: &Goban, _options: &MakeSvgOptions) -> Element {
 
 fn build_label_group(goban: &Goban, options: &MakeSvgOptions) -> Element {
     let mut group_builder = Element::builder("g", NAMESPACE).attr("id", "markup-labels");
-    let mut labels: Vec<_> = goban.labels.iter().collect();
-    labels.sort();
+    let mut labels: Vec<_> = goban.labels().collect();
+    labels.sort_unstable();
     for (point, text) in labels {
-        let stone_color = goban.stones.get(point).copied();
+        let stone_color = goban.stone_color(point.0, point.1);
         group_builder = group_builder.append(draw_label(
             point.0,
             point.1,
@@ -382,9 +405,9 @@ fn build_line_group(goban: &Goban, options: &MakeSvgOptions) -> Element {
         .attr("stroke-width", format_float(options.style.line_width()))
         .attr("marker-start", "url(#linehead)")
         .attr("marker-end", "url(#linehead)");
-    let mut lines: Vec<_> = goban.lines.iter().collect();
-    lines.sort();
-    for &(p1, p2) in lines {
+    let mut lines: Vec<_> = goban.lines().collect();
+    lines.sort_unstable();
+    for (p1, p2) in lines {
         group_builder = group_builder.append(
             Element::builder("line", NAMESPACE)
                 .attr("x1", p1.0)
@@ -402,9 +425,9 @@ fn build_arrow_group(goban: &Goban, options: &MakeSvgOptions) -> Element {
         .attr("stroke", "black")
         .attr("stroke-width", format_float(options.style.line_width()))
         .attr("marker-end", "url(#arrowhead)");
-    let mut arrows: Vec<_> = goban.arrows.iter().collect();
-    arrows.sort();
-    for &(p1, p2) in arrows {
+    let mut arrows: Vec<_> = goban.arrows().collect();
+    arrows.sort_unstable();
+    for (p1, p2) in arrows {
         group_builder = group_builder.append(
             Element::builder("line", NAMESPACE)
                 .attr("x1", p1.0)
@@ -519,16 +542,25 @@ fn draw_repeated_stones(
         .attr("y", format_float(y))
         .attr("font-size", format_float(entry_height))
         .attr("fill", options.style.line_color()); // TODO: Evaluate this choice
-    let mut repeated_moves: Vec<_> = goban
-        .move_numbers
-        .values()
-        .filter(|moves| !moves.is_empty())
-        .flat_map(|moves| {
-            let first_move = moves[0];
-            moves.iter().skip(1).map(move |&n| (n, first_move))
-        })
-        .collect();
-    repeated_moves.sort_unstable();
+    let repeated_moves: Vec<(u64, u64)> = {
+        let mut repeated_moves = Vec::new();
+        let mut seen_moves: HashMap<(u8, u8), u64> = HashMap::new();
+        let numbered_moves = goban
+            .moves()
+            .skip_while(|(n, _)| n < &options.first_move_number);
+        for (n, stone) in numbered_moves {
+            match seen_moves.entry((stone.x, stone.y)) {
+                std::collections::hash_map::Entry::Occupied(entry) => {
+                    repeated_moves.push((n, *entry.get()))
+                }
+                std::collections::hash_map::Entry::Vacant(entry) => {
+                    entry.insert(n);
+                }
+            }
+        }
+        repeated_moves.sort_unstable();
+        repeated_moves
+    };
     let rows = (f64::from(repeated_moves.len() as u32) / f64::from(columns as u32)).ceil();
     for (i, (move_num, original)) in repeated_moves.iter().enumerate() {
         let column = f64::from((i % columns) as u32);
