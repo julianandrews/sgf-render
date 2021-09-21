@@ -7,6 +7,7 @@ use super::{MakeSvgError, NodeDescription, NodePathStep};
 pub struct Goban {
     size: (u8, u8),
     stones: HashMap<(u8, u8), StoneColor>,
+    stones_before_move: HashMap<u64, HashSet<Stone>>,
     moves: Vec<(u64, Stone)>,
     move_number: u64,
     marks: HashSet<(u8, u8)>,
@@ -89,6 +90,18 @@ impl Goban {
         })
     }
 
+    pub fn stones_before_move(&self, move_number: u64) -> Box<dyn Iterator<Item = Stone> + '_> {
+        let stones = self.stones_before_move.get(&move_number);
+        match stones {
+            Some(stones) => Box::new(stones.iter().copied()),
+            None => Box::new(self.stones.iter().map(|(point, color)| Stone {
+                x: point.0,
+                y: point.1,
+                color: *color,
+            })),
+        }
+    }
+
     pub fn stone_color(&self, x: u8, y: u8) -> Option<StoneColor> {
         self.stones.get(&(x, y)).copied()
     }
@@ -150,6 +163,7 @@ impl Goban {
         Self {
             size: board_size,
             stones: HashMap::new(),
+            stones_before_move: HashMap::new(),
             moves: Vec::new(),
             move_number: 0,
             marks: HashSet::new(),
@@ -249,6 +263,17 @@ impl Goban {
     }
 
     fn play_stone(&mut self, stone: Stone) -> Result<(), MakeSvgError> {
+        self.stones_before_move.insert(
+            self.move_number,
+            self.stones
+                .iter()
+                .map(|(point, color)| Stone {
+                    x: point.0,
+                    y: point.1,
+                    color: *color,
+                })
+                .collect(),
+        );
         self.add_stone(stone)?;
         let opponent_color = match stone.color {
             StoneColor::Black => StoneColor::White,
@@ -331,13 +356,13 @@ impl Goban {
     }
 }
 
-#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
 pub enum StoneColor {
     Black,
     White,
 }
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
 pub struct Stone {
     pub x: u8,
     pub y: u8,

@@ -113,14 +113,15 @@ pub fn make_svg(sgf: &str, options: &MakeSvgOptions) -> Result<Element, MakeSvgE
         let mut diagram_height =
             f64::from(height) - 1.0 + 2.0 * BOARD_MARGIN + top_margin + bottom_margin;
         if options.kifu_mode {
-            let (element, element_height) = draw_repeated_stones(
+            if let Some((element, element_height)) = draw_repeated_stones(
                 &goban,
                 width,
                 diagram_height + REPEATED_MOVES_MARGIN,
                 options,
-            );
-            diagram_builder = diagram_builder.append(element);
-            diagram_height += element_height + REPEATED_MOVES_MARGIN * 2.0;
+            ) {
+                diagram_builder = diagram_builder.append(element);
+                diagram_height += element_height + REPEATED_MOVES_MARGIN * 2.0;
+            }
         }
 
         (diagram_builder.build(), diagram_height)
@@ -245,16 +246,17 @@ fn build_stones_group(goban: &Goban, options: &MakeSvgOptions) -> Element {
         .attr("id", "stones")
         .attr("stroke", "none");
     let mut stones: Vec<Stone> = if options.kifu_mode {
-        // TODO: This is only right if starting_move_number is 1 and there are no board edits.
-        // Instead, kifu mode should
-        //  - figure out the board state before the first move number and use that as a base before
-        //    overriding with numbered moves
-        //  - throw an error if there are any setup actions (AB, AW, AE, PL) in the numbered moves
-        //    because it's really unclear how a kifu is supposed to handle/display that!
-        get_move_numbers(goban, options)
+        let mut stones: HashMap<(u8, u8), Stone> = goban
+            .stones_before_move(options.first_move_number)
+            .map(|stone| ((stone.x, stone.y), stone))
+            .collect();
+        let new_stones = get_move_numbers(goban, options)
             .into_iter()
-            .map(|(_, stone)| stone)
-            .collect()
+            .map(|(_, stone)| stone);
+        for stone in new_stones {
+            stones.entry((stone.x, stone.y)).or_insert(stone);
+        }
+        stones.into_iter().map(|(_, stone)| stone).collect()
     } else {
         goban.stones().collect()
     };
@@ -526,7 +528,7 @@ fn draw_repeated_stones(
     width: u8,
     diagram_height: f64,
     options: &MakeSvgOptions,
-) -> (Element, f64) {
+) -> Option<(Element, f64)> {
     let entry_padding = 0.2;
     let entry_width = 1.9;
     let entry_height = 0.4;
@@ -561,6 +563,9 @@ fn draw_repeated_stones(
         repeated_moves.sort_unstable();
         repeated_moves
     };
+    if repeated_moves.is_empty() {
+        return None;
+    }
     let rows = (f64::from(repeated_moves.len() as u32) / f64::from(columns as u32)).ceil();
     for (i, (move_num, original)) in repeated_moves.iter().enumerate() {
         let column = f64::from((i % columns) as u32);
@@ -589,7 +594,7 @@ fn draw_repeated_stones(
         .append(text_builder)
         .build();
 
-    (group, rect_height)
+    Some((group, rect_height))
 }
 
 fn label_text(x: u8) -> String {
