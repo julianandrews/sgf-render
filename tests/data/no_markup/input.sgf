@@ -1,0 +1,116 @@
+(;GM[1]FF[4]
+CA[UTF-8]
+AP[Quarry:0.2.0]
+SZ[19]
+GN[Gametree 1: properties]
+US[Arno Hollosi]
+;AB[nd:nf][dd:dj][ih:ij][nh:nj][an:bn][bo][ap:dp][dq:iq][dr:ds]
+[ir:is][mr:ms]
+AW[fd:ff][fh:fj][kh:kj][pd:pj][rn:sn][ro][op:sp][kq:oq][er]
+[gr][fs:gs][kr:ks][or:os]
+N[Markup]C[Position set up without compressed point lists.]
+;C[Markup at top partially using compressed point lists (for markup on \
+white stones); listed clockwise, starting at upper left:
+- TR (triangle)
+- CR (circle)
+- SQ (square)
+- SL (selected points)
+- MA ('X')
+
+Markup at bottom: black & white territory (using compressed point lists)]
+MA[dh:fj]
+CR[nd:pf]
+SQ[nh:pj]
+TR[dd:ff]
+SL[ih:kj]
+TB[ao][aq:cs][er:hs]
+TW[so][lr:ns][pq:ss]
+;C[Label (LB property)
+
+Top: 8 single char labels (1-4, a-d)
+
+Bottom: Labels up to 8 char length.]LB[dc:1][fc:2][nc:3][pc:4]
+[dj:a][fj:b][nj:c][pj:d][gm:AB][mm:12][gn:ABC][mn:123][go:ABCD]
+[mo:1234][gp:ABCDE][mp:12345][gq:ABCDEF][mq:123456][gr:ABCDEFG]
+[mr:1234567][gs:ABCDEFGH][ms:12345678]
+;C[Arrows, lines and dimmed points.]AR[aa:sc][sa:ac][aa:sa]
+[aa:ac][cd:cj][gd:md][fh:ij][kj:nh]
+LN[pj:pd][nf:ff][ih:fj][kh:nj]
+DD[dq:hs][kq:os]
+)
+
+(;GM[1]FF[4]
+CA[UTF-8]
+AP[Quarry:0.2.0]
+SZ[19]
+C[Gametree 2: game-info
+
+Game-info properties are usually stored in the root node.
+If games are merged into a single game-tree, they are stored in the \
+node where the game first becomes distinguishable from all other games \
+in the tree.]
+;B[pd]
+(;W[dp]EV[Go Congress]
+RO[2]
+PC[London]
+PB[B. Lack]
+BR[5d]
+PW[W. Hite]
+WR[6d]
+RE[W+3.5]
+C[Game-info:
+Black: B. Lack, 5d
+White: W. Hite, 6d
+Place: London
+Event: Go Congress
+Round: 2
+Result: White wins by 3.5])
+(;W[cp]EV[Go Congress]
+RO[1]
+PC[London]
+PB[B. Lack]
+BR[5d]
+PW[T. Suji]
+WR[7d]
+RE[W+Resign]
+C[Game-info:
+Black: B. Lack, 5d
+White: T. Suji, 7d
+Place: London
+Event: Go Congress
+Round: 1
+Result: White wins by resignation])
+(;W[ep];B[pp]
+(;W[ed]EV[Go Congress]
+RO[3]
+PC[London]
+PB[B. Lack]
+BR[5d]
+PW[S. Abaki]
+WR[1d]
+RE[B+63.5]
+C[Game-info:
+Black: B. Lack, 5d
+White: S. Abaki, 1d
+Place: London
+Event: Go Congress
+Round: 3
+Result: Balck wins by 63.5])
+(;W[cd]EV[Go Congress]
+RO[4]
+PC[London]
+KM[-59.5]
+PB[B. Lack]
+BR[5d]
+PW[A. Tari]
+WR[12k]
+RE[B+Resign]
+C[Game-info:
+Black: B. Lack, 5d
+White: A. Tari, 12k
+Place: London
+Event: Go Congress
+Round: 4
+Komi: -59.5 points
+Result: Black wins by resignation]))
+)

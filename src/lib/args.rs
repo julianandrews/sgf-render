@@ -104,16 +104,16 @@ pub fn extract_make_svg_options(matches: &getopts::Matches) -> Result<MakeSvgOpt
         .map_or(Ok(DEFAULT_FIRST_MOVE_NUM), |c| c.parse())
         .map_err(|_| UsageError::InvalidFirstMoveNumber)?;
 
-    // There isn't really a clean way to draw both markup and move numbers that I can see.
-    let draw_marks = !draw_move_numbers && !matches.opt_present("no-marks");
-    let draw_triangles = !draw_move_numbers && !matches.opt_present("no-triangles");
-    let draw_circles = !draw_move_numbers && !matches.opt_present("no-circles");
-    let draw_squares = !draw_move_numbers && !matches.opt_present("no-squares");
-    let draw_selected = !draw_move_numbers && !matches.opt_present("no-selected");
-    let draw_dimmed = !draw_move_numbers && !matches.opt_present("no-dimmed");
-    let draw_labels = !draw_move_numbers && !matches.opt_present("no-labels");
-    let draw_lines = !draw_move_numbers && !matches.opt_present("no-lines");
-    let draw_arrows = !draw_move_numbers && !matches.opt_present("no-arrows");
+    let no_point_markup = matches.opt_present("no-point-markup");
+    let draw_marks = !no_point_markup && !matches.opt_present("no-marks");
+    let draw_triangles = !no_point_markup && !matches.opt_present("no-triangles");
+    let draw_circles = !no_point_markup && !matches.opt_present("no-circles");
+    let draw_squares = !no_point_markup && !matches.opt_present("no-squares");
+    let draw_selected = !no_point_markup && !matches.opt_present("no-selected");
+    let draw_dimmed = !matches.opt_present("no-dimmed");
+    let draw_labels = !no_point_markup && !matches.opt_present("no-labels");
+    let draw_lines = !matches.opt_present("no-lines");
+    let draw_arrows = !matches.opt_present("no-arrows");
 
     Ok(MakeSvgOptions {
         node_description,
@@ -195,7 +195,7 @@ pub fn build_opts() -> getopts::Options {
     opts.optflag(
         "",
         "move-numbers",
-        "Draw move numbers (disables other markup).",
+        "Draw move numbers (may replace other markup).",
     );
     opts.optopt(
         "",
@@ -219,6 +219,7 @@ pub fn build_opts() -> getopts::Options {
     opts.optflag("", "no-labels", "Don't draw SGF labels.");
     opts.optflag("", "no-lines", "Don't draw SGF lines.");
     opts.optflag("", "no-arrows", "Don't draw SGF arrows.");
+    opts.optflag("", "no-point-markup", "Don't draw any markup on points.");
     opts.optflag("", "kifu", "Generate a kifu.");
     opts.optflag("", "version", "Display the version and exit.");
     opts.optflag("h", "help", "Display this help and exit.");
