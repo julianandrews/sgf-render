@@ -17,6 +17,7 @@ pub fn parse(opts: &getopts::Options, args: &[String]) -> Result<SgfRenderArgs, 
     }
     let infile = matches.free.first().map(PathBuf::from);
     let outfile = matches.opt_str("o").map(PathBuf::from);
+    let format = matches.opt_str("f");
     let print_help = matches.opt_present("h");
     let print_version = matches.opt_present("version");
     let options = extract_make_svg_options(&matches)?;
@@ -24,6 +25,7 @@ pub fn parse(opts: &getopts::Options, args: &[String]) -> Result<SgfRenderArgs, 
     Ok(SgfRenderArgs {
         infile,
         outfile,
+        format,
         options,
         print_version,
         print_help,
@@ -151,6 +153,12 @@ pub fn build_opts() -> getopts::Options {
         "FILE",
     );
     opts.optopt(
+	"f",
+	"format",
+	"Format for stdout, SVG and PNG formats supported.",
+	"FORMAT",
+    );
+    opts.optopt(
         "n",
         "node",
         &format!(
@@ -231,6 +239,7 @@ pub fn build_opts() -> getopts::Options {
 pub struct SgfRenderArgs {
     pub infile: Option<PathBuf>,
     pub outfile: Option<PathBuf>,
+    pub format: Option<String>,
     pub options: MakeSvgOptions,
     pub print_version: bool,
     pub print_help: bool,
