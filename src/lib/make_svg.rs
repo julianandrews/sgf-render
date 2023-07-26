@@ -313,7 +313,7 @@ fn get_move_numbers_to_draw(goban: &Goban, options: &MakeSvgOptions) -> Vec<(u64
 }
 
 fn get_move_numbers(goban: &Goban, options: &MakeSvgOptions) -> Vec<(u64, Stone)> {
-    if !options.draw_move_numbers && !options.kifu_mode {
+    if !options.draw_move_numbers {
         return Vec::new();
     }
     let numbered_moves = goban
