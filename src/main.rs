@@ -1,12 +1,10 @@
-mod lib;
-
 use minidom::Element;
 use std::error::Error;
 use std::path::Path;
 
 const VERSION: &str = env!("CARGO_PKG_VERSION");
 
-use lib::args;
+use sgf_render::args;
 
 fn main() {
     let args: Vec<String> = std::env::args().collect();
@@ -36,7 +34,7 @@ fn main() {
         }
     };
 
-    let svg = match lib::make_svg(&input, &parsed_args.options) {
+    let svg = match sgf_render::make_svg(&input, &parsed_args.options) {
         Ok(svg) => svg,
         Err(e) => {
             eprintln!("Failed to generate SVG: {}", e);

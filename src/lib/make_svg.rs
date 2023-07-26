@@ -266,7 +266,7 @@ fn build_stones_group(goban: &Goban, options: &MakeSvgOptions) -> Element {
         for stone in new_stones {
             stones.entry((stone.x, stone.y)).or_insert(stone);
         }
-        stones.into_iter().map(|(_, stone)| stone).collect()
+        stones.into_values().collect()
     } else {
         goban.stones().collect()
     };
