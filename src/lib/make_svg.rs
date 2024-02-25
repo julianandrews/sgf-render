@@ -579,7 +579,7 @@ fn draw_repeated_stones(
         + left_margin
         + entry_padding
         + (width - 1.0 - 2.0 * entry_padding - entry_width * f64::from(columns as u32)) / 2.0;
-    let y = diagram_height + entry_padding;
+    let y = diagram_height + entry_padding + entry_height;
     let mut text_builder = Element::builder("text", NAMESPACE)
         .attr("y", format_float(y))
         .attr("font-size", format_float(entry_height))
@@ -612,14 +612,13 @@ fn draw_repeated_stones(
         let column = f64::from((i % columns) as u32);
         let mut tspan_builder = Element::builder("tspan", NAMESPACE)
             .append(format!("{}→{}", move_num, original))
-            .attr("alignment-baseline", "hanging")
             .attr("x", format_float(x + entry_width * column));
         if i % columns == 0 && i != 0 {
             tspan_builder = tspan_builder.attr("dy", format_float(entry_height));
         }
         text_builder = text_builder.append(tspan_builder);
     }
-    let rect_height = 2.0 * entry_padding + entry_height * rows;
+    let rect_height = 2.0 * entry_padding + entry_height * rows + options.style.line_width() * 2.0;
     let group = Element::builder("g", NAMESPACE)
         .attr("id", "repeated-stones")
         .append(
