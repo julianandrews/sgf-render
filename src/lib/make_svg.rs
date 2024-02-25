@@ -21,7 +21,6 @@ pub struct MakeSvgOptions {
     pub goban_range: GobanRange,
     pub style: GobanStyle,
     pub viewbox_width: f64,
-    pub draw_board_labels: bool,
     pub label_sides: HashSet<BoardSide>,
     pub draw_move_numbers: bool,
     pub first_move_number: u64,
@@ -51,14 +50,10 @@ pub fn make_svg(sgf: &str, options: &MakeSvgOptions) -> Result<Element, MakeSvgE
     let (x_range, y_range) = options.goban_range.get_ranges(&goban, options)?;
     let width = x_range.end - x_range.start;
     let height = y_range.end - y_range.start;
-    if options.draw_board_labels && !options.label_sides.is_empty() && width > 25 || height > 99 {
+    if !options.label_sides.is_empty() && width > 25 || height > 99 {
         return Err(MakeSvgError::UnlabellableRange);
     }
-    let (top_margin, right_margin, bottom_margin, left_margin) = if options.draw_board_labels {
-        get_margins(&options.label_sides)
-    } else {
-        (0.0, 0.0, 0.0, 0.0)
-    };
+    let (top_margin, right_margin, bottom_margin, left_margin) = get_margins(&options.label_sides);
 
     let definitions = {
         let clip_path = Element::builder("clipPath", NAMESPACE)
@@ -101,7 +96,7 @@ pub fn make_svg(sgf: &str, options: &MakeSvgOptions) -> Result<Element, MakeSvgE
             .attr("transform", transform)
             .append(board_view);
 
-        if options.draw_board_labels {
+        if !options.label_sides.is_empty() {
             let goban_size = goban.size();
             diagram_builder = diagram_builder.append(draw_board_labels(
                 x_range,

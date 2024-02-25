@@ -46,8 +46,9 @@ pub fn extract_make_svg_options(matches: &getopts::Matches) -> Result<MakeSvgOpt
             }
         }
     };
-    let draw_board_labels = !matches.opt_present("no-board-labels");
-    let label_sides = {
+    let label_sides = if matches.opt_present("no-board-labels") {
+        std::collections::HashSet::new()
+    } else {
         let s = matches
             .opt_str("label-sides")
             .unwrap_or_else(|| "nw".to_owned())
@@ -120,7 +121,6 @@ pub fn extract_make_svg_options(matches: &getopts::Matches) -> Result<MakeSvgOpt
         goban_range,
         style,
         viewbox_width,
-        draw_board_labels,
         label_sides,
         draw_move_numbers,
         first_move_number,
