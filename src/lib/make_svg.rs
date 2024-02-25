@@ -589,7 +589,8 @@ fn draw_repeated_stones(
         let mut seen_moves: HashMap<(u8, u8), u64> = HashMap::new();
         let numbered_moves = goban
             .moves()
-            .skip_while(|(n, _)| n < &options.first_move_number);
+            .skip_while(|(n, _)| n < &options.first_move_number)
+            .map(|(n, stone)| (n + 1 - options.first_move_number, stone));
         for (n, stone) in numbered_moves {
             match seen_moves.entry((stone.x, stone.y)) {
                 std::collections::hash_map::Entry::Occupied(entry) => {
