@@ -1,9 +1,12 @@
-name: build
+name: Create Release
 on:
-  workflow_dispatch: {}
+  push:
+    tags:
+      - 'v*'
+
 jobs:
   build:
-    name: build
+    name: Build
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -41,6 +44,24 @@ jobs:
       env:
         RUST_BACKTRACE: 1
 
+    - name: Build .deb
+      id: build_deb
+      if: matrix.build == 'linux'
+      run: |
+        cargo install cargo-deb
+        file=$(cargo deb)
+        result=$?
+        echo "Outputting debfile=$(basename $file)"
+        echo "debfile=$(basename $file)" >> "$GITHUB_OUTPUT"
+        exit $result
+
+    - name: Upload .deb
+      if: matrix.build == 'linux'
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ steps.build_deb.outputs.debfile }}
+        path: target/debian/${{ steps.build_deb.outputs.debfile }}
+
     - name: Strip binary (linux and macos)
       if: matrix.build == 'linux' || matrix.build == 'macos'
       run: strip "target/${{ matrix.target }}/release/sgf-render"
@@ -64,3 +85,23 @@ jobs:
       with:
         name: ${{ matrix.archive-name }}
         path: archive/${{ matrix.archive-name }}
+
+  release:
+    name: Create release
+    needs: Build
+    runs-on: ubuntu-latest
+    steps:
+    - name: Download artifacts
+      uses: actions/download-artifact@v4
+      with:
+        path: artifacts
+        merge-multiple: true
+    - name: Create release
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: ${{ github.ref_name }}
+        draft: true
+        files: |
+          artifacts/*
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
