@@ -12,7 +12,7 @@ static LABEL_MARGIN: f64 = 0.8;
 static REPEATED_MOVES_MARGIN: f64 = 0.32;
 
 static FONT_FAMILY: &str = "Inter";
-static FONT_SIZE: f64 = 0.5;
+static FONT_SIZE: f64 = 0.45;
 static FONT_WEIGHT: usize = 700;
 
 #[derive(Debug, Clone)]
@@ -569,8 +569,8 @@ fn draw_repeated_stones(
     diagram_height: f64,
     options: &MakeSvgOptions,
 ) -> Option<(Element, f64)> {
-    let entry_padding = 0.2;
-    let entry_width = 1.9;
+    let entry_padding = 0.25;
+    let entry_width = 2.43;
     let entry_height = 0.4;
     let width = f64::from(width);
     let (_, _, _, left_margin) = get_margins(&options.label_sides);
