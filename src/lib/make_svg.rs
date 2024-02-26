@@ -11,7 +11,7 @@ static BOARD_MARGIN: f64 = 0.64;
 static LABEL_MARGIN: f64 = 0.8;
 static REPEATED_MOVES_MARGIN: f64 = 0.32;
 
-static FONT_FAMILY: &str = "Roboto";
+static FONT_FAMILY: &str = "Inter";
 static FONT_SIZE: f64 = 0.5;
 static FONT_WEIGHT: usize = 700;
 

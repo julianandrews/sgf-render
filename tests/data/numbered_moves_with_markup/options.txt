@@ -1,1 +1,1 @@
--n 5 --move-numbers --no-circles input.sgf
+-n 5 --move-numbers --no-circles

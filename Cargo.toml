@@ -1,6 +1,6 @@
 [package]
 name = "sgf-render"
-version = "2.4.3"
+version = "2.4.4"
 authors = ["Julian Andrews <jandrews271@gmail.com>"]
 edition = "2018"
 license = "MIT"
@@ -33,3 +33,11 @@ tiny-skia = { version = "0.5.0", optional = true }
 
 [dev-dependencies]
 shell-words = "1.0.0"
+
+[package.metadata.deb]
+license-file = ["LICENSE", "0"]
+assets = [
+    ["target/release/sgf-render", "/usr/bin/", "755"],
+    ["README.md", "/usr/share/doc/sgf-render/", "644"],
+    ["FONT-LICENSE", "/usr/share/doc/sgf-render/", "644"],
+]

@@ -84,8 +84,7 @@ fn save_png(outfile: &Path, svg: &Element) -> Result<(), Box<dyn Error>> {
     svg.write_to(&mut buffer)?;
     let s = std::str::from_utf8(&buffer)?;
     let mut fontdb = usvg::fontdb::Database::new();
-    let font_data = include_bytes!("../resources/Roboto-Bold.ttf").to_vec();
-    fontdb.load_font_data(font_data);
+    fontdb.load_font_data(include_bytes!("../resources/Inter-Bold.ttf").to_vec());
     let tree = usvg::Tree::from_str(
         s,
         &usvg::Options {
