@@ -44,24 +44,6 @@ jobs:
       env:
         RUST_BACKTRACE: 1
 
-    - name: Build .deb
-      id: build_deb
-      if: matrix.build == 'linux'
-      run: |
-        cargo install cargo-deb
-        file=$(cargo deb)
-        result=$?
-        echo "Outputting debfile=$(basename $file)"
-        echo "debfile=$(basename $file)" >> "$GITHUB_OUTPUT"
-        exit $result
-
-    - name: Upload .deb
-      if: matrix.build == 'linux'
-      uses: actions/upload-artifact@v4
-      with:
-        name: ${{ steps.build_deb.outputs.debfile }}
-        path: target/debian/${{ steps.build_deb.outputs.debfile }}
-
     - name: Strip binary (linux and macos)
       if: matrix.build == 'linux' || matrix.build == 'macos'
       run: strip "target/${{ matrix.target }}/release/sgf-render"
@@ -86,9 +68,37 @@ jobs:
         name: ${{ matrix.archive-name }}
         path: archive/${{ matrix.archive-name }}
 
+  make_deb:
+    name: Make .deb
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Install Rust
+      uses: dtolnay/rust-toolchain@master
+      with:
+        toolchain: nightly
+
+    - name: Build .deb
+      id: deb
+      run: |
+        cargo install cargo-deb
+        debfile=$(cargo deb)
+        result=$?
+        echo "debfile=$(basename $debfile)" >> "$GITHUB_OUTPUT"
+        exit $result
+
+    - name: Upload .deb
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ steps.deb.outputs.debfile }}
+        path: target/debian/${{ steps.deb.outputs.debfile }}
+
   release:
     name: Create release
-    needs: Build
+    needs: [build, make_deb]
     runs-on: ubuntu-latest
     steps:
     - name: Download artifacts
