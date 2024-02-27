@@ -1,1 +1,1 @@
--n 120 --move-numbers --first-move-number 80 --custom-style wacky.toml
+-n 120 --move-numbers=80 --custom-style wacky.toml

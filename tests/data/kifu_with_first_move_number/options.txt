@@ -1,1 +1,1 @@
---kifu --style minimalist --first-move-number 40 --node 80
+--kifu --style minimalist --move-numbers=40 --node 80

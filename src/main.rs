@@ -1,30 +1,20 @@
-use minidom::Element;
 use std::error::Error;
 use std::path::Path;
 
-const VERSION: &str = env!("CARGO_PKG_VERSION");
+use clap::Parser;
+use minidom::Element;
 
-use sgf_render::args;
+use sgf_render::args::SgfRenderArgs;
 
 fn main() {
-    let args: Vec<String> = std::env::args().collect();
-    let opts = args::build_opts();
-    let parsed_args = match args::parse(&opts, &args) {
-        Ok(args) => args,
-        Err(error) => {
-            eprintln!("{}", error);
-            args::print_usage(&args[0], &opts);
+    let parsed_args = SgfRenderArgs::parse();
+    let options = match parsed_args.make_svg_args.options() {
+        Ok(options) => options,
+        Err(e) => {
+            eprintln!("Failed to read input: {}", e);
             std::process::exit(1);
         }
     };
-    if parsed_args.print_help {
-        args::print_usage(&args[0], &opts);
-        return;
-    }
-    if parsed_args.print_version {
-        println!("sgf-render {}", VERSION);
-        return;
-    }
 
     let input = match read_input(parsed_args.infile) {
         Ok(goban) => goban,
@@ -34,7 +24,7 @@ fn main() {
         }
     };
 
-    let svg = match sgf_render::make_svg(&input, &parsed_args.options) {
+    let svg = match sgf_render::make_svg(&input, &options) {
         Ok(svg) => svg,
         Err(e) => {
             eprintln!("Failed to generate SVG: {}", e);

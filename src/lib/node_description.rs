@@ -10,6 +10,19 @@ pub enum NodePathStep {
     Last,
 }
 
+impl NodeDescription {
+    pub fn default(kifu_mode: bool) -> NodeDescription {
+        match kifu_mode {
+            true => NodeDescription {
+                steps: vec![NodePathStep::Last],
+            },
+            false => NodeDescription {
+                steps: vec![NodePathStep::Advance(0)],
+            },
+        }
+    }
+}
+
 impl std::str::FromStr for NodeDescription {
     type Err = NodeDescriptionError;
 

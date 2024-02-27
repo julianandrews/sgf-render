@@ -82,8 +82,10 @@ fn write_tests_header(outfile: &mut fs::File) {
         outfile,
         r#"/// Automatically generated tests.
 
+use clap::Parser;
+
 use sgf_render::make_svg;
-use sgf_render::args;
+use sgf_render::args::MakeSvgArgs;
 "#,
     )
     .unwrap();
@@ -104,8 +106,9 @@ fn {test_name}() {{
     if let Some(i) = arguments.iter().position(|s| s == "--custom-style") {{
         arguments[i + 1] = format!(r"{path}{separator}{{}}", arguments[i + 1]);
     }}
-    let matches = args::build_opts().parse(&arguments).unwrap();
-    let options = args::extract_make_svg_options(&matches).unwrap();
+    arguments.insert(0, "sgf-render".to_string());
+    let make_svg_args = MakeSvgArgs::parse_from(&arguments);
+    let options = make_svg_args.options().unwrap();
     let input = include_str!(r"{path}{separator}input.sgf");
     let expected = include_str!(r"{path}{separator}output.svg");
 

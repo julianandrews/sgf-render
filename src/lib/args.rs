@@ -1,286 +1,297 @@
-use super::{
-    BoardSide, GobanRange, MakeSvgOptions, NodeDescription, NodeDescriptionError, NodePathStep,
-    GENERATED_STYLES,
-};
 use std::path::PathBuf;
 
-const DEFAULT_NODE_NUM: usize = 0;
-const DEFAULT_FIRST_MOVE_NUM: u64 = 1;
-const DEFAULT_WIDTH: u32 = 800;
+use clap::builder::styling::{AnsiColor, Styles};
+use clap::Parser;
 
-pub fn parse(opts: &getopts::Options, args: &[String]) -> Result<SgfRenderArgs, UsageError> {
-    let matches = opts
-        .parse(&args[1..])
-        .map_err(|_| UsageError::FailedToParse)?;
-    if matches.free.len() > 1 {
-        return Err(UsageError::TooManyArguments);
-    }
-    let infile = matches.free.first().map(PathBuf::from);
-    let outfile = matches.opt_str("o").map(PathBuf::from);
-    let print_help = matches.opt_present("h");
-    let print_version = matches.opt_present("version");
-    let options = extract_make_svg_options(&matches)?;
+use super::{
+    BoardSide, BoardSideSet, GobanRange, MakeSvgOptions, MoveNumberOptions, NodeDescription,
+    GENERATED_STYLES,
+};
 
-    Ok(SgfRenderArgs {
-        infile,
-        outfile,
-        options,
-        print_version,
-        print_help,
-    })
-}
+// clap v3 styling
+const CLAP_STYLES: Styles = Styles::styled()
+    .header(AnsiColor::Yellow.on_default())
+    .usage(AnsiColor::Green.on_default())
+    .literal(AnsiColor::Green.on_default())
+    .placeholder(AnsiColor::Green.on_default());
 
-pub fn extract_make_svg_options(matches: &getopts::Matches) -> Result<MakeSvgOptions, UsageError> {
-    let kifu_mode = matches.opt_present("kifu");
-    let node_description = match matches.opt_str("n").as_deref() {
-        Some(s) => s.parse().map_err(UsageError::InvalidNodeDescription)?,
-        None => {
-            if kifu_mode {
-                NodeDescription {
-                    steps: vec![NodePathStep::Last],
-                }
-            } else {
-                NodeDescription {
-                    steps: vec![NodePathStep::Advance(DEFAULT_NODE_NUM)],
-                }
-            }
-        }
-    };
-    let label_sides = if matches.opt_present("no-board-labels") {
-        std::collections::HashSet::new()
-    } else {
-        let s = matches
-            .opt_str("label-sides")
-            .unwrap_or_else(|| "nw".to_owned())
-            .to_lowercase();
-        s.chars()
-            .map(|c| match c {
-                'n' => Ok(BoardSide::North),
-                'e' => Ok(BoardSide::East),
-                's' => Ok(BoardSide::South),
-                'w' => Ok(BoardSide::West),
-                _ => Err(UsageError::InvalidBoardSides),
-            })
-            .collect::<Result<_, _>>()?
-    };
-    let viewbox_width = f64::from(
-        matches
-            .opt_str("w")
-            .map_or(Ok(DEFAULT_WIDTH), |c| c.parse::<u32>())
-            .map_err(|_| UsageError::InvalidWidth)?,
-    );
-    let goban_range = {
-        if matches.opt_present("shrink-wrap") && matches.opt_present("r") {
-            return Err(UsageError::OverspecifiedRange);
-        }
-
-        if matches.opt_present("shrink-wrap") {
-            GobanRange::ShrinkWrap
-        } else {
-            match matches.opt_str("r") {
-                Some(s) => parse_point_pair(&s)?,
-                None => GobanRange::FullBoard,
-            }
-        }
-    };
-    let style = match matches.opt_str("custom-style") {
-        Some(filename) => {
-            let data = std::fs::read_to_string(filename)
-                .map_err(|e| UsageError::InvalidStyleFile(e.into()))?;
-            toml::from_str(&data).map_err(|e| UsageError::InvalidStyleFile(e.into()))?
-        }
-        None => {
-            let name = matches
-                .opt_str("style")
-                .unwrap_or_else(|| "simple".to_string());
-            GENERATED_STYLES
-                .get(name.as_str())
-                .ok_or(UsageError::InvalidStyle)?
-                .clone()
-        }
-    };
-    let draw_move_numbers = matches.opt_present("move-numbers") || kifu_mode;
-    let first_move_number = matches
-        .opt_str("first-move-number")
-        .map_or(Ok(DEFAULT_FIRST_MOVE_NUM), |c| c.parse())
-        .map_err(|_| UsageError::InvalidFirstMoveNumber)?;
-
-    let no_point_markup = matches.opt_present("no-point-markup");
-    let draw_marks = !no_point_markup && !matches.opt_present("no-marks");
-    let draw_triangles = !no_point_markup && !matches.opt_present("no-triangles");
-    let draw_circles = !no_point_markup && !matches.opt_present("no-circles");
-    let draw_squares = !no_point_markup && !matches.opt_present("no-squares");
-    let draw_selected = !no_point_markup && !matches.opt_present("no-selected");
-    let draw_dimmed = !matches.opt_present("no-dimmed");
-    let draw_labels = !no_point_markup && !matches.opt_present("no-labels");
-    let draw_lines = !matches.opt_present("no-lines");
-    let draw_arrows = !matches.opt_present("no-arrows");
-
-    Ok(MakeSvgOptions {
-        node_description,
-        goban_range,
-        style,
-        viewbox_width,
-        label_sides,
-        draw_move_numbers,
-        first_move_number,
-        draw_marks,
-        draw_triangles,
-        draw_circles,
-        draw_squares,
-        draw_selected,
-        draw_dimmed,
-        draw_labels,
-        draw_lines,
-        draw_arrows,
-        kifu_mode,
-    })
-}
-
-pub fn print_usage(program: &str, opts: &getopts::Options) {
-    let brief = format!("Usage: {} [FILE] [options]", program);
-    print!("{}", opts.usage(&brief));
-}
-
-pub fn build_opts() -> getopts::Options {
-    let mut opts = getopts::Options::new();
-    opts.optopt(
-        "o",
-        "outfile",
-        "Output file. SVG and PNG formats supported.",
-        "FILE",
-    );
-    opts.optopt(
-        "n",
-        "node",
-        &format!(
-            "Node to render. For simple use provide a number or `last` to render the last \
-            node. See the README for more detail (default {}).",
-            DEFAULT_NODE_NUM,
-        ),
-        "PATH_SPEC",
-    );
-    opts.optopt(
-        "w",
-        "width",
-        &format!(
-            "Width of the output image in pixels (default {}).",
-            DEFAULT_WIDTH,
-        ),
-        "WIDTH",
-    );
-    opts.optflag(
-        "s",
-        "shrink-wrap",
-        "Draw only enough of the board to hold all the stones (with 1 space padding).",
-    );
-    opts.optopt(
-        "r",
-        "range",
-        "Range to draw as a pair of corners (e.g. 'cc-ff').",
-        "RANGE",
-    );
-    opts.optopt(
-        "",
-        "style",
-        "Style to use. One of 'simple', 'fancy' or 'minimalist'.",
-        "STYLE",
-    );
-    opts.optopt(
-        "",
-        "custom-style",
-        "Custom style to use. Overrides '--style'. See the README for details.",
-        "FILE",
-    );
-    opts.optflag(
-        "",
-        "move-numbers",
-        "Draw move numbers (may replace other markup).",
-    );
-    opts.optopt(
-        "",
-        "first-move-number",
-        "First move number to draw if using --move-numbers",
-        "NUM",
-    );
-    opts.optopt(
-        "",
-        "label-sides",
-        "Sides to draw position labels on (any of nesw).",
-        "SIDES",
-    );
-    opts.optflag("", "no-board-labels", "Don't draw position labels.");
-    opts.optflag("", "no-marks", "Don't draw SGF marks.");
-    opts.optflag("", "no-triangles", "Don't draw SGF triangles.");
-    opts.optflag("", "no-circles", "Don't draw SGF circles.");
-    opts.optflag("", "no-squares", "Don't draw SGF squares.");
-    opts.optflag("", "no-selected", "Don't draw SGF selected.");
-    opts.optflag("", "no-dimmed", "Don't draw SGF dimmmed.");
-    opts.optflag("", "no-labels", "Don't draw SGF labels.");
-    opts.optflag("", "no-lines", "Don't draw SGF lines.");
-    opts.optflag("", "no-arrows", "Don't draw SGF arrows.");
-    opts.optflag("", "no-point-markup", "Don't draw any markup on points.");
-    opts.optflag("", "kifu", "Generate a kifu.");
-    opts.optflag("", "version", "Display the version and exit.");
-    opts.optflag("h", "help", "Display this help and exit.");
-
-    opts
-}
-
-#[derive(Debug)]
+#[derive(Debug, Parser)]
+#[clap(version, about, styles=CLAP_STYLES)]
 pub struct SgfRenderArgs {
+    /// SGF file to render (defaults to stdin).
+    #[arg(value_name = "FILE")]
     pub infile: Option<PathBuf>,
+    /// Output file. SVG and PNG formats supported.
+    #[arg(short, long, value_name = "FILE")]
     pub outfile: Option<PathBuf>,
-    pub options: MakeSvgOptions,
-    pub print_version: bool,
-    pub print_help: bool,
+    #[clap(flatten)]
+    pub make_svg_args: MakeSvgArgs,
+}
+
+impl MakeSvgArgs {
+    pub fn options(&self) -> Result<MakeSvgOptions, UsageError> {
+        let node_description = match &self.node_description {
+            Some(node_description) => node_description.clone(),
+            None => NodeDescription::default(self.kifu),
+        };
+
+        let goban_range = if self.shrink_wrap {
+            GobanRange::ShrinkWrap
+        } else if let Some(range) = &self.range {
+            range.clone()
+        } else {
+            GobanRange::FullBoard
+        };
+
+        let style = match &self.custom_style {
+            Some(filename) => {
+                let data = std::fs::read_to_string(filename)
+                    .map_err(|e| UsageError::InvalidStyleFile(e.into()))?;
+                toml::from_str(&data).map_err(|e| UsageError::InvalidStyleFile(e.into()))?
+            }
+            None => GENERATED_STYLES
+                .get(self.style.to_string().as_str())
+                .ok_or(UsageError::InvalidStyle)?
+                .clone(),
+        };
+
+        let count_from = self.move_numbers_from;
+        let move_number_options = if let Some(range) = self.move_numbers {
+            Some(MoveNumberOptions {
+                start: range.start,
+                end: range.end,
+                count_from,
+            })
+        } else if self.kifu {
+            Some(MoveNumberOptions {
+                start: 1,
+                end: None,
+                count_from,
+            })
+        } else {
+            None
+        };
+
+        let no_point_markup = self.no_point_markup;
+        let label_sides = if self.no_board_labels {
+            BoardSideSet::default()
+        } else {
+            self.label_sides
+        };
+
+        Ok(MakeSvgOptions {
+            node_description,
+            goban_range,
+            style,
+            viewbox_width: self.viewbox_width,
+            label_sides,
+            move_number_options,
+            draw_marks: self.draw_marks && !no_point_markup,
+            draw_triangles: self.draw_triangles && !no_point_markup,
+            draw_circles: self.draw_circles && !no_point_markup,
+            draw_squares: self.draw_squares && !no_point_markup,
+            draw_selected: self.draw_selected && !no_point_markup,
+            draw_dimmed: self.draw_dimmed && !no_point_markup,
+            draw_labels: self.draw_labels && !no_point_markup,
+            draw_lines: self.draw_lines && !no_point_markup,
+            draw_arrows: self.draw_arrows && !no_point_markup,
+            kifu_mode: self.kifu,
+        })
+    }
+}
+
+#[derive(Debug, Parser)]
+pub struct MakeSvgArgs {
+    /// Node to render. For simple use provide a number or `last` to render
+    /// the last node. See the README for more detail.
+    #[arg(short, long = "node", value_name = "PATH_SPEC")]
+    pub node_description: Option<NodeDescription>,
+    /// Width of the output image in pixels.
+    #[arg(
+        short = 'w',
+        long = "width",
+        value_name = "WIDTH",
+        default_value_t = 800.0
+    )]
+    pub viewbox_width: f64,
+    /// Draw only enough of the board to hold all the stones (with 1 space padding).
+    #[arg(short, long, conflicts_with = "range")]
+    pub shrink_wrap: bool,
+    /// Range to draw as a pair of corners (e.g. 'cc-ff').
+    #[arg(short, long)]
+    pub range: Option<GobanRange>,
+    /// Style to use. One of 'simple', 'fancy' or 'minimalist'.
+    #[arg(long, value_name = "STYLE", default_value = "simple")]
+    pub style: Style,
+    /// Custom style to use. Overrides '--style'. See the README for details.
+    #[arg(long, value_name = "FILE", conflicts_with = "style")]
+    pub custom_style: Option<PathBuf>,
+    /// Draw move numbers (may replace other markup).
+    #[arg(long, require_equals=true, num_args = 0..=1, value_name = "RANGE", default_missing_value = "1")]
+    pub move_numbers: Option<MoveNumberRange>,
+    /// Number to start counting move numbers from (requires --move-numbers).
+    #[arg(
+        long,
+        value_name = "NUM",
+        default_value_t = 1,
+        requires = "move_numbers"
+    )]
+    pub move_numbers_from: u64,
+    /// Sides to draw position labels on.
+    #[arg(long, value_name = "SIDES", default_value = "nw")]
+    pub label_sides: BoardSideSet,
+    /// Don't draw position labels.
+    #[arg(long, conflicts_with = "label_sides")]
+    pub no_board_labels: bool,
+    /// Don't draw SGF marks.
+    #[clap(long = "no-marks", action = clap::ArgAction::SetFalse)]
+    pub draw_marks: bool,
+    /// Don't draw SGF triangles.
+    #[clap(long = "no-triangles", action = clap::ArgAction::SetFalse)]
+    pub draw_triangles: bool,
+    /// Don't draw SGF circles.
+    #[clap(long = "no-circles", action = clap::ArgAction::SetFalse)]
+    pub draw_circles: bool,
+    /// Don't draw SGF squares.
+    #[clap(long = "no-squares", action = clap::ArgAction::SetFalse)]
+    pub draw_squares: bool,
+    /// Don't draw SGF selected.
+    #[clap(long = "no-selected", action = clap::ArgAction::SetFalse)]
+    pub draw_selected: bool,
+    /// Don't draw SGF dimmed.
+    #[clap(long = "no-dimmed", action = clap::ArgAction::SetFalse)]
+    pub draw_dimmed: bool,
+    /// Don't draw SGF labels.
+    #[clap(long = "no-labels", action = clap::ArgAction::SetFalse)]
+    pub draw_labels: bool,
+    /// Don't draw SGF lines.
+    #[clap(long = "no-lines", action = clap::ArgAction::SetFalse)]
+    pub draw_lines: bool,
+    /// Don't draw SGF arrows.
+    #[clap(long = "no-arrows", action = clap::ArgAction::SetFalse)]
+    pub draw_arrows: bool,
+    /// Don't draw any markup on points.
+    #[clap(long)]
+    pub no_point_markup: bool,
+    /// Generate a kifu.
+    #[clap(long)]
+    pub kifu: bool,
+}
+
+#[derive(Debug, Clone)]
+pub enum Style {
+    Simple,
+    Minimalist,
+    Fancy,
+}
+
+impl std::str::FromStr for Style {
+    type Err = UsageError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "simple" => Ok(Style::Simple),
+            "minimalist" => Ok(Style::Minimalist),
+            "fancy" => Ok(Style::Fancy),
+            _ => Err(UsageError::InvalidStyle),
+        }
+    }
+}
+
+impl std::fmt::Display for Style {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Style::Simple => write!(f, "simple"),
+            Style::Minimalist => write!(f, "minimalist"),
+            Style::Fancy => write!(f, "fancy"),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct MoveNumberRange {
+    start: u64,
+    end: Option<u64>,
+}
+
+impl std::str::FromStr for MoveNumberRange {
+    type Err = UsageError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let parts: Vec<_> = s.splitn(2, '-').collect();
+        let start = parts[0]
+            .parse()
+            .map_err(|_| UsageError::InvalidFirstMoveNumber)?;
+        let end = parts
+            .get(1)
+            .map(|end| end.parse())
+            .transpose()
+            .map_err(|_| UsageError::InvalidLastMoveNumber)?;
+        Ok(MoveNumberRange { start, end })
+    }
 }
 
 #[derive(Debug)]
 pub enum UsageError {
-    FailedToParse,
-    TooManyArguments,
-    InvalidNodeDescription(NodeDescriptionError),
-    InvalidWidth,
-    OverspecifiedRange,
     InvalidRange,
     InvalidStyle,
     InvalidStyleFile(Box<dyn std::error::Error>),
     InvalidFirstMoveNumber,
+    InvalidLastMoveNumber,
     InvalidBoardSides,
 }
 
 impl std::fmt::Display for UsageError {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         match self {
-            UsageError::FailedToParse => write!(f, "Failed to parse arguments."),
-            UsageError::TooManyArguments => write!(f, "Too many arguments."),
-            UsageError::InvalidNodeDescription(e) => write!(f, "Invalid node description: {}", e),
-            UsageError::InvalidWidth => write!(f, "Invalid width."),
-            UsageError::OverspecifiedRange => write!(f, "Specify only '-r' or '-s'"),
             UsageError::InvalidRange => write!(f, "Invalid range."),
             UsageError::InvalidStyle => write!(f, "Invalid style."),
             UsageError::InvalidStyleFile(e) => write!(f, "Failed to read style file: {}", e),
             UsageError::InvalidFirstMoveNumber => write!(f, "Invalid first move number."),
+            UsageError::InvalidLastMoveNumber => write!(f, "Invalid last move number."),
             UsageError::InvalidBoardSides => write!(f, "Invalid board sides."),
         }
     }
 }
 
-impl ::std::error::Error for UsageError {}
+impl std::error::Error for UsageError {}
+unsafe impl Send for UsageError {}
+unsafe impl Sync for UsageError {}
 
-fn parse_point_pair(s: &str) -> Result<GobanRange, UsageError> {
-    let parse_byte = |b: u8| match b {
-        b'a'..=b'z' => Ok(b - b'a'),
-        _ => Err(UsageError::InvalidRange),
-    };
+impl std::str::FromStr for BoardSideSet {
+    type Err = UsageError;
 
-    let s = s.as_bytes();
-    if s.len() != 5 || s[2] != b'-' {
-        return Err(UsageError::InvalidRange);
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let mut value = BoardSideSet::default();
+        for c in s.chars() {
+            match c {
+                'n' => value.insert(BoardSide::North),
+                'e' => value.insert(BoardSide::East),
+                's' => value.insert(BoardSide::South),
+                'w' => value.insert(BoardSide::West),
+                _ => return Err(UsageError::InvalidBoardSides),
+            }
+        }
+        Ok(value)
     }
-    Ok(GobanRange::Ranged(
-        parse_byte(s[0])?..parse_byte(s[3])? + 1,
-        parse_byte(s[1])?..parse_byte(s[4])? + 1,
-    ))
+}
+
+impl std::str::FromStr for GobanRange {
+    type Err = UsageError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let parse_byte = |b: u8| match b {
+            b'a'..=b'z' => Ok(b - b'a'),
+            _ => Err(UsageError::InvalidRange),
+        };
+
+        let s = s.as_bytes();
+        if s.len() != 5 || s[2] != b'-' {
+            return Err(UsageError::InvalidRange);
+        }
+        Ok(GobanRange::Ranged(
+            parse_byte(s[0])?..parse_byte(s[3])? + 1,
+            parse_byte(s[1])?..parse_byte(s[4])? + 1,
+        ))
+    }
 }

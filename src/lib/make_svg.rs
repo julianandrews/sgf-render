@@ -21,9 +21,8 @@ pub struct MakeSvgOptions {
     pub goban_range: GobanRange,
     pub style: GobanStyle,
     pub viewbox_width: f64,
-    pub label_sides: HashSet<BoardSide>,
-    pub draw_move_numbers: bool,
-    pub first_move_number: u64,
+    pub label_sides: BoardSideSet,
+    pub move_number_options: Option<MoveNumberOptions>,
     pub draw_marks: bool,
     pub draw_triangles: bool,
     pub draw_circles: bool,
@@ -42,6 +41,30 @@ pub enum BoardSide {
     East,
     South,
     West,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
+pub struct BoardSideSet(u8);
+
+impl BoardSideSet {
+    pub fn is_empty(&self) -> bool {
+        self.0 == 0
+    }
+
+    pub fn contains(&self, side: BoardSide) -> bool {
+        self.0 & (1 << side as u8) != 0
+    }
+
+    pub fn insert(&mut self, side: BoardSide) {
+        self.0 |= 1 << side as u8
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct MoveNumberOptions {
+    pub start: u64,
+    pub end: Option<u64>,
+    pub count_from: u64,
 }
 
 pub fn make_svg(sgf: &str, options: &MakeSvgOptions) -> Result<Element, MakeSvgError> {
@@ -157,14 +180,18 @@ fn build_board(goban: &Goban, options: &MakeSvgOptions) -> Element {
         .append(build_board_lines_group(goban, options))
         .append(build_stones_group(goban, options));
 
-    let move_numbers = get_move_numbers_to_draw(goban, options);
+    let move_numbers = get_move_numbers(goban, options);
     let no_markup_points: HashSet<(u8, u8)> = move_numbers
         .iter()
         .map(|(_, stone)| (stone.x, stone.y))
         .collect();
-    if options.draw_move_numbers {
-        group_builder =
-            group_builder.append(build_move_numbers_group(goban, options, &move_numbers));
+    if let Some(move_number_options) = &options.move_number_options {
+        group_builder = group_builder.append(build_move_numbers_group(
+            goban,
+            options,
+            move_number_options,
+            &move_numbers,
+        ));
     }
     if options.draw_marks {
         group_builder = group_builder.append(build_marks_group(goban, options, &no_markup_points));
@@ -251,15 +278,17 @@ fn build_stones_group(goban: &Goban, options: &MakeSvgOptions) -> Element {
         .attr("id", "stones")
         .attr("stroke", "none");
     let mut stones: Vec<Stone> = if options.kifu_mode {
-        let mut stones: HashMap<(u8, u8), Stone> = goban
-            .stones_before_move(options.first_move_number)
-            .map(|stone| ((stone.x, stone.y), stone))
-            .collect();
-        let new_stones = get_move_numbers(goban, options)
-            .into_iter()
-            .map(|(_, stone)| stone);
-        for stone in new_stones {
-            stones.entry((stone.x, stone.y)).or_insert(stone);
+        // For each intersection draw the first numbered stone, or the last non-numbered stone.
+        let mut stones: HashMap<(u8, u8), Stone> = HashMap::new();
+        let mut numbered_stones: HashMap<(u8, u8), Stone> = HashMap::new();
+        for (n, stone) in goban.moves() {
+            if n >= options.move_number_options.unwrap().start {
+                numbered_stones.entry((stone.x, stone.y)).or_insert(stone);
+            }
+            stones.insert((stone.x, stone.y), stone);
+        }
+        for (key, stone) in numbered_stones {
+            stones.insert(key, stone);
         }
         stones.into_values().collect()
     } else {
@@ -275,6 +304,7 @@ fn build_stones_group(goban: &Goban, options: &MakeSvgOptions) -> Element {
 fn build_move_numbers_group(
     goban: &Goban,
     options: &MakeSvgOptions,
+    move_number_options: &MoveNumberOptions,
     move_numbers: &[(u64, Stone)],
 ) -> Element {
     let mut group_builder = Element::builder("g", NAMESPACE)
@@ -288,11 +318,11 @@ fn build_move_numbers_group(
             // Otherwise, we can look at the board.
             goban.stone_color(stone.x, stone.y)
         };
-        let starting_num = (n - options.first_move_number) + 1;
+        let move_number = n + move_number_options.count_from - move_number_options.start;
         group_builder = group_builder.append(draw_move_number(
             stone.x,
             stone.y,
-            starting_num,
+            move_number,
             stone_color,
             &options.style,
         ));
@@ -300,20 +330,15 @@ fn build_move_numbers_group(
     group_builder.build()
 }
 
-fn get_move_numbers_to_draw(goban: &Goban, options: &MakeSvgOptions) -> Vec<(u64, Stone)> {
-    get_move_numbers(goban, options)
-        .into_iter()
-        .filter(|(n, _)| n >= &options.first_move_number)
-        .collect()
-}
-
 fn get_move_numbers(goban: &Goban, options: &MakeSvgOptions) -> Vec<(u64, Stone)> {
-    if !options.draw_move_numbers {
-        return Vec::new();
-    }
+    let move_number_options = match options.move_number_options {
+        Some(move_number_options) => move_number_options,
+        None => return Vec::new(),
+    };
     let numbered_moves = goban
         .moves()
-        .skip_while(|(n, _)| n < &options.first_move_number);
+        .skip_while(|&(n, _)| n < move_number_options.start)
+        .take_while(|&(n, _)| move_number_options.end.map(|end| n <= end).unwrap_or(true));
     let mut move_numbers: HashMap<(u8, u8), (u64, Stone)> = HashMap::new();
     for (n, stone) in numbered_moves {
         if options.kifu_mode {
@@ -498,7 +523,7 @@ fn draw_board_labels(x_range: Range<u8>, y_range: Range<u8>, options: &MakeSvgOp
         .attr("fill", options.style.label_color())
         .attr("transform", transform);
 
-    if options.label_sides.contains(&BoardSide::North) {
+    if options.label_sides.contains(BoardSide::North) {
         let mut builder = Element::builder("g", NAMESPACE).attr("text-anchor", "middle");
         let start = x_range.start;
         for x in x_range.clone() {
@@ -512,7 +537,7 @@ fn draw_board_labels(x_range: Range<u8>, y_range: Range<u8>, options: &MakeSvgOp
         }
         group_builder = group_builder.append(builder);
     };
-    if options.label_sides.contains(&BoardSide::West) {
+    if options.label_sides.contains(BoardSide::West) {
         let mut builder = Element::builder("g", NAMESPACE).attr("text-anchor", "end");
         let end = y_range.end;
         for y in y_range.clone() {
@@ -527,7 +552,7 @@ fn draw_board_labels(x_range: Range<u8>, y_range: Range<u8>, options: &MakeSvgOp
         }
         group_builder = group_builder.append(builder);
     };
-    if options.label_sides.contains(&BoardSide::South) {
+    if options.label_sides.contains(BoardSide::South) {
         let mut builder = Element::builder("g", NAMESPACE).attr("text-anchor", "middle");
         let start = x_range.start;
         let y = f64::from(y_range.end - y_range.start + 1) - BOARD_MARGIN;
@@ -543,7 +568,7 @@ fn draw_board_labels(x_range: Range<u8>, y_range: Range<u8>, options: &MakeSvgOp
         }
         group_builder = group_builder.append(builder);
     };
-    if options.label_sides.contains(&BoardSide::East) {
+    if options.label_sides.contains(BoardSide::East) {
         let mut builder = Element::builder("g", NAMESPACE).attr("text-anchor", "start");
         let end = y_range.end;
         let x = f64::from(x_range.end - x_range.start + 1) - BOARD_MARGIN;
@@ -584,17 +609,28 @@ fn draw_repeated_stones(
         .attr("y", format_float(y))
         .attr("font-size", format_float(entry_height))
         .attr("fill", options.style.line_color()); // TODO: Evaluate this choice
+    let move_number_options = options.move_number_options.unwrap();
     let repeated_moves: Vec<(u64, u64)> = {
         let mut repeated_moves = Vec::new();
         let mut seen_moves: HashMap<(u8, u8), u64> = HashMap::new();
-        let numbered_moves = goban
-            .moves()
-            .skip_while(|(n, _)| n < &options.first_move_number)
-            .map(|(n, stone)| (n + 1 - options.first_move_number, stone));
-        for (n, stone) in numbered_moves {
+        for (n, stone) in goban.moves() {
             match seen_moves.entry((stone.x, stone.y)) {
-                std::collections::hash_map::Entry::Occupied(entry) => {
-                    repeated_moves.push((n, *entry.get()))
+                std::collections::hash_map::Entry::Occupied(mut entry) => {
+                    if *entry.get() < move_number_options.start {
+                        entry.insert(n);
+                    }
+                    let value = *entry.get();
+                    let in_range = value >= move_number_options.start
+                        && move_number_options
+                            .end
+                            .map(|end| value <= end)
+                            .unwrap_or(true);
+                    if n > value && in_range {
+                        repeated_moves.push((
+                            n + move_number_options.count_from - move_number_options.start,
+                            value + move_number_options.count_from - move_number_options.start,
+                        ));
+                    }
                 }
                 std::collections::hash_map::Entry::Vacant(entry) => {
                     entry.insert(n);
@@ -817,23 +853,23 @@ fn draw_label(x: u8, y: u8, text: &str, color: Option<StoneColor>, style: &Goban
     group_builder.append(text_element).build()
 }
 
-fn get_margins(label_sides: &HashSet<BoardSide>) -> (f64, f64, f64, f64) {
-    let top = if label_sides.contains(&BoardSide::North) {
+fn get_margins(label_sides: &BoardSideSet) -> (f64, f64, f64, f64) {
+    let top = if label_sides.contains(BoardSide::North) {
         LABEL_MARGIN
     } else {
         0.0
     };
-    let right = if label_sides.contains(&BoardSide::East) {
+    let right = if label_sides.contains(BoardSide::East) {
         LABEL_MARGIN
     } else {
         0.0
     };
-    let bottom = if label_sides.contains(&BoardSide::South) {
+    let bottom = if label_sides.contains(BoardSide::South) {
         LABEL_MARGIN
     } else {
         0.0
     };
-    let left = if label_sides.contains(&BoardSide::West) {
+    let left = if label_sides.contains(BoardSide::West) {
         LABEL_MARGIN
     } else {
         0.0

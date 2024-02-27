@@ -1,0 +1,1 @@
+--kifu --style minimalist --move-numbers=250-280 --node 300

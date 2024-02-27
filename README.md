@@ -43,42 +43,36 @@ $ ./target/release/sgf-render -h
 ## Usage
 
 ```
-Usage: sgf-render [FILE] [options]
+Usage: sgf-render [OPTIONS] [FILE]
+
+Arguments:
+  [FILE]  SGF file to render (defaults to stdin)
 
 Options:
-    -o, --outfile FILE  Output file. SVG and PNG formats supported.
-    -n, --node PATH_SPEC
-                        Node to render. For simple use provide a number or
-                        `last` to render the last node. See the README for
-                        more detail (default 0).
-    -w, --width WIDTH   Width of the output image in pixels (default 800).
-    -s, --shrink-wrap   Draw only enough of the board to hold all the stones
-                        (with 1 space padding).
-    -r, --range RANGE   Range to draw as a pair of corners (e.g. 'cc-ff').
-        --style STYLE   Style to use. One of 'simple', 'fancy' or
-                        'minimalist'.
-        --custom-style FILE
-                        Custom style to use. Overrides '--style'. See the
-                        README for details.
-        --move-numbers  Draw move numbers (disables other markup).
-        --first-move-number NUM
-                        First move number to draw if using --move-numbers
-        --label-sides SIDES
-                        Sides to draw board labels on (any of nesw).
-        --no-board-labels
-                        Don't draw position labels.
-        --no-marks      Don't draw SGF marks.
-        --no-triangles  Don't draw SGF triangles.
-        --no-circles    Don't draw SGF circles.
-        --no-squares    Don't draw SGF squares.
-        --no-selected   Don't draw SGF selected.
-        --no-dimmed     Don't draw SGF dimmmed.
-        --no-labels     Don't draw SGF labels.
-        --no-lines      Don't draw SGF lines.
-        --no-arrows     Don't draw SGF arrows.
-        --kifu          Generate a kifu.
-        --version       Display the version and exit.
-    -h, --help          Display this help and exit.
+  -o, --outfile <FILE>           Output file. SVG and PNG formats supported
+  -n, --node <PATH_SPEC>         Node to render. For simple use provide a number or `last` to render the last node.
+                                 See the README for more detail
+  -w, --width <WIDTH>            Width of the output image in pixels [default: 800]
+  -s, --shrink-wrap              Draw only enough of the board to hold all the stones (with 1 space padding)
+  -r, --range <RANGE>            Range to draw as a pair of corners (e.g. 'cc-ff')
+      --style <STYLE>            Style to use. One of 'simple', 'fancy' or 'minimalist' [default: simple]
+      --custom-style <FILE>      Custom style to use. Overrides '--style'. See the README for details
+      --move-numbers[=<RANGE>]   Draw move numbers (may replace other markup)
+      --move-numbers-from <NUM>  Number to start counting move numbers from (requires --move-numbers) [default: 1]
+      --label-sides <SIDES>      Sides to draw position labels on [default: nw]
+      --no-marks                 Don't draw SGF marks
+      --no-triangles             Don't draw SGF triangles
+      --no-circles               Don't draw SGF circles
+      --no-squares               Don't draw SGF squares
+      --no-selected              Don't draw SGF selected
+      --no-dimmed                Don't draw SGF dimmed
+      --no-labels                Don't draw SGF labels
+      --no-lines                 Don't draw SGF lines
+      --no-arrows                Don't draw SGF arrows
+      --no-point-markup          Don't draw any markup on points
+      --kifu                     Generate a kifu
+  -h, --help                     Print help
+  -V, --version                  Print version
 ```
 
 If `FILE` isn't provided, `sgf-render` will read from stdin. If `--outfile`
