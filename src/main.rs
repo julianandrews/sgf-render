@@ -11,7 +11,7 @@ fn main() {
     let options = match parsed_args.make_svg_args.options() {
         Ok(options) => options,
         Err(e) => {
-            eprintln!("Failed to read input: {}", e);
+            eprintln!("Failed to parse arguments: {}", e);
             std::process::exit(1);
         }
     };
@@ -53,50 +53,34 @@ fn write_output<P: AsRef<Path>>(
     outfile: Option<P>,
     format: OutputFormat,
 ) -> Result<(), Box<dyn Error>> {
-    let mut out: Box<dyn std::io::Write> = match outfile {
+    let mut writer: Box<dyn std::io::Write> = match outfile {
         Some(path) => Box::new(std::fs::File::create(path)?),
         None => Box::new(std::io::stdout()),
     };
     match format {
-        OutputFormat::Svg => svg.write_to(&mut out)?,
+        OutputFormat::Svg => svg.write_to(&mut writer)?,
         #[cfg(feature = "png")]
-        OutputFormat::Png => save_png(out, svg)?,
+        OutputFormat::Png => save_png(writer, svg)?,
     }
     Ok(())
 }
 
 #[cfg(feature = "png")]
-fn save_png(mut out: Box<dyn std::io::Write>, svg: &Element) -> Result<(), Box<dyn Error>> {
-    let mut buffer: Vec<u8> = vec![];
-    svg.write_to(&mut buffer)?;
-    let s = std::str::from_utf8(&buffer)?;
-    let mut fontdb = usvg::fontdb::Database::new();
-    fontdb.load_font_data(include_bytes!("../resources/Inter-Bold.ttf").to_vec());
-    let tree = usvg::Tree::from_str(
-        s,
-        &usvg::Options {
-            fontdb,
-            ..usvg::Options::default()
-        },
-    )?;
-    let pixmap_size = tree.svg_node().size.to_screen_size();
-    let mut pixmap = tiny_skia::Pixmap::new(pixmap_size.width(), pixmap_size.height()).unwrap();
-    resvg::render(&tree, usvg::FitTo::Original, pixmap.as_mut()).ok_or(PngRenderFailure {})?;
-    let data = pixmap.encode_png()?;
-    out.write_all(&data)?;
+fn save_png(mut writer: Box<dyn std::io::Write>, svg: &Element) -> Result<(), Box<dyn Error>> {
+    let tree = {
+        let mut buffer: Vec<u8> = vec![];
+        svg.write_to(&mut buffer)?;
+        let mut fontdb = usvg::fontdb::Database::new();
+        fontdb.load_font_data(include_bytes!("../resources/Inter-Bold.ttf").to_vec());
+        usvg::Tree::from_data(&buffer, &usvg::Options::default(), &fontdb)?
+    };
+    let data = {
+        let pixmap_size = tree.size().to_int_size();
+        let mut pixmap = tiny_skia::Pixmap::new(pixmap_size.width(), pixmap_size.height()).unwrap();
+        resvg::render(&tree, tiny_skia::Transform::default(), &mut pixmap.as_mut());
+        pixmap.encode_png()?
+    };
+
+    writer.write_all(&data)?;
     Ok(())
 }
-
-#[cfg(feature = "png")]
-#[derive(Debug, Clone, Copy)]
-struct PngRenderFailure {}
-
-#[cfg(feature = "png")]
-impl std::fmt::Display for PngRenderFailure {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "Rendering png failed.")
-    }
-}
-
-#[cfg(feature = "png")]
-impl std::error::Error for PngRenderFailure {}
