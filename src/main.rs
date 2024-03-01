@@ -4,8 +4,10 @@ use std::path::Path;
 use clap::Parser;
 use minidom::Element;
 
+use sgf_render::{OutputFormat, SgfRenderArgs};
+
 fn main() {
-    let parsed_args = sgf_render::SgfRenderArgs::parse();
+    let parsed_args = SgfRenderArgs::parse();
     let options = match parsed_args.make_svg_args.options() {
         Ok(options) => options,
         Err(e) => {
@@ -30,7 +32,7 @@ fn main() {
         }
     };
 
-    if let Err(e) = write_output(&svg, parsed_args.outfile) {
+    if let Err(e) = write_output(&svg, parsed_args.outfile, parsed_args.output_format) {
         eprintln!("Failed to write output: {}", e);
         std::process::exit(1);
     }
@@ -46,28 +48,25 @@ fn read_input<P: AsRef<Path>>(infile: Option<P>) -> Result<String, Box<dyn Error
     Ok(input)
 }
 
-fn write_output<P: AsRef<Path>>(svg: &Element, outfile: Option<P>) -> Result<(), Box<dyn Error>> {
-    match outfile {
-        Some(filename) => write_to_file(filename.as_ref(), svg)?,
-        None => svg.write_to(&mut std::io::stdout())?,
-    }
-    Ok(())
-}
-
-fn write_to_file(outfile: &Path, svg: &Element) -> Result<(), Box<dyn Error>> {
-    match outfile.extension().and_then(std::ffi::OsStr::to_str) {
-        Some("svg") => {
-            let mut file = std::fs::File::create(outfile)?;
-            svg.write_to(&mut file)?;
-        }
-        Some("png") => save_png(outfile, svg)?,
-        _ => return Err(SgfRenderError::UnsupportedFileExtension.into()),
+fn write_output<P: AsRef<Path>>(
+    svg: &Element,
+    outfile: Option<P>,
+    format: OutputFormat,
+) -> Result<(), Box<dyn Error>> {
+    let mut out: Box<dyn std::io::Write> = match outfile {
+        Some(path) => Box::new(std::fs::File::create(path)?),
+        None => Box::new(std::io::stdout()),
+    };
+    match format {
+        OutputFormat::Svg => svg.write_to(&mut out)?,
+        #[cfg(feature = "png")]
+        OutputFormat::Png => save_png(out, svg)?,
     }
     Ok(())
 }
 
 #[cfg(feature = "png")]
-fn save_png(outfile: &Path, svg: &Element) -> Result<(), Box<dyn Error>> {
+fn save_png(mut out: Box<dyn std::io::Write>, svg: &Element) -> Result<(), Box<dyn Error>> {
     let mut buffer: Vec<u8> = vec![];
     svg.write_to(&mut buffer)?;
     let s = std::str::from_utf8(&buffer)?;
@@ -82,36 +81,22 @@ fn save_png(outfile: &Path, svg: &Element) -> Result<(), Box<dyn Error>> {
     )?;
     let pixmap_size = tree.svg_node().size.to_screen_size();
     let mut pixmap = tiny_skia::Pixmap::new(pixmap_size.width(), pixmap_size.height()).unwrap();
-    resvg::render(&tree, usvg::FitTo::Original, pixmap.as_mut())
-        .ok_or(SgfRenderError::PNGRenderFailed)?;
-    pixmap.save_png(outfile)?;
+    resvg::render(&tree, usvg::FitTo::Original, pixmap.as_mut()).ok_or(PngRenderFailure {})?;
+    let data = pixmap.encode_png()?;
+    out.write_all(&data)?;
     Ok(())
 }
 
-#[cfg(not(feature = "png"))]
-fn save_png(_outfile: &Path, _document: &Element) -> Result<(), Box<dyn Error>> {
-    Err(SgfRenderError::NoPngSupport.into())
-}
+#[cfg(feature = "png")]
+#[derive(Debug, Clone, Copy)]
+struct PngRenderFailure {}
 
-#[derive(Debug)]
-enum SgfRenderError {
-    UnsupportedFileExtension,
-    #[cfg(feature = "png")]
-    PNGRenderFailed,
-    #[cfg(not(feature = "png"))]
-    NoPngSupport,
-}
-
-impl std::fmt::Display for SgfRenderError {
+#[cfg(feature = "png")]
+impl std::fmt::Display for PngRenderFailure {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::UnsupportedFileExtension => write!(f, "Unsupported file extension."),
-            #[cfg(feature = "png")]
-            Self::PNGRenderFailed => write!(f, "Rendering png failed."),
-            #[cfg(not(feature = "png"))]
-            Self::NoPngSupport => write!(f, "Compiled without png support."),
-        }
+        write!(f, "Rendering png failed.")
     }
 }
 
-impl std::error::Error for SgfRenderError {}
+#[cfg(feature = "png")]
+impl std::error::Error for PngRenderFailure {}

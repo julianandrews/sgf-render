@@ -8,5 +8,5 @@ mod goban_style;
 mod make_svg;
 mod node_description;
 
-pub use args::{MakeSvgArgs, SgfRenderArgs};
+pub use args::{MakeSvgArgs, OutputFormat, SgfRenderArgs};
 pub use make_svg::make_svg;

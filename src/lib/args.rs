@@ -26,6 +26,10 @@ pub struct SgfRenderArgs {
     /// Output file. SVG and PNG formats supported.
     #[arg(short, long, value_name = "FILE")]
     pub outfile: Option<PathBuf>,
+    /// Output format.
+    #[arg(short = 'f', long = "format", default_value = "svg")]
+    #[cfg_attr(not(feature = "png"), arg(hide = true))]
+    pub output_format: OutputFormat,
     #[clap(flatten)]
     pub make_svg_args: MakeSvgArgs,
 }
@@ -176,6 +180,13 @@ impl MakeSvgArgs {
             kifu_mode: self.kifu,
         })
     }
+}
+
+#[derive(Debug, Clone, Copy, clap::ValueEnum)]
+pub enum OutputFormat {
+    Svg,
+    #[cfg(feature = "png")]
+    Png,
 }
 
 #[derive(Debug, Clone, Copy)]
