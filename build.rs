@@ -1,8 +1,7 @@
 use std::env;
-use std::ffi::OsStr;
 use std::fs;
 use std::io::Write;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 fn main() {
     generate_styles();
@@ -10,57 +9,80 @@ fn main() {
 }
 
 fn generate_styles() {
+    let styles: Vec<PathBuf> = std::fs::read_dir("./resources/styles")
+        .unwrap()
+        .map(|direntry| direntry.unwrap().path().canonicalize().unwrap())
+        .collect();
+
     let outfile_path = Path::new(&env::var("OUT_DIR").unwrap()).join("generated_styles.rs");
     let mut outfile = fs::File::create(outfile_path).unwrap();
-    write!(
+    writeln!(
         outfile,
         r#"/// Automatically generated styles.
 
-use std::collections::HashMap;
-
-use super::GobanStyle;
-
-lazy_static::lazy_static! {{
-    pub static ref GENERATED_STYLES: HashMap<&'static str, GobanStyle> = {{
-        let mut m = HashMap::new();"#
+use crate::goban_style::GobanStyle;"#
     )
     .unwrap();
 
-    let styles = std::fs::read_dir("./resources/styles").unwrap();
-    for result in styles {
-        let path = result.unwrap().path().canonicalize().unwrap();
-        if path.extension().and_then(OsStr::to_str) == Some("toml") {
-            write_style(&mut outfile, &path);
-        }
-    }
-
-    write!(
+    writeln!(
         outfile,
         r#"
-        m
-    }};
-}}
-"#
+lazy_static::lazy_static! {{
+    static ref STYLES: [GobanStyle; {}] = ["#,
+        styles.len()
+    )
+    .unwrap();
+
+    for path in &styles {
+        writeln!(
+            outfile,
+            r#"        toml::from_str(include_str!(r"{path}")).unwrap(),"#,
+            path = path.display(),
+        )
+        .unwrap();
+    }
+
+    writeln!(
+        outfile,
+        r#"    ];
+}}"#
+    )
+    .unwrap();
+
+    writeln!(
+        outfile,
+        r#"
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, clap::ValueEnum)]
+pub enum GeneratedStyle {{"#
+    )
+    .unwrap();
+    for path in &styles {
+        writeln!(outfile, "    {},", style_name(path)).unwrap();
+    }
+    writeln!(outfile, r#"}}"#).unwrap();
+
+    writeln!(
+        outfile,
+        r#"
+impl GeneratedStyle {{
+    pub fn style(&self) -> &GobanStyle {{
+        &STYLES[*self as usize]
+    }}
+}}"#
     )
     .unwrap();
 }
 
-fn write_style(outfile: &mut fs::File, path: &Path) {
-    let style_name = path
+fn style_name(path: &Path) -> String {
+    let mut name = path
         .with_extension("")
         .file_name()
         .unwrap()
         .to_str()
         .unwrap()
         .to_owned();
-    write!(
-        outfile,
-        r#"
-        m.insert("{style_name}", toml::from_str(include_str!(r"{path}")).unwrap());"#,
-        style_name = style_name,
-        path = path.display(),
-    )
-    .unwrap();
+    name.get_mut(0..1).unwrap().make_ascii_uppercase();
+    name
 }
 
 fn generate_tests() {
@@ -84,8 +106,7 @@ fn write_tests_header(outfile: &mut fs::File) {
 
 use clap::Parser;
 
-use sgf_render::make_svg;
-use sgf_render::args::MakeSvgArgs;
+use sgf_render::{{MakeSvgArgs, make_svg}};
 "#,
     )
     .unwrap();
@@ -97,7 +118,7 @@ fn write_test(outfile: &mut fs::File, dir: &fs::DirEntry) {
     let separator = std::path::MAIN_SEPARATOR;
     let test_name = dir.file_name().unwrap().to_string_lossy();
 
-    write!(
+    writeln!(
         outfile,
         r#"
 #[test]
@@ -118,8 +139,7 @@ fn {test_name}() {{
     let result = std::str::from_utf8(&buffer).unwrap();
 
     assert_eq!(result, expected);
-}}
-        "#,
+}}"#,
         test_name = test_name,
         path = path,
         separator = separator,

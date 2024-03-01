@@ -3,7 +3,12 @@ use std::ops::Range;
 
 use minidom::Element;
 
-use super::{Goban, GobanRange, GobanStyle, MakeSvgError, NodeDescription, Stone, StoneColor};
+use crate::board_side::{BoardSide, BoardSideSet};
+use crate::errors::MakeSvgError;
+use crate::goban::{Goban, Stone, StoneColor};
+use crate::goban_range::GobanRange;
+use crate::goban_style::GobanStyle;
+use crate::node_description::NodeDescription;
 
 pub static NAMESPACE: &str = "http://www.w3.org/2000/svg";
 
@@ -33,31 +38,6 @@ pub struct MakeSvgOptions {
     pub draw_lines: bool,
     pub draw_arrows: bool,
     pub kifu_mode: bool,
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub enum BoardSide {
-    North,
-    East,
-    South,
-    West,
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
-pub struct BoardSideSet(u8);
-
-impl BoardSideSet {
-    pub fn is_empty(&self) -> bool {
-        self.0 == 0
-    }
-
-    pub fn contains(&self, side: BoardSide) -> bool {
-        self.0 & (1 << side as u8) != 0
-    }
-
-    pub fn insert(&mut self, side: BoardSide) {
-        self.0 |= 1 << side as u8
-    }
 }
 
 #[derive(Debug, Clone, Copy)]

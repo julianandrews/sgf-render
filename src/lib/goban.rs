@@ -2,7 +2,8 @@ use std::collections::{HashMap, HashSet, VecDeque};
 
 use sgf_parse::{go, SgfNode};
 
-use super::{MakeSvgError, NodeDescription, NodePathStep};
+use crate::errors::MakeSvgError;
+use crate::node_description::{NodeDescription, NodePathStep};
 
 pub struct Goban {
     size: (u8, u8),

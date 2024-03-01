@@ -32,3 +32,28 @@ impl From<SgfParseError> for MakeSvgError {
         Self::ParseError(error)
     }
 }
+
+#[derive(Debug)]
+pub enum UsageError {
+    InvalidRange,
+    StyleReadError(Box<dyn std::error::Error>),
+    InvalidFirstMoveNumber,
+    InvalidLastMoveNumber,
+    InvalidBoardSides,
+}
+
+impl std::fmt::Display for UsageError {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        match self {
+            UsageError::InvalidRange => write!(f, "Invalid range."),
+            UsageError::StyleReadError(e) => write!(f, "Failed to read style file: {}", e),
+            UsageError::InvalidFirstMoveNumber => write!(f, "Invalid first move number."),
+            UsageError::InvalidLastMoveNumber => write!(f, "Invalid last move number."),
+            UsageError::InvalidBoardSides => write!(f, "Invalid board sides."),
+        }
+    }
+}
+
+impl std::error::Error for UsageError {}
+unsafe impl Send for UsageError {}
+unsafe impl Sync for UsageError {}

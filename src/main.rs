@@ -4,10 +4,8 @@ use std::path::Path;
 use clap::Parser;
 use minidom::Element;
 
-use sgf_render::args::SgfRenderArgs;
-
 fn main() {
-    let parsed_args = SgfRenderArgs::parse();
+    let parsed_args = sgf_render::SgfRenderArgs::parse();
     let options = match parsed_args.make_svg_args.options() {
         Ok(options) => options,
         Err(e) => {

@@ -1,7 +1,8 @@
 use minidom::Element;
 
-use super::make_svg::NAMESPACE;
-use super::{MakeSvgError, StoneColor};
+use crate::errors::MakeSvgError;
+use crate::goban::StoneColor;
+use crate::make_svg::NAMESPACE;
 
 #[derive(Debug, Clone, serde::Deserialize)]
 pub struct GobanStyle {

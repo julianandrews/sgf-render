@@ -1,7 +1,9 @@
 use std::collections::HashSet;
 use std::ops::Range;
 
-use super::{Goban, MakeSvgError, MakeSvgOptions};
+use crate::errors::{MakeSvgError, UsageError};
+use crate::goban::Goban;
+use crate::make_svg::MakeSvgOptions;
 
 #[derive(Debug, Clone)]
 pub enum GobanRange {
@@ -106,5 +108,25 @@ impl GobanRange {
                 }
             }
         }
+    }
+}
+
+impl std::str::FromStr for GobanRange {
+    type Err = UsageError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let parse_byte = |b: u8| match b {
+            b'a'..=b'z' => Ok(b - b'a'),
+            _ => Err(UsageError::InvalidRange),
+        };
+
+        let s = s.as_bytes();
+        if s.len() != 5 || s[2] != b'-' {
+            return Err(UsageError::InvalidRange);
+        }
+        Ok(GobanRange::Ranged(
+            parse_byte(s[0])?..parse_byte(s[3])? + 1,
+            parse_byte(s[1])?..parse_byte(s[4])? + 1,
+        ))
     }
 }
