@@ -20,10 +20,10 @@ const CLAP_STYLES: Styles = Styles::styled()
 #[derive(Debug, Parser)]
 #[clap(version, about, styles=CLAP_STYLES)]
 pub struct SgfRenderArgs {
-    /// SGF file to render (defaults to stdin).
+    /// SGF file to render [default: read from stdin].
     #[arg(value_name = "FILE")]
     pub infile: Option<PathBuf>,
-    /// Output file. SVG and PNG formats supported.
+    /// Output file [default: write to stdout].
     #[arg(short, long, value_name = "FILE")]
     pub outfile: Option<PathBuf>,
     /// Output format.
@@ -54,10 +54,10 @@ pub struct MakeSvgArgs {
     /// Range to draw as a pair of corners (e.g. 'cc-ff').
     #[arg(short, long)]
     range: Option<GobanRange>,
-    /// Style to use. One of 'simple', 'fancy' or 'minimalist'.
+    /// Style to use.
     #[arg(long = "style", value_name = "STYLE", default_value = "simple")]
     generated_style: generated_styles::GeneratedStyle,
-    /// Custom style to use. Overrides '--style'. See the README for details.
+    /// Custom style `toml` file. Conflicts with '--style'. See the README for details.
     #[arg(long, value_name = "FILE", conflicts_with = "generated_style")]
     custom_style: Option<PathBuf>,
     /// Draw move numbers (may replace other markup).

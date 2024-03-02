@@ -46,20 +46,28 @@ $ ./target/release/sgf-render -h
 Usage: sgf-render [OPTIONS] [FILE]
 
 Arguments:
-  [FILE]  SGF file to render (defaults to stdin)
+  [FILE]  SGF file to render [default: read from stdin]
 
 Options:
-  -o, --outfile <FILE>           Output file. SVG and PNG formats supported
-  -n, --node <PATH_SPEC>         Node to render. For simple use provide a number or `last` to render the last node.
-                                 See the README for more detail
+  -o, --outfile <FILE>           Output file [default: write to stdout]
+  -f, --format <OUTPUT_FORMAT>   Output format [default: svg] [possible values: svg,
+                                 png]
+  -n, --node <PATH_SPEC>         Node to render. For simple use provide a number or
+                                 `last` to render the last node. See the README for more
+                                 detail
   -w, --width <WIDTH>            Width of the output image in pixels [default: 800]
-  -s, --shrink-wrap              Draw only enough of the board to hold all the stones (with 1 space padding)
+  -s, --shrink-wrap              Draw only enough of the board to hold all the stones
+                                 (with 1 space padding)
   -r, --range <RANGE>            Range to draw as a pair of corners (e.g. 'cc-ff')
-      --style <STYLE>            Style to use. One of 'simple', 'fancy' or 'minimalist' [default: simple]
-      --custom-style <FILE>      Custom style to use. Overrides '--style'. See the README for details
+      --style <STYLE>            Style to use [default: simple] [possible values:
+                                 minimalist, fancy, simple]
+      --custom-style <FILE>      Custom style `toml` file. Conflicts with '--style'. See
+                                 the README for details
       --move-numbers[=<RANGE>]   Draw move numbers (may replace other markup)
-      --move-numbers-from <NUM>  Number to start counting move numbers from (requires --move-numbers) [default: 1]
+      --move-numbers-from <NUM>  Number to start counting move numbers from (requires
+                                 --move-numbers) [default: 1]
       --label-sides <SIDES>      Sides to draw position labels on [default: nw]
+      --no-board-labels          Don't draw position labels
       --no-marks                 Don't draw SGF marks
       --no-triangles             Don't draw SGF triangles
       --no-circles               Don't draw SGF circles
