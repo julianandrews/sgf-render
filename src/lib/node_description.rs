@@ -21,6 +21,28 @@ impl NodeDescription {
             },
         }
     }
+
+    pub fn normalize(&mut self) {
+        for step in &mut self.steps {
+            if matches!(step, NodePathStep::Variation(0)) {
+                *step = NodePathStep::Advance(1);
+            }
+        }
+        let mut steps = vec![];
+        for step in &self.steps {
+            match step {
+                NodePathStep::Variation(_) | NodePathStep::Last => steps.push(*step),
+                NodePathStep::Advance(n) => {
+                    if let Some(NodePathStep::Advance(m)) = steps.last() {
+                        *steps.last_mut().unwrap() = NodePathStep::Advance(n + m)
+                    } else {
+                        steps.push(NodePathStep::Advance(*n));
+                    }
+                }
+            }
+        }
+        self.steps = steps;
+    }
 }
 
 impl std::str::FromStr for NodeDescription {
@@ -45,6 +67,26 @@ impl std::str::FromStr for NodeDescription {
                 })
                 .collect::<Result<_, _>>()?;
         Ok(NodeDescription { steps })
+    }
+}
+
+impl std::fmt::Display for NodePathStep {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            NodePathStep::Advance(n) => write!(f, "{}", n),
+            NodePathStep::Variation(n) => write!(f, "v{}", n),
+            NodePathStep::Last => write!(f, "last"),
+        }
+    }
+}
+
+impl std::fmt::Display for NodeDescription {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut steps = vec![];
+        for step in &self.steps {
+            steps.push(step.to_string());
+        }
+        write!(f, "{}", steps.join(","))
     }
 }
 

@@ -4,22 +4,36 @@ use std::path::Path;
 use clap::Parser;
 use minidom::Element;
 
-use sgf_render::{OutputFormat, SgfRenderArgs};
+use sgf_render::{Command, OutputFormat, SgfRenderArgs};
 
 fn main() {
     let parsed_args = SgfRenderArgs::parse();
-    let options = match parsed_args.make_svg_args.options() {
-        Ok(options) => options,
+    let input = match read_input(&parsed_args.infile) {
+        Ok(goban) => goban,
         Err(e) => {
-            eprintln!("Failed to parse arguments: {}", e);
+            eprintln!("Failed to read input: {}", e);
             std::process::exit(1);
         }
     };
 
-    let input = match read_input(parsed_args.infile) {
-        Ok(goban) => goban,
+    match parsed_args.command {
+        Some(Command::Query) => query(&input),
+        None => render(&input, parsed_args),
+    }
+}
+
+fn query(input: &str) {
+    if let Err(e) = sgf_render::query(input) {
+        eprintln!("Failed to parse SGF: {}", e);
+        std::process::exit(1);
+    }
+}
+
+fn render(input: &str, parsed_args: SgfRenderArgs) {
+    let options = match parsed_args.make_svg_args.options() {
+        Ok(options) => options,
         Err(e) => {
-            eprintln!("Failed to read input: {}", e);
+            eprintln!("Failed to parse arguments: {}", e);
             std::process::exit(1);
         }
     };
@@ -38,7 +52,7 @@ fn main() {
     }
 }
 
-fn read_input<P: AsRef<Path>>(infile: Option<P>) -> Result<String, Box<dyn Error>> {
+fn read_input<P: AsRef<Path>>(infile: &Option<P>) -> Result<String, Box<dyn Error>> {
     let mut reader: Box<dyn std::io::Read> = match infile {
         Some(filename) => Box::new(std::io::BufReader::new(std::fs::File::open(&filename)?)),
         None => Box::new(std::io::stdin()),

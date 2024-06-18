@@ -20,8 +20,10 @@ const CLAP_STYLES: Styles = Styles::styled()
 #[derive(Debug, Parser)]
 #[clap(version, about, styles=CLAP_STYLES)]
 pub struct SgfRenderArgs {
-    /// SGF file to render [default: read from stdin].
-    #[arg(value_name = "FILE")]
+    #[clap(subcommand)]
+    pub command: Option<Command>,
+    /// SGF file to read [default: read from stdin].
+    #[arg(value_name = "FILE", global = true)]
     pub infile: Option<PathBuf>,
     /// Output file [default: write to stdout].
     #[arg(short, long, value_name = "FILE")]
@@ -32,6 +34,12 @@ pub struct SgfRenderArgs {
     pub output_format: OutputFormat,
     #[clap(flatten)]
     pub make_svg_args: MakeSvgArgs,
+}
+
+#[derive(Debug, clap::Subcommand)]
+pub enum Command {
+    /// Print a tree of the SGF's variations
+    Query,
 }
 
 #[derive(Debug, Parser)]
