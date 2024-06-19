@@ -1,108 +1,51 @@
-#[derive(Debug, PartialEq, Eq, Clone)]
+use clap::Parser;
+
+#[derive(Debug, PartialEq, Eq, Clone, Copy, Parser)]
 pub struct NodeDescription {
-    pub steps: Vec<NodePathStep>,
+    /// Game number to display (for multi-game files).
+    #[arg(short, long, default_value_t = 0)]
+    pub game_number: u64,
+    /// Variation number to display (use `query` command for numbers).
+    #[arg(short, long, default_value_t = 0)]
+    pub variation: u64,
+    /// Node number in the variation to display.
+    #[arg(short, long, default_value = "last")]
+    pub node_number: NodeNumber,
 }
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
-pub enum NodePathStep {
-    Advance(usize),
-    Variation(usize),
+pub enum NodeNumber {
+    Number(u64),
     Last,
 }
 
-impl NodeDescription {
-    pub fn default(kifu_mode: bool) -> NodeDescription {
-        match kifu_mode {
-            true => NodeDescription {
-                steps: vec![NodePathStep::Last],
-            },
-            false => NodeDescription {
-                steps: vec![NodePathStep::Advance(0)],
-            },
-        }
-    }
-
-    pub fn normalize(&mut self) {
-        for step in &mut self.steps {
-            if matches!(step, NodePathStep::Variation(0)) {
-                *step = NodePathStep::Advance(1);
-            }
-        }
-        let mut steps = vec![];
-        for step in &self.steps {
-            match step {
-                NodePathStep::Variation(_) | NodePathStep::Last => steps.push(*step),
-                NodePathStep::Advance(n) => {
-                    if let Some(NodePathStep::Advance(m)) = steps.last() {
-                        *steps.last_mut().unwrap() = NodePathStep::Advance(n + m)
-                    } else {
-                        steps.push(NodePathStep::Advance(*n));
-                    }
-                }
-            }
-        }
-        self.steps = steps;
-    }
-}
-
-impl std::str::FromStr for NodeDescription {
+impl std::str::FromStr for NodeNumber {
     type Err = NodeDescriptionError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let steps =
-            s.split(',')
-                .map(|step| match step {
-                    "last" => Ok(NodePathStep::Last),
-                    _ => {
-                        match step.chars().next() {
-                            Some('v') => Ok(NodePathStep::Variation(step[1..].parse().map_err(
-                                |_| NodeDescriptionError::InvalidVariation(step.to_owned()),
-                            )?)),
-                            Some(_) => Ok(NodePathStep::Advance(step.parse().map_err(|_| {
-                                NodeDescriptionError::InvalidAdvance(step.to_owned())
-                            })?)),
-                            None => Err(NodeDescriptionError::EmptyNodePathStep),
-                        }
-                    }
-                })
-                .collect::<Result<_, _>>()?;
-        Ok(NodeDescription { steps })
-    }
-}
-
-impl std::fmt::Display for NodePathStep {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            NodePathStep::Advance(n) => write!(f, "{}", n),
-            NodePathStep::Variation(n) => write!(f, "v{}", n),
-            NodePathStep::Last => write!(f, "last"),
+        match s {
+            "last" => Ok(NodeNumber::Last),
+            _ => {
+                let n = s
+                    .parse()
+                    .map_err(|_| NodeDescriptionError::UnrecognizedNodeNumber(s.to_string()))?;
+                Ok(NodeNumber::Number(n))
+            }
         }
     }
 }
 
-impl std::fmt::Display for NodeDescription {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let mut steps = vec![];
-        for step in &self.steps {
-            steps.push(step.to_string());
-        }
-        write!(f, "{}", steps.join(","))
-    }
-}
-
-#[derive(Debug, PartialEq, Eq, Clone)]
+#[derive(Debug, Clone)]
 pub enum NodeDescriptionError {
-    EmptyNodePathStep,
-    InvalidVariation(String),
-    InvalidAdvance(String),
+    UnrecognizedNodeNumber(String),
 }
 
 impl std::fmt::Display for NodeDescriptionError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            NodeDescriptionError::EmptyNodePathStep => write!(f, "Empty node path step"),
-            NodeDescriptionError::InvalidVariation(s) => write!(f, "Invalid variation {}", s),
-            NodeDescriptionError::InvalidAdvance(s) => write!(f, "Invalid advance {}", s),
+            NodeDescriptionError::UnrecognizedNodeNumber(s) => {
+                write!(f, "Unrecognized node number: {}", s)
+            }
         }
     }
 }

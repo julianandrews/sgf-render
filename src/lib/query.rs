@@ -18,8 +18,9 @@ fn print_node(sgf_node: &SgfNode<Prop>) {
     for fork_node in variation_roots(sgf_node) {
         let SgfTraversalNode {
             sgf_node,
-            move_number,
+            variation_node_number,
             variation,
+            parent_variation: _,
             branch_number: _,
             is_variation_root: _,
             branches,
@@ -45,7 +46,7 @@ fn print_node(sgf_node: &SgfNode<Prop>) {
             s.join("")
         };
         let last_move = std::iter::successors(Some(sgf_node), |n| n.children().next()).count() - 1
-            + move_number;
-        println!("{branch_diagram_for_line}v{variation}, {move_number}-{last_move}",);
+            + variation_node_number as usize;
+        println!("{branch_diagram_for_line}v{variation}, {variation_node_number}-{last_move}",);
     }
 }

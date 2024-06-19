@@ -3,7 +3,8 @@ use std::collections::{HashMap, HashSet, VecDeque};
 use sgf_parse::{go, SgfNode};
 
 use crate::errors::MakeSvgError;
-use crate::node_description::{NodeDescription, NodePathStep};
+use crate::node_description::{NodeDescription, NodeNumber};
+use crate::traversal::variation_nodes;
 
 pub struct Goban {
     size: (u8, u8),
@@ -42,42 +43,25 @@ impl Goban {
         node_description: &NodeDescription,
         collection: &[SgfNode<go::Prop>],
     ) -> Result<Self, MakeSvgError> {
-        let mut sgf_node = collection
-            .iter()
-            .next()
-            .ok_or(MakeSvgError::InsufficientSgfNodes)?;
-
-        let board_size = get_board_size(sgf_node);
+        let root_node = collection
+            .get(node_description.game_number as usize)
+            .ok_or(MakeSvgError::MissingGame)?;
+        let board_size = get_board_size(root_node);
         let mut goban = Goban::new(board_size);
-        goban.process_node(sgf_node)?;
-
-        for step in &node_description.steps {
-            match step {
-                NodePathStep::Advance(n) => {
-                    for _ in 0..*n {
-                        sgf_node = sgf_node
-                            .children()
-                            .next()
-                            .ok_or(MakeSvgError::InsufficientSgfNodes)?;
-                        goban.process_node(sgf_node)?;
-                    }
+        let nodes = variation_nodes(root_node, node_description.variation)?;
+        let mut node_count = 0;
+        for node in nodes {
+            goban.process_node(node.sgf_node)?;
+            node_count += 1;
+            if let NodeNumber::Number(n) = node_description.node_number {
+                if node_count > n {
+                    break;
                 }
-                NodePathStep::Variation(n) => {
-                    sgf_node = sgf_node
-                        .children()
-                        .nth(*n)
-                        .ok_or(MakeSvgError::MissingVariation)?;
-                    goban.process_node(sgf_node)?;
-                }
-                NodePathStep::Last => {
-                    while !sgf_node.children.is_empty() {
-                        sgf_node = sgf_node
-                            .children()
-                            .next()
-                            .ok_or(MakeSvgError::InsufficientSgfNodes)?;
-                        goban.process_node(sgf_node)?;
-                    }
-                }
+            }
+        }
+        if let NodeNumber::Number(n) = node_description.node_number {
+            if n > node_count {
+                return Err(MakeSvgError::InsufficientSgfNodes);
             }
         }
         Ok(goban)

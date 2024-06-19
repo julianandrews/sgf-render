@@ -1,1 +1,1 @@
---shrink-wrap --no-board-labels
+-n 0 --shrink-wrap --no-board-labels

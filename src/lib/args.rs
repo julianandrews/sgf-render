@@ -22,7 +22,7 @@ const CLAP_STYLES: Styles = Styles::styled()
 pub struct SgfRenderArgs {
     #[clap(subcommand)]
     pub command: Option<Command>,
-    /// SGF file to read [default: read from stdin].
+    /// SGF file to [default: read from stdin].
     #[arg(value_name = "FILE", global = true)]
     pub infile: Option<PathBuf>,
     /// Output file [default: write to stdout].
@@ -44,10 +44,8 @@ pub enum Command {
 
 #[derive(Debug, Parser)]
 pub struct MakeSvgArgs {
-    /// Node to render. For simple use provide a number or `last` to render
-    /// the last node. See the README for more detail.
-    #[arg(short, long = "node", value_name = "PATH_SPEC")]
-    node_description: Option<NodeDescription>,
+    #[clap(flatten)]
+    node_description: NodeDescription,
     /// Width of the output image in pixels.
     #[arg(
         short = 'w',
@@ -123,11 +121,6 @@ pub struct MakeSvgArgs {
 impl MakeSvgArgs {
     /// Map MakeSvgArgs to options used by `make_svg`.
     pub fn options(&self) -> Result<MakeSvgOptions, UsageError> {
-        let node_description = match &self.node_description {
-            Some(node_description) => node_description.clone(),
-            None => NodeDescription::default(self.kifu),
-        };
-
         let goban_range = if self.shrink_wrap {
             GobanRange::ShrinkWrap
         } else if let Some(range) = &self.range {
@@ -170,7 +163,7 @@ impl MakeSvgArgs {
         };
 
         Ok(MakeSvgOptions {
-            node_description,
+            node_description: self.node_description,
             goban_range,
             style,
             viewbox_width: self.viewbox_width,
