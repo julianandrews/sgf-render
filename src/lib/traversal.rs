@@ -38,7 +38,8 @@ pub fn variation_nodes(
     Ok(SgfTraversal::new(root)
         .take_while(move |node| node.variation <= variation)
         .filter(move |node| {
-            if node.variation_node_number >= next_node_number {
+            if node.variation == current_variation && node.variation_node_number >= next_node_number
+            {
                 current_variation = next_variation;
                 if let Some((a, b)) = variations.pop() {
                     (next_variation, next_node_number) = (a, b);
