@@ -43,72 +43,82 @@ $ ./target/release/sgf-render -h
 ## Usage
 
 ```
-Usage: sgf-render [OPTIONS] [FILE]
+Usage: sgf-render [OPTIONS] [FILE] [COMMAND]
+
+Commands:
+  query  Print a tree of the SGF's variations
+  help   Print this message or the help of the given subcommand(s)
 
 Arguments:
-  [FILE]  SGF file to render [default: read from stdin]
+  [FILE]  SGF file to [default: read from stdin]
 
 Options:
-  -o, --outfile <FILE>           Output file [default: write to stdout]
-  -f, --format <OUTPUT_FORMAT>   Output format [default: svg] [possible values: svg,
-                                 png]
-  -n, --node <PATH_SPEC>         Node to render. For simple use provide a number or
-                                 `last` to render the last node. See the README for more
-                                 detail
-  -w, --width <WIDTH>            Width of the output image in pixels [default: 800]
-  -s, --shrink-wrap              Draw only enough of the board to hold all the stones
-                                 (with 1 space padding)
-  -r, --range <RANGE>            Range to draw as a pair of corners (e.g. 'cc-ff')
-      --style <STYLE>            Style to use [default: simple] [possible values:
-                                 minimalist, fancy, simple]
-      --custom-style <FILE>      Custom style `toml` file. Conflicts with '--style'. See
-                                 the README for details
-      --move-numbers[=<RANGE>]   Draw move numbers (may replace other markup)
-      --move-numbers-from <NUM>  Number to start counting move numbers from (requires
-                                 --move-numbers) [default: 1]
-      --label-sides <SIDES>      Sides to draw position labels on [default: nw]
-      --no-board-labels          Don't draw position labels
-      --no-marks                 Don't draw SGF marks
-      --no-triangles             Don't draw SGF triangles
-      --no-circles               Don't draw SGF circles
-      --no-squares               Don't draw SGF squares
-      --no-selected              Don't draw SGF selected
-      --no-dimmed                Don't draw SGF dimmed
-      --no-labels                Don't draw SGF labels
-      --no-lines                 Don't draw SGF lines
-      --no-arrows                Don't draw SGF arrows
-      --no-point-markup          Don't draw any markup on points
-      --kifu                     Generate a kifu
-  -h, --help                     Print help
-  -V, --version                  Print version
+  -o, --outfile <FILE>             Output file [default: write to stdout]
+  -f, --format <OUTPUT_FORMAT>     Output format [default: svg] [possible values: svg, png]
+  -g, --game-number <GAME_NUMBER>  Game number to display (for multi-game files) [default: 0]
+  -v, --variation <VARIATION>      Variation number to display (use `query` command for numbers) [default: 0]
+  -n, --node-number <NODE_NUMBER>  Node number in the variation to display [default: last]
+  -w, --width <WIDTH>              Width of the output image in pixels [default: 800]
+  -s, --shrink-wrap                Draw only enough of the board to hold all the stones (with 1 space padding)
+  -r, --range <RANGE>              Range to draw as a pair of corners (e.g. 'cc-ff')
+      --style <STYLE>              Style to use [default: simple] [possible values: minimalist, fancy, simple]
+      --custom-style <FILE>        Custom style `toml` file. Conflicts with '--style'. See the README for details
+      --move-numbers[=<RANGE>]     Draw move numbers (may replace other markup)
+      --move-numbers-from <NUM>    Number to start counting move numbers from (requires --move-numbers) [default: 1]
+      --label-sides <SIDES>        Sides to draw position labels on [default: nw]
+      --no-board-labels            Don't draw position labels
+      --no-marks                   Don't draw SGF marks
+      --no-triangles               Don't draw SGF triangles
+      --no-circles                 Don't draw SGF circles
+      --no-squares                 Don't draw SGF squares
+      --no-selected                Don't draw SGF selected
+      --no-dimmed                  Don't draw SGF dimmed
+      --no-labels                  Don't draw SGF labels
+      --no-lines                   Don't draw SGF lines
+      --no-arrows                  Don't draw SGF arrows
+      --no-point-markup            Don't draw any markup on points
+      --kifu                       Generate a kifu
+  -h, --help                       Print help
+  -V, --version                    Print version
 ```
 
 If `FILE` isn't provided, `sgf-render` will read from stdin. If `--outfile`
 isn't provided `sgf-render` will print the resulting SVG to stdout.
 
-### Node selection
+### Node selection and the Query command
 
-For the `--node` argument `PATH_SPEC` should be a comma-separated list of
-steps.  A step can be a number which advances that many steps, 'v' followed by
-a number which advances one step down the chosen variation, or `last` which
-advances to the last node down the current variation.  Variations are
-zero-indexed, so, for instance, `v0` is equivalent to `1`.
+Node numbers can be selected with the `--node-number` flag. For a simple
+SGF, `--node-number` and move number will usually line up since
+conventionally SGF files have no moves in the root (`0`) node.
 
-Note that the zeroth node in an SGF usually has no moves, but may have setup
-(which is common for tsumego).  Nodes without moves (with commentary or
-annotations) are possible, but uncommon.
+Variations can be selected with the `--variation` flag, and are numbered in
+depth-first traversal order. You can print a diagram of variations and their
+associated `--node-number` values with the `query` command:
 
-Examples:
+```
+$ sgf-render query tests/data/variation_tricky/input.sgf
+Game #0
+v0, 0-8
+├── v0, 3-8
+│   ├── v0, 6-8
+│   └── v1, 6-7
+└── v2, 3-7
+    ├── v2, 5-7
+    │   ├── v2, 6-7
+    │   │   ├── v2, 7-7
+    │   │   ├── v3, 7-7
+    │   │   └── v4, 7-7
+    │   └── v5, 6-7
+    │       ├── v5, 7-7
+    │       └── v6, 7-8
+    ├── v7, 5-5
+    └── v8, 5-5
 
-- `--node 0`: Show the root node (usually before the first move).
-- `--node 7`: Show the 8th node (probably the 7th move) of the main variation.
-- `--node last`: Show the last node of the main variation.
-- `--node 5,v1,12`: Advance to the 6th node advance 1 step down the first
-  (non-main) variation at that node, then advance 12 more steps. Show that
-  node.
-- `--node 5,v1,last`: Advance to the 6th node advance 1 step down the first
-  (non-main) variation at that node, then advance to the last node. Show that
-  node.
+Game #1
+v0, 0-3
+├── v0, 3-3
+└── v1, 3-3
+```
 
 ### Kifu mode
 
@@ -122,7 +132,6 @@ at a single point in time. Captured stones are removed, and when using
 - stones are never removed from the board,
 - if a stone would be placed on an existing stone an annotation is added
   instead, and
-- `--node` defaults to `last` (can be overridden).
 
 ### Custom styles
 
