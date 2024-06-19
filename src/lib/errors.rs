@@ -59,3 +59,32 @@ impl std::fmt::Display for UsageError {
 impl std::error::Error for UsageError {}
 unsafe impl Send for UsageError {}
 unsafe impl Sync for UsageError {}
+
+#[derive(Debug)]
+pub enum QueryError {
+    ParseError(SgfParseError),
+    IoError(std::io::Error),
+}
+
+impl std::fmt::Display for QueryError {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        match self {
+            QueryError::ParseError(e) => write!(f, "{}", e),
+            QueryError::IoError(e) => write!(f, "{}", e),
+        }
+    }
+}
+
+impl std::error::Error for QueryError {}
+
+impl From<SgfParseError> for QueryError {
+    fn from(error: SgfParseError) -> Self {
+        Self::ParseError(error)
+    }
+}
+
+impl From<std::io::Error> for QueryError {
+    fn from(error: std::io::Error) -> Self {
+        Self::IoError(error)
+    }
+}
