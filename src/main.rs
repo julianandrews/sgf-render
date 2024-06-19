@@ -38,7 +38,7 @@ fn render(input: &str, parsed_args: SgfRenderArgs) {
         }
     };
 
-    let svg = match sgf_render::make_svg(&input, &options) {
+    let svg = match sgf_render::make_svg(input, &options) {
         Ok(svg) => svg,
         Err(e) => {
             eprintln!("Failed to generate SVG: {}", e);
@@ -54,7 +54,7 @@ fn render(input: &str, parsed_args: SgfRenderArgs) {
 
 fn read_input<P: AsRef<Path>>(infile: &Option<P>) -> Result<String, Box<dyn Error>> {
     let mut reader: Box<dyn std::io::Read> = match infile {
-        Some(filename) => Box::new(std::io::BufReader::new(std::fs::File::open(&filename)?)),
+        Some(filename) => Box::new(std::io::BufReader::new(std::fs::File::open(filename)?)),
         None => Box::new(std::io::stdin()),
     };
     let mut input = String::new();

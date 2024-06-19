@@ -8,7 +8,7 @@ pub fn query(sgf: &str) -> Result<(), SgfParseError> {
         println!("Game #{}", game_num);
         print_node(node);
         if game_num < collection.len() - 1 {
-            println!("");
+            println!();
         }
     }
     Ok(())
