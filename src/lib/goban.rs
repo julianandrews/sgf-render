@@ -60,7 +60,7 @@ impl Goban {
             }
         }
         if let NodeNumber::Number(n) = node_description.node_number {
-            if n > node_count {
+            if n >= node_count {
                 return Err(MakeSvgError::InsufficientSgfNodes);
             }
         }
