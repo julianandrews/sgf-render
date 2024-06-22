@@ -22,7 +22,7 @@ const CLAP_STYLES: Styles = Styles::styled()
 pub struct SgfRenderArgs {
     #[clap(subcommand)]
     pub command: Option<Command>,
-    /// SGF file to [default: read from stdin].
+    /// SGF file to read from [default: read from stdin].
     #[arg(value_name = "FILE", global = true)]
     pub infile: Option<PathBuf>,
     /// Output file [default: write to stdout].
