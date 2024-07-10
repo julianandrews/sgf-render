@@ -21,23 +21,21 @@ and
 ## Installation
 
 Check the [releases](https://github.com/julianandrews/sgf-render/releases) page
-on GitHub for pre-built binaries.
-
-If you have `cargo` installed, you can also install the package from crates.io:
+on GitHub for pre-built binaries. Alternatively, you can also install the
+package from crates.io:
 
 ```
 $ cargo install sgf-render
 ```
 
-## Building
+## Building from Source
 
-If you have `git` and `cargo` installed you can also build from source:
+Make sure you have `git` and `cargo` installed. Then:
 
 ```
 $ git clone https://julianandrews/sgf-render
 $ cd sgf-render
 $ cargo build --release
-$ ./target/release/sgf-render -h
 ```
 
 ## Usage
@@ -82,14 +80,11 @@ Options:
   -V, --version                    Print version
 ```
 
-If `FILE` isn't provided, `sgf-render` will read from stdin. If `--outfile`
-isn't provided `sgf-render` will print the resulting SVG to stdout.
-
 ### Node selection and the Query command
 
 Node numbers can be selected with the `--node-number` flag. For a simple
-SGF, `--node-number` and move number will usually line up since
-conventionally SGF files have no moves in the root (`0`) node.
+SGF, `--node-number` and move number will usually line up since conventionally
+SGF files have no moves in the root node.
 
 Variations can be selected with the `--variation` flag, and are numbered in
 depth-first traversal order. You can print a diagram of variations and their
@@ -120,18 +115,23 @@ v0, 0-3
 └── v1, 3-3
 ```
 
-### Kifu mode
+### Kifu Generation
 
 By default `sgf-render` generates diagrams designed to show the board position
 at a single point in time. Captured stones are removed, and when using
 `--move-numbers` only the last move number at a given point is displayed.
-`--kifu` generates diagrams appropriate for use as a whole game record:
+Use the `--kifu` flag to generate diagrams appropriate for use as a game
+record:
 
-- move numbers are enabled,
-- all other markup is disabled,
-- stones are never removed from the board,
+- move numbers are enabled
+- all other markup is disabled
+- stones are never removed from the board
 - if a stone would be placed on an existing stone an annotation is added
-  instead, and
+  instead
+
+You can use the `--move-numbers` flag to select a subset of moves to number,
+which can be useful for generating a diagram (or series of diagrams) showing
+only part of a game.
 
 ### Custom styles
 
@@ -158,7 +158,7 @@ white_stone_selected_color = "blue"
 empty_selected_color = "blue"
 ```
 
-You can see a couple other examples in the source code package under
+You can see a few other examples in the source code package under
 `resources/styles/`
 
 ## Contributing
@@ -166,5 +166,5 @@ Pull requests are welcome! For major changes, please open an issue first to
 discuss what you would like to change.
 
 Feature requests are also welcome! The goal is to make this a general purpose
-sgf diagram generation tool. Just open an issue at
+SGF diagram generation tool. Just open an issue at
 [GitHub](https://github.com/julianandrews/sgf-render/issues).
