@@ -32,10 +32,10 @@ fn main() {
         }
     };
 
-    if let Err(e) = write_output(&svg, parsed_args.outfile, parsed_args.output_format) {
-        eprintln!("Failed to write output: {}", e);
-        std::process::exit(1);
-    }
+    //if let Err(e) = write_output(&svg, parsed_args.outfile, parsed_args.output_format) {
+    //    eprintln!("Failed to write output: {}", e);
+    //    std::process::exit(1);
+    //}
 }
 
 fn read_input<P: AsRef<Path>>(infile: Option<P>) -> Result<String, Box<dyn Error>> {

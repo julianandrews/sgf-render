@@ -49,7 +49,9 @@ impl Goban {
 
         let board_size = get_board_size(sgf_node);
         let mut goban = Goban::new(board_size);
+        
         goban.process_node(sgf_node)?;
+        //goban.print_board();
 
         for step in &node_description.steps {
             match step {
@@ -76,12 +78,29 @@ impl Goban {
                             .next()
                             .ok_or(MakeSvgError::InsufficientSgfNodes)?;
                         goban.process_node(sgf_node)?;
+                        //println!("board");
+                        goban.print_board();
                     }
                 }
             }
         }
         Ok(goban)
     }
+    
+    pub fn print_board(&self) {
+    
+	    let mut stones: Vec<Stone> = self.stones().collect();
+	    stones.sort_by_key(|stone| (stone.y, stone.x));
+	    let mut board = vec!['n'; 19*19];
+	    for stone in stones {
+		board[stone.y as usize * 19 + stone.x as usize] = match stone.color {
+		   StoneColor::Black => 'b',
+		   StoneColor::White => 'w'
+		};
+		//println!("{} {} {:?}", stone.x, stone.y, stone.color);
+	    }
+	    println!("{}",board.iter().map(|x| x.to_string()).collect::<Vec<_>>().join(","));
+}
 
     pub fn stones(&self) -> impl Iterator<Item = Stone> + '_ {
         self.stones.iter().map(|(point, color)| Stone {
@@ -282,16 +301,23 @@ impl Goban {
         };
         // Remove any neighboring groups with no liberties.
         let key = (stone.x, stone.y);
+        let mut mcounter = 0;
         for neighbor in self.neighbors(key) {
             if let Some(color) = self.stones.get(&neighbor) {
                 if *color == opponent_color {
-                    self.process_captures(neighbor);
-                }
-            }
+                    mcounter = mcounter + self.process_captures(neighbor);
+                } 
+            } 
         }
         // Now remove the played stone if still neccessary
-        self.process_captures(key);
+        mcounter = mcounter + self.process_captures(key);
         self.move_number += 1;
+        print!("{},", self.move_number);
+        print!("{},{},{},", stone.x, stone.y, match stone.color {
+		   StoneColor::Black => 'b',
+		   StoneColor::White => 'w'
+		});
+        print!("{},", mcounter);
         self.moves.push((self.move_number, stone));
 
         Ok(())
@@ -324,10 +350,10 @@ impl Goban {
         neighbors.into_iter()
     }
 
-    fn process_captures(&mut self, start_point: (u8, u8)) {
+    fn process_captures(&mut self, start_point: (u8, u8)) -> u16 {
         let group_color = match self.stones.get(&start_point) {
             Some(color) => color,
-            None => return,
+            None => return 0,
         };
         let mut group = HashSet::new();
         let mut to_process = VecDeque::new();
@@ -339,7 +365,7 @@ impl Goban {
                     continue;
                 }
                 match self.stones.get(&neighbor) {
-                    None => return,
+                    None => return 0,
                     Some(c) if c == group_color => {
                         to_process.push_back(neighbor);
                     }
@@ -347,9 +373,14 @@ impl Goban {
                 }
             }
         }
+        let mut counter = 0;
         for stone in group {
             self.stones.remove(&stone);
+            counter = counter + 1;
+            
         }
+        counter
+        
     }
 
     fn is_tt_pass(&self, point: go::Point) -> bool {
