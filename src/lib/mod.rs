@@ -11,5 +11,6 @@ mod query;
 mod traversal;
 
 pub use args::{Command, MakeSvgArgs, OutputFormat, SgfRenderArgs};
+pub use goban::Goban;
 pub use make_svg::make_svg;
 pub use query::query;

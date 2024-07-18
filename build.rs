@@ -106,7 +106,7 @@ fn write_tests_header(outfile: &mut fs::File) {
 
 use clap::Parser;
 
-use sgf_render::{{MakeSvgArgs, make_svg}};
+use sgf_render::{{Goban, MakeSvgArgs, make_svg}};
 "#,
     )
     .unwrap();
@@ -133,7 +133,8 @@ fn {test_name}() {{
     let input = include_str!(r"{path}{separator}input.sgf");
     let expected = include_str!(r"{path}{separator}output.svg");
 
-    let svg = make_svg(input, &options).unwrap();
+    let goban = Goban::from_sgf(input, &options.node_description).unwrap();
+    let svg = make_svg(&goban, &options).unwrap();
     let mut buffer: Vec<u8> = vec![];
     svg.write_to(&mut buffer).unwrap();
     let result = std::str::from_utf8(&buffer).unwrap();

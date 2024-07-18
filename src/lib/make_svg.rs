@@ -47,9 +47,7 @@ pub struct MoveNumberOptions {
     pub count_from: u64,
 }
 
-pub fn make_svg(sgf: &str, options: &MakeSvgOptions) -> Result<Element, MakeSvgError> {
-    let collection = sgf_parse::go::parse(sgf)?;
-    let goban = Goban::from_node_in_collection(&options.node_description, &collection)?;
+pub fn make_svg(goban: &Goban, options: &MakeSvgOptions) -> Result<Element, MakeSvgError> {
     let (x_range, y_range) = options.goban_range.get_ranges(&goban, options)?;
     let width = x_range.end - x_range.start;
     let height = y_range.end - y_range.start;

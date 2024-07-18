@@ -37,8 +37,14 @@ fn render(input: &str, parsed_args: SgfRenderArgs) {
             std::process::exit(1);
         }
     };
-
-    let svg = match sgf_render::make_svg(input, &options) {
+    let goban = match sgf_render::Goban::from_sgf(input, &options.node_description) {
+        Ok(goban) => goban,
+        Err(e) => {
+            eprintln!("Failed to generate goban: {}", e);
+            std::process::exit(1);
+        }
+    };
+    let svg = match sgf_render::make_svg(&goban, &options) {
         Ok(svg) => svg,
         Err(e) => {
             eprintln!("Failed to generate SVG: {}", e);

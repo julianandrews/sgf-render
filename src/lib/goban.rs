@@ -39,10 +39,8 @@ impl Goban {
         (15, 15),
     ];
 
-    pub fn from_node_in_collection(
-        node_description: &NodeDescription,
-        collection: &[SgfNode<go::Prop>],
-    ) -> Result<Self, MakeSvgError> {
+    pub fn from_sgf(sgf: &str, node_description: &NodeDescription) -> Result<Self, MakeSvgError> {
+        let collection = sgf_parse::go::parse(sgf)?;
         let root_node = collection
             .get(node_description.game_number as usize)
             .ok_or(MakeSvgError::MissingGame)?;
