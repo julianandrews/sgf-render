@@ -2,13 +2,13 @@ use std::collections::{HashMap, HashSet, VecDeque};
 
 use sgf_parse::{go, SgfNode};
 
-use crate::errors::MakeSvgError;
-use crate::node_description::{NodeDescription, NodeNumber};
-use crate::traversal::variation_nodes;
+use crate::errors::GobanError;
+use crate::render::{NodeDescription, NodeNumber};
+use crate::sgf_traversal::variation_nodes;
 
 pub struct Goban {
     size: (u8, u8),
-    pub stones: HashMap<(u8, u8), StoneColor>,
+    stones: HashMap<(u8, u8), StoneColor>,
     stones_before_move: HashMap<u64, HashSet<Stone>>,
     moves: Vec<(u64, Stone)>,
     move_number: u64,
@@ -39,11 +39,11 @@ impl Goban {
         (15, 15),
     ];
 
-    pub fn from_sgf(sgf: &str, node_description: &NodeDescription) -> Result<Self, MakeSvgError> {
+    pub fn from_sgf(sgf: &str, node_description: &NodeDescription) -> Result<Self, GobanError> {
         let collection = sgf_parse::go::parse(sgf)?;
         let root_node = collection
             .get(node_description.game_number as usize)
-            .ok_or(MakeSvgError::MissingGame)?;
+            .ok_or(GobanError::MissingGame)?;
         let board_size = get_board_size(root_node);
         let mut goban = Goban::new(board_size);
         let nodes = variation_nodes(root_node, node_description.variation)?;
@@ -59,7 +59,7 @@ impl Goban {
         }
         if let NodeNumber::Number(n) = node_description.node_number {
             if n >= node_count {
-                return Err(MakeSvgError::InsufficientSgfNodes);
+                return Err(GobanError::InsufficientSgfNodes);
             }
         }
         Ok(goban)
@@ -161,7 +161,7 @@ impl Goban {
         }
     }
 
-    fn process_node(&mut self, sgf_node: &SgfNode<go::Prop>) -> Result<(), MakeSvgError> {
+    fn process_node(&mut self, sgf_node: &SgfNode<go::Prop>) -> Result<(), GobanError> {
         self.marks.clear();
         self.triangles.clear();
         self.circles.clear();
@@ -232,20 +232,20 @@ impl Goban {
         Ok(())
     }
 
-    fn add_stone(&mut self, stone: Stone) -> Result<(), MakeSvgError> {
+    fn add_stone(&mut self, stone: Stone) -> Result<(), GobanError> {
         if stone.x > self.size.0 || stone.y > self.size.1 {
-            return Err(MakeSvgError::InvalidMoveError);
+            return Err(GobanError::InvalidMove);
         }
         let key = (stone.x, stone.y);
         if self.stones.contains_key(&key) {
-            return Err(MakeSvgError::InvalidMoveError);
+            return Err(GobanError::InvalidMove);
         }
         self.stones.insert(key, stone.color);
 
         Ok(())
     }
 
-    fn play_stone(&mut self, stone: Stone) -> Result<(), MakeSvgError> {
+    fn play_stone(&mut self, stone: Stone) -> Result<(), GobanError> {
         self.stones_before_move.insert(
             self.move_number,
             self.stones

@@ -20,7 +20,7 @@ fn generate_styles() {
         outfile,
         r#"/// Automatically generated styles.
 
-use crate::goban_style::GobanStyle;"#
+use crate::render::GobanStyle;"#
     )
     .unwrap();
 
@@ -106,7 +106,7 @@ fn write_tests_header(outfile: &mut fs::File) {
 
 use clap::Parser;
 
-use sgf_render::{{Goban, MakeSvgArgs, OutputFormat, make_svg}};
+use sgf_render::{{Goban, RenderArgs, OutputFormat, svg}};
 "#,
     )
     .unwrap();
@@ -128,13 +128,13 @@ fn {test_name}() {{
         arguments[i + 1] = format!(r"{path}{separator}{{}}", arguments[i + 1]);
     }}
     arguments.insert(0, "sgf-render".to_string());
-    let make_svg_args = MakeSvgArgs::parse_from(&arguments);
-    let options = make_svg_args.options(&OutputFormat::Svg).unwrap();
+    let render_args = RenderArgs::parse_from(&arguments);
+    let options = render_args.options(&OutputFormat::Svg).unwrap();
     let input = include_str!(r"{path}{separator}input.sgf");
     let expected = include_str!(r"{path}{separator}output.svg");
 
     let goban = Goban::from_sgf(input, &options.node_description).unwrap();
-    let svg = make_svg(&goban, &options).unwrap();
+    let svg = svg::render(&goban, &options).unwrap();
     let mut buffer: Vec<u8> = vec![];
     svg.write_to(&mut buffer).unwrap();
     let result = std::str::from_utf8(&buffer).unwrap();

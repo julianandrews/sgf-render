@@ -3,7 +3,7 @@ use std::io::{stdout, Write};
 use sgf_parse::{go::Prop, SgfNode};
 
 use crate::errors::QueryError;
-use crate::traversal::{variation_roots, SgfTraversalNode};
+use crate::sgf_traversal::{variation_roots, SgfTraversalNode};
 
 pub fn query(sgf: &str) -> Result<(), QueryError> {
     write_query_text(sgf, stdout())

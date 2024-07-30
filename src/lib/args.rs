@@ -3,12 +3,10 @@ use std::path::PathBuf;
 use clap::builder::styling::{AnsiColor, Styles};
 use clap::Parser;
 
-use crate::board_side::BoardSideSet;
 use crate::errors::UsageError;
-use crate::generated_styles;
-use crate::goban_range::GobanRange;
-use crate::make_svg::{MakeSvgOptions, MoveNumberOptions};
-use crate::node_description::NodeDescription;
+use crate::render::{
+    BoardSideSet, GeneratedStyle, GobanRange, MoveNumberOptions, NodeDescription, RenderOptions,
+};
 
 // clap v3 styling
 const CLAP_STYLES: Styles = Styles::styled()
@@ -33,7 +31,7 @@ pub struct SgfRenderArgs {
     #[cfg_attr(not(feature = "png"), arg(hide = true))]
     pub output_format: OutputFormat,
     #[clap(flatten)]
-    pub make_svg_args: MakeSvgArgs,
+    pub render_args: RenderArgs,
 }
 
 #[derive(Debug, clap::Subcommand)]
@@ -43,7 +41,7 @@ pub enum Command {
 }
 
 #[derive(Debug, Parser)]
-pub struct MakeSvgArgs {
+pub struct RenderArgs {
     #[clap(flatten)]
     node_description: NodeDescription,
     /// Width of the output image in pixels.
@@ -62,7 +60,7 @@ pub struct MakeSvgArgs {
     range: Option<GobanRange>,
     /// Style to use.
     #[arg(long = "style", value_name = "STYLE", default_value = "simple")]
-    generated_style: generated_styles::GeneratedStyle,
+    generated_style: GeneratedStyle,
     /// Custom style `toml` file. Conflicts with '--style'. See the README for details.
     #[arg(long, value_name = "FILE", conflicts_with = "generated_style")]
     custom_style: Option<PathBuf>,
@@ -118,15 +116,9 @@ pub struct MakeSvgArgs {
     kifu: bool,
 }
 
-impl MakeSvgArgs {
-    /// Map MakeSvgArgs to options used by `make_svg`.
-    pub fn options(&self, output_format: &OutputFormat) -> Result<MakeSvgOptions, UsageError> {
-        if output_format == &OutputFormat::Text && self.kifu {
-            return Err(UsageError::InvalidTextOutputOption(
-                "Kifu mode not supported for text output".to_owned(),
-            ));
-        }
-
+impl RenderArgs {
+    /// Map RenderArgs to RenderOptions.
+    pub fn options(&self, output_format: &OutputFormat) -> Result<RenderOptions, UsageError> {
         let goban_range = if self.shrink_wrap {
             GobanRange::ShrinkWrap
         } else if let Some(range) = &self.range {
@@ -160,11 +152,6 @@ impl MakeSvgArgs {
         } else {
             None
         };
-        if output_format == &OutputFormat::Text && move_number_options.is_some() {
-            return Err(UsageError::InvalidTextOutputOption(
-                "Move numbers not supported for text output".to_owned(),
-            ));
-        }
 
         let no_point_markup = self.no_point_markup;
         let label_sides = if self.no_board_labels {
@@ -173,7 +160,18 @@ impl MakeSvgArgs {
             self.label_sides
         };
 
-        Ok(MakeSvgOptions {
+        if output_format == &OutputFormat::Text {
+            if self.kifu {
+                return Err(UsageError::InvalidTextOutputOption("Kifu mode".to_owned()));
+            }
+            if move_number_options.is_some() {
+                return Err(UsageError::InvalidTextOutputOption(
+                    "Move numbers".to_owned(),
+                ));
+            }
+        }
+
+        Ok(RenderOptions {
             node_description: self.node_description,
             goban_range,
             style,

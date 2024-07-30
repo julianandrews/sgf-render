@@ -4,7 +4,7 @@ use std::path::Path;
 use clap::Parser;
 use minidom::Element;
 
-use sgf_render::{Command, Goban, MakeSvgOptions, OutputFormat, SgfRenderArgs};
+use sgf_render::{Command, Goban, OutputFormat, RenderOptions, SgfRenderArgs};
 
 fn main() {
     let parsed_args = SgfRenderArgs::parse();
@@ -30,10 +30,7 @@ fn query(input: &str) {
 }
 
 fn render(input: &str, parsed_args: SgfRenderArgs) {
-    let options = match parsed_args
-        .make_svg_args
-        .options(&parsed_args.output_format)
-    {
+    let options = match parsed_args.render_args.options(&parsed_args.output_format) {
         Ok(options) => options,
         Err(e) => {
             eprintln!("Failed to parse arguments: {}", e);
@@ -70,7 +67,7 @@ fn read_input<P: AsRef<Path>>(infile: &Option<P>) -> Result<String, Box<dyn Erro
 
 fn write_output<P: AsRef<Path>>(
     goban: &Goban,
-    options: &MakeSvgOptions,
+    options: &RenderOptions,
     outfile: Option<P>,
     format: OutputFormat,
 ) -> Result<(), Box<dyn Error>> {
@@ -80,16 +77,16 @@ fn write_output<P: AsRef<Path>>(
     };
     match format {
         OutputFormat::Svg => {
-            let svg = sgf_render::make_svg(goban, options)?;
+            let svg = sgf_render::svg::render(goban, options)?;
             svg.write_to(&mut writer)?
         }
         OutputFormat::Text => {
-            let diagram = sgf_render::text_diagram(goban, options)?;
+            let diagram = sgf_render::text::render(goban, options)?;
             writeln!(writer, "{}", diagram)?
         }
         #[cfg(feature = "png")]
         OutputFormat::Png => {
-            let svg = sgf_render::make_svg(goban, options)?;
+            let svg = sgf_render::svg::render(goban, options)?;
             save_png(writer, &svg)?
         }
     }

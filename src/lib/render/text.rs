@@ -1,14 +1,16 @@
-use crate::board_side::BoardSide;
-use crate::errors::MakeSvgError;
-use crate::goban::StoneColor;
-use crate::{board_label_text, Goban, MakeSvgOptions};
+use super::options::BoardSide;
+use super::{board_label_text, RenderOptions};
 
-pub fn text_diagram(goban: &Goban, options: &MakeSvgOptions) -> Result<String, MakeSvgError> {
+use crate::errors::GobanError;
+use crate::goban::StoneColor;
+use crate::Goban;
+
+pub fn render(goban: &Goban, options: &RenderOptions) -> Result<String, GobanError> {
     let (x_range, y_range) = options.goban_range.get_ranges(goban, options)?;
     let width = x_range.end - x_range.start;
     let height = y_range.end - y_range.start;
     if !options.label_sides.is_empty() && width > 25 || height > 99 {
-        return Err(MakeSvgError::UnlabellableRange);
+        return Err(GobanError::UnlabellableRange);
     }
     let mut lines: Vec<String> = vec![];
     let label_padding = if options.label_sides.contains(BoardSide::West) {
@@ -61,12 +63,12 @@ fn char_at(goban: &Goban, x: u8, y: u8) -> char {
 mod tests {
     use std::path::PathBuf;
 
-    use crate::goban_range::GobanRange;
-    use crate::{Goban, MakeSvgOptions};
+    use crate::render::GobanRange;
+    use crate::{Goban, RenderOptions};
 
-    use super::text_diagram;
+    use super::render;
 
-    fn build_diagram(sgf_dir: &str, options: &MakeSvgOptions) -> String {
+    fn build_diagram(sgf_dir: &str, options: &RenderOptions) -> String {
         let d: PathBuf = [
             env!("CARGO_MANIFEST_DIR"),
             "tests",
@@ -78,12 +80,12 @@ mod tests {
         .collect();
         let sgf = std::fs::read_to_string(d).unwrap();
         let goban = Goban::from_sgf(&sgf, &options.node_description).unwrap();
-        text_diagram(&goban, &options).unwrap()
+        render(&goban, &options).unwrap()
     }
 
     #[test]
     fn full_board() {
-        let options = MakeSvgOptions::default();
+        let options = RenderOptions::default();
         let diagram = build_diagram("last_move", &options);
         let expected = "\
 ┏┯┯┯┯┯┯┯┯┯┯○●●●●┯┯┓
@@ -110,7 +112,7 @@ mod tests {
 
     #[test]
     fn labels() {
-        let mut options = MakeSvgOptions::default();
+        let mut options = RenderOptions::default();
         options.label_sides = "nw".parse().unwrap();
         let diagram = build_diagram("last_move", &options);
         let expected = "   ABCDEFGHJKLMNOPQRST
@@ -138,7 +140,7 @@ mod tests {
 
     #[test]
     fn range() {
-        let mut options = MakeSvgOptions::default();
+        let mut options = RenderOptions::default();
         options.goban_range = GobanRange::Ranged(1..7, 0..5);
         let diagram = build_diagram("prob45", &options);
         let expected = "\
@@ -152,7 +154,7 @@ mod tests {
 
     #[test]
     fn range_with_labels() {
-        let mut options = MakeSvgOptions::default();
+        let mut options = RenderOptions::default();
         options.label_sides = "nwes".parse().unwrap();
         options.goban_range = GobanRange::Ranged(1..7, 0..5);
         let diagram = build_diagram("prob45", &options);
@@ -169,7 +171,7 @@ mod tests {
 
     #[test]
     fn shrink_wrap() {
-        let mut options = MakeSvgOptions::default();
+        let mut options = RenderOptions::default();
         options.goban_range = GobanRange::ShrinkWrap;
         let diagram = build_diagram("prob45", &options);
         let expected = "\

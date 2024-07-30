@@ -1,9 +1,9 @@
 use minidom::Element;
 
-use crate::errors::MakeSvgError;
-use crate::generated_styles::GeneratedStyle;
+use crate::errors::GobanError;
 use crate::goban::StoneColor;
-use crate::make_svg::NAMESPACE;
+use crate::render::generated_styles::GeneratedStyle;
+use crate::render::svg::NAMESPACE;
 
 #[derive(Debug, Clone, serde::Deserialize)]
 pub struct GobanStyle {
@@ -81,7 +81,7 @@ impl GobanStyle {
         }
     }
 
-    pub fn defs(&self) -> Result<Vec<Element>, MakeSvgError> {
+    pub fn defs(&self) -> Result<Vec<Element>, GobanError> {
         let linehead = Element::builder("marker", NAMESPACE)
             .attr("id", "linehead")
             .attr("markerWidth", "4")
@@ -113,7 +113,7 @@ impl GobanStyle {
         if let Some(s) = &self.defs {
             // Wrap
             let wrapped = format!("<svg xmlns=\"{}\">{}</svg>", NAMESPACE, s);
-            let wrapper: Element = wrapped.parse().map_err(MakeSvgError::StyleDefError)?;
+            let wrapper: Element = wrapped.parse().map_err(GobanError::StyleDefError)?;
             for child in wrapper.children() {
                 defs.push(child.clone());
             }

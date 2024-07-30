@@ -1,15 +1,17 @@
 use sgf_parse::{go::Prop, SgfNode};
 
-use crate::errors::MakeSvgError;
+use crate::errors::GobanError;
 
+/// Returns an iterator over SgfTraversalNode values at the root of each variation.
 pub fn variation_roots(node: &SgfNode<Prop>) -> impl Iterator<Item = SgfTraversalNode<'_>> {
     SgfTraversal::new(node).filter(|node| node.is_variation_root)
 }
 
+/// Returns an iterator of SgfTraversalNode values for every node in a variation.
 pub fn variation_nodes(
     root: &SgfNode<Prop>,
     variation: u64,
-) -> Result<impl Iterator<Item = SgfTraversalNode<'_>>, MakeSvgError> {
+) -> Result<impl Iterator<Item = SgfTraversalNode<'_>>, GobanError> {
     let mut parents = vec![0; variation as usize + 1];
     let mut starts = vec![u64::MAX; variation as usize + 1];
     let mut variation_seen = false;
@@ -22,7 +24,7 @@ pub fn variation_nodes(
         }
     }
     if !variation_seen {
-        return Err(MakeSvgError::MissingVariation);
+        return Err(GobanError::MissingVariation);
     }
     let mut current_variation = variation;
     let mut variations = vec![];

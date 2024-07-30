@@ -1,9 +1,9 @@
 use std::collections::HashSet;
 use std::ops::Range;
 
-use crate::errors::{MakeSvgError, UsageError};
+use crate::errors::{GobanError, UsageError};
 use crate::goban::Goban;
-use crate::make_svg::MakeSvgOptions;
+use crate::RenderOptions;
 
 #[derive(Debug, Clone, Default)]
 pub enum GobanRange {
@@ -17,8 +17,8 @@ impl GobanRange {
     pub fn get_ranges(
         &self,
         goban: &Goban,
-        options: &MakeSvgOptions,
-    ) -> Result<(Range<u8>, Range<u8>), MakeSvgError> {
+        options: &RenderOptions,
+    ) -> Result<(Range<u8>, Range<u8>), GobanError> {
         let goban_size = goban.size();
         match self {
             Self::FullBoard => Ok((0..goban_size.0, 0..goban_size.1)),
@@ -103,7 +103,7 @@ impl GobanRange {
             }
             Self::Ranged(a, b) => {
                 if a.end > goban_size.0 || b.end > goban_size.1 {
-                    Err(MakeSvgError::InvalidRange)
+                    Err(GobanError::InvalidRange)
                 } else {
                     Ok((a.clone(), b.clone()))
                 }

@@ -3,13 +3,11 @@ use std::ops::Range;
 
 use minidom::Element;
 
-use crate::board_label_text;
-use crate::board_side::{BoardSide, BoardSideSet};
-use crate::errors::MakeSvgError;
+use super::options::BoardSide;
+use super::{board_label_text, BoardSideSet, GobanStyle, MoveNumberOptions, RenderOptions};
+
+use crate::errors::GobanError;
 use crate::goban::{Goban, Stone, StoneColor};
-use crate::goban_range::GobanRange;
-use crate::goban_style::GobanStyle;
-use crate::node_description::NodeDescription;
 
 pub static NAMESPACE: &str = "http://www.w3.org/2000/svg";
 
@@ -21,39 +19,12 @@ static FONT_FAMILY: &str = "Inter";
 static FONT_SIZE: f64 = 0.45;
 static FONT_WEIGHT: usize = 700;
 
-#[derive(Debug, Clone, Default)]
-pub struct MakeSvgOptions {
-    pub node_description: NodeDescription,
-    pub goban_range: GobanRange,
-    pub style: GobanStyle,
-    pub viewbox_width: f64,
-    pub label_sides: BoardSideSet,
-    pub move_number_options: Option<MoveNumberOptions>,
-    pub draw_marks: bool,
-    pub draw_triangles: bool,
-    pub draw_circles: bool,
-    pub draw_squares: bool,
-    pub draw_selected: bool,
-    pub draw_dimmed: bool,
-    pub draw_labels: bool,
-    pub draw_lines: bool,
-    pub draw_arrows: bool,
-    pub kifu_mode: bool,
-}
-
-#[derive(Debug, Clone, Copy)]
-pub struct MoveNumberOptions {
-    pub start: u64,
-    pub end: Option<u64>,
-    pub count_from: u64,
-}
-
-pub fn make_svg(goban: &Goban, options: &MakeSvgOptions) -> Result<Element, MakeSvgError> {
+pub fn render(goban: &Goban, options: &RenderOptions) -> Result<Element, GobanError> {
     let (x_range, y_range) = options.goban_range.get_ranges(goban, options)?;
     let width = x_range.end - x_range.start;
     let height = y_range.end - y_range.start;
     if !options.label_sides.is_empty() && width > 25 || height > 99 {
-        return Err(MakeSvgError::UnlabellableRange);
+        return Err(GobanError::UnlabellableRange);
     }
     let (top_margin, right_margin, bottom_margin, left_margin) = get_margins(&options.label_sides);
 
@@ -152,7 +123,7 @@ pub fn make_svg(goban: &Goban, options: &MakeSvgOptions) -> Result<Element, Make
 }
 
 /// Draws a goban with squares of unit size.
-fn build_board(goban: &Goban, options: &MakeSvgOptions) -> Element {
+fn build_board(goban: &Goban, options: &RenderOptions) -> Element {
     let mut group_builder = Element::builder("g", NAMESPACE)
         .attr("id", "goban")
         .attr("clip-path", "url(#board-clip)")
@@ -207,7 +178,7 @@ fn build_board(goban: &Goban, options: &MakeSvgOptions) -> Element {
     group_builder.build()
 }
 
-fn build_board_lines_group(goban: &Goban, options: &MakeSvgOptions) -> Element {
+fn build_board_lines_group(goban: &Goban, options: &RenderOptions) -> Element {
     let mut group_builder = Element::builder("g", NAMESPACE)
         .attr("id", "lines")
         .attr("stroke", options.style.line_color())
@@ -252,7 +223,7 @@ fn build_board_lines_group(goban: &Goban, options: &MakeSvgOptions) -> Element {
     group_builder.append(hoshi).build()
 }
 
-fn build_stones_group(goban: &Goban, options: &MakeSvgOptions) -> Element {
+fn build_stones_group(goban: &Goban, options: &RenderOptions) -> Element {
     let mut group_builder = Element::builder("g", NAMESPACE)
         .attr("id", "stones")
         .attr("stroke", "none");
@@ -282,7 +253,7 @@ fn build_stones_group(goban: &Goban, options: &MakeSvgOptions) -> Element {
 
 fn build_move_numbers_group(
     goban: &Goban,
-    options: &MakeSvgOptions,
+    options: &RenderOptions,
     move_number_options: &MoveNumberOptions,
     move_numbers: &[(u64, Stone)],
 ) -> Element {
@@ -309,7 +280,7 @@ fn build_move_numbers_group(
     group_builder.build()
 }
 
-fn get_move_numbers(goban: &Goban, options: &MakeSvgOptions) -> Vec<(u64, Stone)> {
+fn get_move_numbers(goban: &Goban, options: &RenderOptions) -> Vec<(u64, Stone)> {
     let move_number_options = match options.move_number_options {
         Some(move_number_options) => move_number_options,
         None => return Vec::new(),
@@ -335,7 +306,7 @@ fn get_move_numbers(goban: &Goban, options: &MakeSvgOptions) -> Vec<(u64, Stone)
 
 fn build_marks_group(
     goban: &Goban,
-    options: &MakeSvgOptions,
+    options: &RenderOptions,
     no_markup_points: &HashSet<(u8, u8)>,
 ) -> Element {
     let mut group_builder = Element::builder("g", NAMESPACE).attr("id", "markup-marks");
@@ -351,7 +322,7 @@ fn build_marks_group(
 
 fn build_triangles_group(
     goban: &Goban,
-    options: &MakeSvgOptions,
+    options: &RenderOptions,
     no_markup_points: &HashSet<(u8, u8)>,
 ) -> Element {
     let mut group_builder = Element::builder("g", NAMESPACE).attr("id", "markup-triangles");
@@ -367,7 +338,7 @@ fn build_triangles_group(
 
 fn build_circles_group(
     goban: &Goban,
-    options: &MakeSvgOptions,
+    options: &RenderOptions,
     no_markup_points: &HashSet<(u8, u8)>,
 ) -> Element {
     let mut group_builder = Element::builder("g", NAMESPACE).attr("id", "markup-circles");
@@ -383,7 +354,7 @@ fn build_circles_group(
 
 fn build_squares_group(
     goban: &Goban,
-    options: &MakeSvgOptions,
+    options: &RenderOptions,
     no_markup_points: &HashSet<(u8, u8)>,
 ) -> Element {
     let mut group_builder = Element::builder("g", NAMESPACE).attr("id", "markup-squares");
@@ -399,7 +370,7 @@ fn build_squares_group(
 
 fn build_selected_group(
     goban: &Goban,
-    options: &MakeSvgOptions,
+    options: &RenderOptions,
     no_markup_points: &HashSet<(u8, u8)>,
 ) -> Element {
     let mut group_builder = Element::builder("g", NAMESPACE).attr("id", "markup-selected");
@@ -413,7 +384,7 @@ fn build_selected_group(
     group_builder.build()
 }
 
-fn build_dimmed_group(goban: &Goban, _options: &MakeSvgOptions) -> Element {
+fn build_dimmed_group(goban: &Goban, _options: &RenderOptions) -> Element {
     let mut group_builder = Element::builder("g", NAMESPACE).attr("id", "markup-dimmed");
     let mut dimmed: Vec<_> = goban.dimmed().collect();
     dimmed.sort_unstable();
@@ -425,7 +396,7 @@ fn build_dimmed_group(goban: &Goban, _options: &MakeSvgOptions) -> Element {
 
 fn build_label_group(
     goban: &Goban,
-    options: &MakeSvgOptions,
+    options: &RenderOptions,
     no_markup_points: &HashSet<(u8, u8)>,
 ) -> Element {
     let mut group_builder = Element::builder("g", NAMESPACE).attr("id", "markup-labels");
@@ -444,7 +415,7 @@ fn build_label_group(
     group_builder.build()
 }
 
-fn build_line_group(goban: &Goban, options: &MakeSvgOptions) -> Element {
+fn build_line_group(goban: &Goban, options: &RenderOptions) -> Element {
     let mut group_builder = Element::builder("g", NAMESPACE)
         .attr("id", "markup-lines")
         .attr("stroke", "black")
@@ -465,7 +436,7 @@ fn build_line_group(goban: &Goban, options: &MakeSvgOptions) -> Element {
     group_builder.build()
 }
 
-fn build_arrow_group(goban: &Goban, options: &MakeSvgOptions) -> Element {
+fn build_arrow_group(goban: &Goban, options: &RenderOptions) -> Element {
     let mut group_builder = Element::builder("g", NAMESPACE)
         .attr("id", "markup-arrows")
         .attr("stroke", "black")
@@ -490,7 +461,7 @@ fn build_arrow_group(goban: &Goban, options: &MakeSvgOptions) -> Element {
 ///
 /// Assumes lines are a unit apart, offset by `BOARD_MARGIN`.
 /// Respects `LABEL_MARGIN`.
-fn draw_board_labels(x_range: Range<u8>, y_range: Range<u8>, options: &MakeSvgOptions) -> Element {
+fn draw_board_labels(x_range: Range<u8>, y_range: Range<u8>, options: &RenderOptions) -> Element {
     let (top_margin, _, _, left_margin) = get_margins(&options.label_sides);
     let transform = format!(
         "translate({}, {})",
@@ -571,7 +542,7 @@ fn draw_repeated_stones(
     goban: &Goban,
     width: u8,
     diagram_height: f64,
-    options: &MakeSvgOptions,
+    options: &RenderOptions,
 ) -> Option<(Element, f64)> {
     let entry_padding = 0.25;
     let entry_width = 2.43;

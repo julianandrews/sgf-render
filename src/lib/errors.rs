@@ -1,35 +1,35 @@
 use sgf_parse::SgfParseError;
 
 #[derive(Debug)]
-pub enum MakeSvgError {
+pub enum GobanError {
     ParseError(SgfParseError),
     StyleDefError(minidom::Error),
     InsufficientSgfNodes,
     MissingGame,
     MissingVariation,
-    InvalidMoveError,
+    InvalidMove,
     InvalidRange,
     UnlabellableRange,
 }
 
-impl std::fmt::Display for MakeSvgError {
+impl std::fmt::Display for GobanError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::ParseError(e) => write!(f, "{}", e),
             Self::StyleDefError(e) => write!(f, "Invalid defs in style: {}", e),
-            Self::InvalidMoveError => write!(f, "Invalid move"),
+            Self::InvalidMove => write!(f, "Invalid move"),
             Self::InsufficientSgfNodes => write!(f, "Insufficient SGF nodes found"),
             Self::MissingGame => write!(f, "Selected game not found"),
-            Self::MissingVariation => write!(f, "Selected variation not found."),
-            Self::InvalidRange => write!(f, "Invalid range to render in goban."),
-            Self::UnlabellableRange => write!(f, "Range too large for use with labels."),
+            Self::MissingVariation => write!(f, "Selected variation not found"),
+            Self::InvalidRange => write!(f, "Invalid range to render in goban"),
+            Self::UnlabellableRange => write!(f, "Range too large for use with labels"),
         }
     }
 }
 
-impl std::error::Error for MakeSvgError {}
+impl std::error::Error for GobanError {}
 
-impl From<SgfParseError> for MakeSvgError {
+impl From<SgfParseError> for GobanError {
     fn from(error: SgfParseError) -> Self {
         Self::ParseError(error)
     }
@@ -42,18 +42,22 @@ pub enum UsageError {
     InvalidFirstMoveNumber,
     InvalidLastMoveNumber,
     InvalidBoardSides,
+    InvalidNodeNumber(String),
     InvalidTextOutputOption(String),
 }
 
 impl std::fmt::Display for UsageError {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         match self {
-            UsageError::InvalidRange => write!(f, "Invalid range."),
+            UsageError::InvalidRange => write!(f, "Invalid range"),
             UsageError::StyleReadError(e) => write!(f, "Failed to read style file: {}", e),
-            UsageError::InvalidFirstMoveNumber => write!(f, "Invalid first move number."),
-            UsageError::InvalidLastMoveNumber => write!(f, "Invalid last move number."),
-            UsageError::InvalidBoardSides => write!(f, "Invalid board sides."),
-            UsageError::InvalidTextOutputOption(s) => write!(f, "{}", s),
+            UsageError::InvalidFirstMoveNumber => write!(f, "Invalid first move number"),
+            UsageError::InvalidLastMoveNumber => write!(f, "Invalid last move number"),
+            UsageError::InvalidBoardSides => write!(f, "Invalid board sides"),
+            UsageError::InvalidNodeNumber(s) => write!(f, "Invalid node number '{}'", s),
+            UsageError::InvalidTextOutputOption(s) => {
+                write!(f, "{} not supported for text output", s)
+            }
         }
     }
 }
