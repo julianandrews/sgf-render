@@ -5,9 +5,10 @@ use crate::errors::{MakeSvgError, UsageError};
 use crate::goban::Goban;
 use crate::make_svg::MakeSvgOptions;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Default)]
 pub enum GobanRange {
     ShrinkWrap,
+    #[default]
     FullBoard,
     Ranged(Range<u8>, Range<u8>),
 }

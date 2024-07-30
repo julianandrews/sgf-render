@@ -4,10 +4,10 @@
 
 ![Cho Chikun Elementary, Problem 45](demo/prob45.svg).
 
-CLI to generate SVG or PNG diagrams of Go games from
-[SGF](https://www.red-bean.com/sgf/) format game records.
+CLI to generate diagrams of Go games from [SGF](https://www.red-bean.com/sgf/)
+format game records.
 
-SVG output is clean and well labeled for easy re-styling or modification.
+Default SVG output is clean and well labeled for easy re-styling or modification.
 
 Supports [numbered
 moves](https://raw.githubusercontent.com/julianandrews/sgf-render/master/demo/simple-numbered.svg),
@@ -114,6 +114,43 @@ v0, 0-3
 ├── v0, 3-3
 └── v1, 3-3
 ```
+
+### Text output
+
+You can generate a text only diagram suitable for use from the terminal with
+`--format text`.
+
+```
+# sgf-render -f text tests/data/minimalist/input.sgf
+
+   ABCDEFGHJKLMNOPQRST
+ 1 ┏┯┯┯┯┯┯┯┯┯┯○●●●●┯┯┓
+ 2 ┠┼┼┼┼┼┼┼┼┼┼○○○●○●┼┨
+ 3 ┠┼┼┼○○●○○○┼┼○●●○●●┨
+ 4 ○○○○○●○○●┼○┼┼○●○○○●
+ 5 ○●●●○●●●┼┼┼┼○┼┼┼○●┨
+ 6 ●┼●○┼┼┼┼○┼┼┼●○┼●●┼●
+ 7 ┠●●○┼┼○○┼●○○○●●┼┼●┨
+ 8 ┠●○○○○●○┼○●●●○┼┼┼┼┨
+ 9 ┠●○●┼○●○○○○○●●●●●┼┨
+10 ┠┼●●●┼●○●●●●○○○○○●┨
+11 ┠┼┼●○┼●●○┼┼○┼┼┼┼┼●┨
+12 ┠┼●┼●○┼○┼○○┼┼┼┼┼○●┨
+13 ┠●●●○○┼○○┼●○┼┼○┼○●┨
+14 ┠●○○○●●●●●●○┼┼○●●┼┨
+15 ○●●○●┼●○○○●●○┼┼○●┼┨
+16 ┠○○●●●┼●●○○○○○○┼●┼┨
+17 ┠○┼○┼●●●○┼┼●●○●●┼┼┨
+18 ┠┼○○●┼┼●○┼○●┼●┼┼┼┼┨
+19 ┗┷┷┷┷┷┷┷┷┷○┷●┷┷┷┷┷┛
+```
+
+Text diagrams are intended primarily for examining an SGF file from the
+terminal, and not all functionality is supported:
+
+- `--move-numbers` and `--kifu` are not supported,
+- point markup is disabled (equivalent to `--no-point-markup`), and
+- `--style`, `--custom-style`, and `--width` are ignored.
 
 ### Kifu Generation
 

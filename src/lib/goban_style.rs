@@ -1,6 +1,7 @@
 use minidom::Element;
 
 use crate::errors::MakeSvgError;
+use crate::generated_styles::GeneratedStyle;
 use crate::goban::StoneColor;
 use crate::make_svg::NAMESPACE;
 
@@ -118,5 +119,11 @@ impl GobanStyle {
             }
         }
         Ok(defs)
+    }
+}
+
+impl Default for GobanStyle {
+    fn default() -> Self {
+        GeneratedStyle::Simple.style().clone()
     }
 }

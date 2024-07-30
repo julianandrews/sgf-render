@@ -42,6 +42,7 @@ pub enum UsageError {
     InvalidFirstMoveNumber,
     InvalidLastMoveNumber,
     InvalidBoardSides,
+    InvalidTextOutputOption(String),
 }
 
 impl std::fmt::Display for UsageError {
@@ -52,6 +53,7 @@ impl std::fmt::Display for UsageError {
             UsageError::InvalidFirstMoveNumber => write!(f, "Invalid first move number."),
             UsageError::InvalidLastMoveNumber => write!(f, "Invalid last move number."),
             UsageError::InvalidBoardSides => write!(f, "Invalid board sides."),
+            UsageError::InvalidTextOutputOption(s) => write!(f, "{}", s),
         }
     }
 }

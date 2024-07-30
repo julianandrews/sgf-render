@@ -539,7 +539,7 @@ checksum = "7aeeb265fe56d6e10e726905d6c1705c5642943bbebe82ebc2673e81086ea5ca"
 
 [[package]]
 name = "sgf-render"
-version = "3.0.2"
+version = "3.1.0"
 dependencies = [
  "clap",
  "getopts",

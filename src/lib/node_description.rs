@@ -1,6 +1,6 @@
 use clap::Parser;
 
-#[derive(Debug, PartialEq, Eq, Clone, Copy, Parser)]
+#[derive(Debug, PartialEq, Eq, Clone, Copy, Default, Parser)]
 pub struct NodeDescription {
     /// Game number to display (for multi-game files).
     #[arg(short, long, default_value_t = 0)]
@@ -13,9 +13,10 @@ pub struct NodeDescription {
     pub node_number: NodeNumber,
 }
 
-#[derive(Debug, PartialEq, Eq, Clone, Copy)]
+#[derive(Debug, PartialEq, Eq, Clone, Copy, Default)]
 pub enum NodeNumber {
     Number(u64),
+    #[default]
     Last,
 }
 

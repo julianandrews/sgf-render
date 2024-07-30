@@ -8,7 +8,7 @@ use crate::traversal::variation_nodes;
 
 pub struct Goban {
     size: (u8, u8),
-    stones: HashMap<(u8, u8), StoneColor>,
+    pub stones: HashMap<(u8, u8), StoneColor>,
     stones_before_move: HashMap<u64, HashSet<Stone>>,
     moves: Vec<(u64, Stone)>,
     move_number: u64,

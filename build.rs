@@ -106,7 +106,7 @@ fn write_tests_header(outfile: &mut fs::File) {
 
 use clap::Parser;
 
-use sgf_render::{{Goban, MakeSvgArgs, make_svg}};
+use sgf_render::{{Goban, MakeSvgArgs, OutputFormat, make_svg}};
 "#,
     )
     .unwrap();
@@ -129,7 +129,7 @@ fn {test_name}() {{
     }}
     arguments.insert(0, "sgf-render".to_string());
     let make_svg_args = MakeSvgArgs::parse_from(&arguments);
-    let options = make_svg_args.options().unwrap();
+    let options = make_svg_args.options(&OutputFormat::Svg).unwrap();
     let input = include_str!(r"{path}{separator}input.sgf");
     let expected = include_str!(r"{path}{separator}output.svg");
 

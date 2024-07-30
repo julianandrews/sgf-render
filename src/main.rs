@@ -4,7 +4,7 @@ use std::path::Path;
 use clap::Parser;
 use minidom::Element;
 
-use sgf_render::{Command, OutputFormat, SgfRenderArgs};
+use sgf_render::{Command, Goban, MakeSvgOptions, OutputFormat, SgfRenderArgs};
 
 fn main() {
     let parsed_args = SgfRenderArgs::parse();
@@ -30,29 +30,29 @@ fn query(input: &str) {
 }
 
 fn render(input: &str, parsed_args: SgfRenderArgs) {
-    let options = match parsed_args.make_svg_args.options() {
+    let options = match parsed_args
+        .make_svg_args
+        .options(&parsed_args.output_format)
+    {
         Ok(options) => options,
         Err(e) => {
             eprintln!("Failed to parse arguments: {}", e);
             std::process::exit(1);
         }
     };
-    let goban = match sgf_render::Goban::from_sgf(input, &options.node_description) {
+    let goban = match Goban::from_sgf(input, &options.node_description) {
         Ok(goban) => goban,
         Err(e) => {
             eprintln!("Failed to generate goban: {}", e);
             std::process::exit(1);
         }
     };
-    let svg = match sgf_render::make_svg(&goban, &options) {
-        Ok(svg) => svg,
-        Err(e) => {
-            eprintln!("Failed to generate SVG: {}", e);
-            std::process::exit(1);
-        }
-    };
-
-    if let Err(e) = write_output(&svg, parsed_args.outfile, parsed_args.output_format) {
+    if let Err(e) = write_output(
+        &goban,
+        &options,
+        parsed_args.outfile,
+        parsed_args.output_format,
+    ) {
         eprintln!("Failed to write output: {}", e);
         std::process::exit(1);
     }
@@ -69,7 +69,8 @@ fn read_input<P: AsRef<Path>>(infile: &Option<P>) -> Result<String, Box<dyn Erro
 }
 
 fn write_output<P: AsRef<Path>>(
-    svg: &Element,
+    goban: &Goban,
+    options: &MakeSvgOptions,
     outfile: Option<P>,
     format: OutputFormat,
 ) -> Result<(), Box<dyn Error>> {
@@ -78,9 +79,19 @@ fn write_output<P: AsRef<Path>>(
         None => Box::new(std::io::stdout()),
     };
     match format {
-        OutputFormat::Svg => svg.write_to(&mut writer)?,
+        OutputFormat::Svg => {
+            let svg = sgf_render::make_svg(goban, options)?;
+            svg.write_to(&mut writer)?
+        }
+        OutputFormat::Text => {
+            let diagram = sgf_render::text_diagram(goban, options)?;
+            writeln!(writer, "{}", diagram)?
+        }
         #[cfg(feature = "png")]
-        OutputFormat::Png => save_png(writer, svg)?,
+        OutputFormat::Png => {
+            let svg = sgf_render::make_svg(goban, options)?;
+            save_png(writer, &svg)?
+        }
     }
     Ok(())
 }

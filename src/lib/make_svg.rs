@@ -3,6 +3,7 @@ use std::ops::Range;
 
 use minidom::Element;
 
+use crate::board_label_text;
 use crate::board_side::{BoardSide, BoardSideSet};
 use crate::errors::MakeSvgError;
 use crate::goban::{Goban, Stone, StoneColor};
@@ -20,7 +21,7 @@ static FONT_FAMILY: &str = "Inter";
 static FONT_SIZE: f64 = 0.45;
 static FONT_WEIGHT: usize = 700;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Default)]
 pub struct MakeSvgOptions {
     pub node_description: NodeDescription,
     pub goban_range: GobanRange,
@@ -48,7 +49,7 @@ pub struct MoveNumberOptions {
 }
 
 pub fn make_svg(goban: &Goban, options: &MakeSvgOptions) -> Result<Element, MakeSvgError> {
-    let (x_range, y_range) = options.goban_range.get_ranges(&goban, options)?;
+    let (x_range, y_range) = options.goban_range.get_ranges(goban, options)?;
     let width = x_range.end - x_range.start;
     let height = y_range.end - y_range.start;
     if !options.label_sides.is_empty() && width > 25 || height > 99 {
@@ -76,7 +77,7 @@ pub fn make_svg(goban: &Goban, options: &MakeSvgOptions) -> Result<Element, Make
     let diagram_width = f64::from(width) - 1.0 + 2.0 * BOARD_MARGIN + left_margin + right_margin;
 
     let (diagram, diagram_height) = {
-        let board = build_board(&goban, options);
+        let board = build_board(goban, options);
         let board_view = {
             let board_view_transform = format!(
                 "translate({}, {})",
@@ -110,7 +111,7 @@ pub fn make_svg(goban: &Goban, options: &MakeSvgOptions) -> Result<Element, Make
             f64::from(height) - 1.0 + 2.0 * BOARD_MARGIN + top_margin + bottom_margin;
         if options.kifu_mode {
             if let Some((element, element_height)) = draw_repeated_stones(
-                &goban,
+                goban,
                 width,
                 diagram_height + REPEATED_MOVES_MARGIN,
                 options,
@@ -509,7 +510,7 @@ fn draw_board_labels(x_range: Range<u8>, y_range: Range<u8>, options: &MakeSvgOp
                 Element::builder("text", NAMESPACE)
                     .attr("x", format_float(f64::from(x - start) + BOARD_MARGIN))
                     .attr("y", "0")
-                    .append(label_text(x))
+                    .append(board_label_text(x))
                     .build(),
             );
         }
@@ -540,7 +541,7 @@ fn draw_board_labels(x_range: Range<u8>, y_range: Range<u8>, options: &MakeSvgOp
                     .attr("x", format_float(f64::from(x - start) + BOARD_MARGIN))
                     .attr("y", format_float(y))
                     .attr("alignment-baseline", "hanging")
-                    .append(label_text(x))
+                    .append(board_label_text(x))
                     .build(),
             );
         }
@@ -649,14 +650,6 @@ fn draw_repeated_stones(
         .build();
 
     Some((group, rect_height))
-}
-
-fn label_text(x: u8) -> String {
-    if x + b'A' < b'I' {
-        ((x + b'A') as char).to_string()
-    } else {
-        ((x + b'B') as char).to_string() // skip 'I'
-    }
 }
 
 fn draw_stone(stone: Stone, style: &GobanStyle) -> Element {

@@ -120,7 +120,13 @@ pub struct MakeSvgArgs {
 
 impl MakeSvgArgs {
     /// Map MakeSvgArgs to options used by `make_svg`.
-    pub fn options(&self) -> Result<MakeSvgOptions, UsageError> {
+    pub fn options(&self, output_format: &OutputFormat) -> Result<MakeSvgOptions, UsageError> {
+        if output_format == &OutputFormat::Text && self.kifu {
+            return Err(UsageError::InvalidTextOutputOption(
+                "Kifu mode not supported for text output".to_owned(),
+            ));
+        }
+
         let goban_range = if self.shrink_wrap {
             GobanRange::ShrinkWrap
         } else if let Some(range) = &self.range {
@@ -154,6 +160,11 @@ impl MakeSvgArgs {
         } else {
             None
         };
+        if output_format == &OutputFormat::Text && move_number_options.is_some() {
+            return Err(UsageError::InvalidTextOutputOption(
+                "Move numbers not supported for text output".to_owned(),
+            ));
+        }
 
         let no_point_markup = self.no_point_markup;
         let label_sides = if self.no_board_labels {
@@ -183,9 +194,10 @@ impl MakeSvgArgs {
     }
 }
 
-#[derive(Debug, Clone, Copy, clap::ValueEnum)]
+#[derive(Debug, Clone, Copy, clap::ValueEnum, Eq, PartialEq)]
 pub enum OutputFormat {
     Svg,
+    Text,
     #[cfg(feature = "png")]
     Png,
 }
