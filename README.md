@@ -52,7 +52,7 @@ Arguments:
 
 Options:
   -o, --outfile <FILE>             Output file [default: write to stdout]
-  -f, --format <OUTPUT_FORMAT>     Output format [default: svg] [possible values: svg, png]
+  -f, --format <OUTPUT_FORMAT>     Output format [default: svg] [possible values: svg, text, png]
   -g, --game-number <GAME_NUMBER>  Game number to display (for multi-game files) [default: 0]
   -v, --variation <VARIATION>      Variation number to display (use `query` command for numbers) [default: 0]
   -n, --node-number <NODE_NUMBER>  Node number in the variation to display [default: last]
