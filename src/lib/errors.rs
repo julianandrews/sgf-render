@@ -44,6 +44,7 @@ pub enum UsageError {
     InvalidBoardSides,
     InvalidNodeNumber(String),
     InvalidTextOutputOption(String),
+    InvalidTileSet,
 }
 
 impl std::fmt::Display for UsageError {
@@ -58,6 +59,7 @@ impl std::fmt::Display for UsageError {
             UsageError::InvalidTextOutputOption(s) => {
                 write!(f, "{} not supported for text output", s)
             }
+            UsageError::InvalidTileSet => write!(f, "Must be 11 characters long"),
         }
     }
 }

@@ -7,6 +7,7 @@ use crate::errors::UsageError;
 use crate::render::{
     BoardSideSet, GeneratedStyle, GobanRange, MoveNumberOptions, NodeDescription, RenderOptions,
 };
+use crate::text::TileSet;
 
 // clap v3 styling
 const CLAP_STYLES: Styles = Styles::styled()
@@ -81,6 +82,9 @@ pub struct RenderArgs {
     /// Don't draw position labels.
     #[arg(long, conflicts_with = "label_sides")]
     no_board_labels: bool,
+    /// Tileset to use for text rendering (11 characters)
+    #[arg(long, default_value = "●○┏┓┗┛┯┠┷┨┼")]
+    tileset: TileSet,
     /// Don't draw SGF marks.
     #[clap(long = "no-marks", action = clap::ArgAction::SetFalse)]
     draw_marks: bool,
@@ -188,6 +192,7 @@ impl RenderArgs {
             draw_lines: self.draw_lines && !no_point_markup,
             draw_arrows: self.draw_arrows && !no_point_markup,
             kifu_mode: self.kifu,
+            tileset: self.tileset.clone(),
         })
     }
 }

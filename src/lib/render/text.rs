@@ -1,7 +1,7 @@
 use super::options::BoardSide;
 use super::{board_label_text, RenderOptions};
 
-use crate::errors::GobanError;
+use crate::errors::{GobanError, UsageError};
 use crate::goban::StoneColor;
 use crate::Goban;
 
@@ -23,7 +23,10 @@ pub fn render(goban: &Goban, options: &RenderOptions) -> Result<String, GobanErr
         lines.push(format!("{}{}", label_padding, line));
     }
     for y in y_range {
-        let mut line = x_range.clone().map(|x| char_at(goban, x, y)).collect();
+        let mut line = x_range
+            .clone()
+            .map(|x| options.tileset.char_at(goban, x, y))
+            .collect();
         if options.label_sides.contains(BoardSide::West) {
             line = format!("{: >2} {}", y + 1, line);
         }
@@ -39,23 +42,51 @@ pub fn render(goban: &Goban, options: &RenderOptions) -> Result<String, GobanErr
     Ok(lines.join("\n"))
 }
 
-fn char_at(goban: &Goban, x: u8, y: u8) -> char {
-    let max_x = goban.size().0 - 1;
-    let max_y = goban.size().1 - 1;
-    match goban.stone_color(x, y) {
-        Some(StoneColor::White) => '●',
-        Some(StoneColor::Black) => '○',
-        None => match (x, y) {
-            (0, 0) => '┏',
-            (x, 0) if x == max_x => '┓',
-            (0, y) if y == max_y => '┗',
-            (x, y) if x == max_x && y == max_y => '┛',
-            (_, 0) => '┯',
-            (0, _) => '┠',
-            (_, y) if y == max_y => '┷',
-            (x, _) if x == max_x => '┨',
-            (_, _) => '┼',
-        },
+#[derive(Debug, Clone)]
+pub struct TileSet {
+    tiles: [char; 11],
+}
+
+impl TileSet {
+    fn char_at(&self, goban: &Goban, x: u8, y: u8) -> char {
+        let max_x = goban.size().0 - 1;
+        let max_y = goban.size().1 - 1;
+        match goban.stone_color(x, y) {
+            Some(StoneColor::White) => self.tiles[0],
+            Some(StoneColor::Black) => self.tiles[1],
+            None => match (x, y) {
+                (0, 0) => self.tiles[2],
+                (x, 0) if x == max_x => self.tiles[3],
+                (0, y) if y == max_y => self.tiles[4],
+                (x, y) if x == max_x && y == max_y => self.tiles[5],
+                (_, 0) => self.tiles[6],
+                (0, _) => self.tiles[7],
+                (_, y) if y == max_y => self.tiles[8],
+                (x, _) if x == max_x => self.tiles[9],
+                (_, _) => self.tiles[10],
+            },
+        }
+    }
+}
+
+impl std::str::FromStr for TileSet {
+    type Err = UsageError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        use std::convert::TryInto;
+
+        let tiles: [char; 11] = s
+            .chars()
+            .collect::<Vec<_>>()
+            .try_into()
+            .map_err(|_| UsageError::InvalidTileSet)?;
+        Ok(TileSet { tiles })
+    }
+}
+
+impl Default for TileSet {
+    fn default() -> Self {
+        "●○┏┓┗┛┯┠┷┨┼".parse().unwrap()
     }
 }
 
@@ -181,6 +212,23 @@ mod tests {
 ●○○●┼┼┼
 ┠●●┼┼┼┼
 ┠┼┼┼┼┼┼";
+        assert_eq!(diagram, expected);
+    }
+
+    #[test]
+    fn tileset() {
+        let mut options = RenderOptions::default();
+        options.goban_range = GobanRange::ShrinkWrap;
+        options.tileset = "OX++++-|-|.".parse().unwrap();
+        let diagram = build_diagram("prob45", &options);
+        let expected = "\
++-XXOO-
+XX.XXO.
+O.XOOO.
+OXXO...
+|OO....
+|......";
+        println!("{}", diagram);
         assert_eq!(diagram, expected);
     }
 }

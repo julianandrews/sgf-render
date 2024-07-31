@@ -1,4 +1,4 @@
-use crate::errors::UsageError;
+use crate::{errors::UsageError, text::TileSet};
 
 use super::{GobanRange, GobanStyle};
 
@@ -19,6 +19,7 @@ pub struct RenderOptions {
     pub draw_labels: bool,
     pub draw_lines: bool,
     pub draw_arrows: bool,
+    pub tileset: TileSet,
     pub kifu_mode: bool,
 }
 

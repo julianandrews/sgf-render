@@ -65,6 +65,7 @@ Options:
       --move-numbers-from <NUM>    Number to start counting move numbers from (requires --move-numbers) [default: 1]
       --label-sides <SIDES>        Sides to draw position labels on [default: nw]
       --no-board-labels            Don't draw position labels
+      --tileset <TILESET>          Tileset to use for text rendering (11 characters) [default: ●○┏┓┗┛┯┠┷┨┼]
       --no-marks                   Don't draw SGF marks
       --no-triangles               Don't draw SGF triangles
       --no-circles                 Don't draw SGF circles
