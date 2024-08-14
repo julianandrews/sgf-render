@@ -1,0 +1,186 @@
+[=DESCRIPTION]
+A renderer for SGF diagrams.
+
+By default, sgf\-render generates SVG output, but can also generate PNG or text
+output with the \-\-format option. Text output is primarily intended for
+quickly examining an SGF file from the terminal, and only supports of subset of
+the full functionality.
+
+[NODE SELECTION]
+Node numbers can be selected with the \-\-node\-number flag. For a simple
+SGF, \-\-node\-number and move number will usually line up since conventionally
+SGF files have no moves in the root node.
+
+Variations can be selected with the \-\-variation flag, and are numbered in
+depth\-first traversal order. You can print a diagram of variations and their
+associated \-\-node\-number values with the 'query' command:
+
+    $ sgf-render query input.sgf
+    Game #0
+    v0, 0-8
+    ├── v0, 3-8
+    │   ├── v0, 6-8
+    │   └── v1, 6-7
+    └── v2, 3-7
+        ├── v2, 5-7
+        │   ├── v2, 6-7
+        │   │   ├── v2, 7-7
+        │   │   ├── v3, 7-7
+        │   │   └── v4, 7-7
+        │   └── v5, 6-7
+        │       ├── v5, 7-7
+        │       └── v6, 7-8
+        ├── v7, 5-5
+        └── v8, 5-5
+
+    Game #1
+    v0, 0-3
+    ├── v0, 3-3
+    └── v1, 3-3
+
+Text output (\-\-format text) can be useful for quickly finding the node you
+want to render.
+
+[KIFU GENERATION]
+By default sgf-render generates diagrams designed to show the board position at
+a single point in time. Captured stones are removed, and when using
+\-\-move-numbers only the last move number at a given point is displayed. Use the
+\-\-kifu flag to generate diagrams appropriate for use as a game record:
+
+    \- move numbers are enabled
+    \- all other markup is disabled
+    \- stones are never removed from the board
+    \- repeated stones are tracked with annotations
+
+You can use the \-\-move\-numbers flag to select a subset of moves to number,
+which can be useful for generating a diagram (or series of diagrams) showing
+only part of a game.
+
+[CUSTOM STYLES]
+Custom styles can be specified by passing a TOML formatted file to the
+\-\-custom-style option. A simple example might look like:
+
+    line_color = "black"
+    line_width = 0.03
+    hoshi_radius = 0.09
+    background_fill = "#cfa87e"
+    label_color = "#6e5840"
+    black_stone_fill = "black"
+    white_stone_fill = "white"
+    black_stone_stroke = "black"
+    white_stone_stroke = "black"
+    markup_stroke_width = 0.1
+    black_stone_markup_color = "white"
+    white_stone_markup_color = "black"
+    empty_markup_color = "black"
+    black_stone_selected_color = "blue"
+    white_stone_selected_color = "blue"
+    empty_selected_color = "blue"
+
+Widths and radiuses should be TOML floats, and colors should be strings
+suitable for use as an SVG stroke or fill.
+
+Gradients are supported by providing a 'defs' value. For example:
+
+    line_color = "black"
+    line_width = 0.03
+    hoshi_radius = 0.09
+    background_fill = "#cfa87e"
+    label_color = "#6e5840"
+    black_stone_fill = "url(#black-stone-fill)"
+    white_stone_fill = "url(#white-stone-fill)"
+    markup_stroke_width = 0.1
+    black_stone_markup_color = "white"
+    white_stone_markup_color = "black"
+    empty_markup_color = "black"
+    black_stone_selected_color = "blue"
+    white_stone_selected_color = "blue"
+    empty_selected_color = "blue"
+    defs = """<radialGradient cx="35%" cy="35%" id="black-stone-fill">
+    <stop offset="0%" stop-color="#666"/>
+    <stop offset="100%" stop-color="black"/>
+    </radialGradient>
+    <radialGradient cx="35%" cy="35%" id="white-stone-fill">
+    <stop offset="0%" stop-color="#eee"/>
+    <stop offset="30%" stop-color="#ddd"/>
+    <stop offset="100%" stop-color="#bbb"/>
+    </radialGradient>"""
+
+The 'defs' value will be used to populate the <defs> element in the generated
+SVG, and any gradients defined there can be referenced with a 'url' value.
+
+[EXAMPLES]
+.TP
+\fBsgf\-render input.sgf\fR
+Generate an SVG from the last move and write it to the terminal
+.TP
+\fBsgf\-render input.sgf \-o output.svg\fR
+Generate an SVG from the last move and write it to a file
+.TP
+\fBsgf\-render \-n 50 input.sgf\fR
+Select the 50th node (usually the 50th move)
+.TP
+\fBsgf\-render \-n 0 input.sgf\fR
+Select the root node (usually before the first move)
+.TP
+\fBsgf\-render query input.sgf\fR
+Query an SGF file to see the available games and variations
+.TP
+\fBsgf\-render \-n 50 \-v 1 input.sgf\fR
+Select the 50th node the 1st variation
+.TP
+\fBsgf\-render \-n 50 \-g 1 input.sgf\fR
+Select the 50th node in the second game in a collection
+.TP
+\fBsgf\-render \-\-kifu input.sgf\fR
+Generate a kifu of a game
+.TP
+\fBsgf\-render \-\-kifu \-\-move\-numbers=50\-99 \-\-move\-numbers\-from 50 input.sgf\fR
+Generate a kifu with moves numbered from 50 to 99. A series of similar
+commands can be used to split a game across a number of diagrams for easier
+reading.
+.TP
+\fBsgf\-render \-\-range cc\-fg input.sgf\fR
+Draw only part of the output diagram
+.TP
+\fBsgf\-render \-s input.sgf\fR
+Draw only the part of the board with stones
+.TP
+\fBsgf\-render \-\-label\-sides sw
+Draw board labels on the south and west sides of the board
+.TP
+\fBsgf\-render \-\-no\-point\-markup input.sgf\fR
+Disable all markup
+.TP
+\fBsgf\-render \-\-no\-triangles input.sgf\fR
+Disable only triangle markup
+.TP
+\fBsgf\-render \-\-move\-numbers input.sgf\fR
+Show move numbers (may replace some markup)
+.TP
+\fBsgf\-render \-\-move\-numbers=20\-30 input.sgf\fR
+Show move numbers from move 20 to 30 (inclusive) starting at 1
+.TP
+\fBsgf\-render \-\-move\-numbers=20\-30 \-\-move\-numbers\-from 20 input.sgf\fR
+Show move numbers from move 20 to 30 (inclusive) starting at 20
+.TP
+\fBsgf\-render \-f png input.sgf \-o output.svg\fR
+Generate a PNG and write it to a file
+.TP
+\fBsgf\-render \-f text input.sgf\fR
+Generate a text diagram in the terminal
+.TP
+\fBsgf\-render \-f text \-\-tileset WB--------- input.sgf\fR
+Generate a text diagram with a simplified ASCII tileset
+.TP
+\fBsgf\-render \-\-custom\-style style.toml input.sgf\fR
+Use the custom style defined in 'style.toml'
+
+[AUTHOR]
+Julian Andrews <jandrews271@gmail.com>
+
+[REPORTING BUGS]
+Report bugs at https://github.com/julianandrews/sgf-render/issues
+
+[COPYRIGHT]
+Copyright © 2020, 2021, 2022, 2023, 2024 Julian Andrews
