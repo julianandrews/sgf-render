@@ -8,9 +8,9 @@ binary="${repo_root}/target/release/sgf-render"
 data_dir="${repo_root}/tests/data"
 demo_dir="${repo_root}/demo"
 
-$binary ${data_dir}/prob45/input.sgf --shrink-wrap --width 400 -o ${demo_dir}/prob45.svg
-$binary ${data_dir}/prob45/input.sgf --shrink-wrap -o ${demo_dir}/prob45.png
-$binary ${data_dir}/prob45/input.sgf --shrink-wrap --style fancy -o ${demo_dir}/prob45-fancy.svg
+$binary ${data_dir}/prob45/input.sgf -n 0 --shrink-wrap --width 400 -o ${demo_dir}/prob45.svg
+$binary ${data_dir}/prob45/input.sgf -f png -n 0 --shrink-wrap -o ${demo_dir}/prob45.png
+$binary ${data_dir}/prob45/input.sgf -n 0 --shrink-wrap --style fancy -o ${demo_dir}/prob45-fancy.svg
 $binary ${data_dir}/markup/input.sgf -n 2 --range cc-qk -o ${demo_dir}/markup.svg
 $binary ${data_dir}/numbered_moves/input.sgf -n 120 --move-numbers -o ${demo_dir}/simple-numbered.svg
 $binary ${data_dir}/numbered_moves/input.sgf --style minimalist -n 120 --move-numbers -o ${demo_dir}/minimalist-numbered.svg
