@@ -7,7 +7,7 @@ license = "MIT"
 keywords = ["baduk", "sgf", "go", "svg", "png"]
 repository = "https://github.com/julianandrews/sgf-render/"
 readme = "README.md"
-description = "A renderer for SGF diagrams."
+description = "CLI to generate diagrams of Go games from SGF game records"
 categories = ["command-line-utilities", "multimedia::images", "rendering", "visualization"]
 build = "build.rs"
 
@@ -36,6 +36,11 @@ shell-words = "1.0.0"
 
 [package.metadata.deb]
 license-file = ["LICENSE", "0"]
+extended-description = """
+sgf-render is suitable for generating diagrams to illustrate board positions,
+sequences, tsumego problems and solutions, or whole game kifu. Most SGF markup
+and properties are supported. Default output is clean and easily customizable
+SVG."""
 assets = [
     ["target/release/sgf-render", "/usr/bin/", "755"],
     ["README.md", "/usr/share/doc/sgf-render/", "644"],
