@@ -1,10 +1,10 @@
 [=DESCRIPTION]
-A renderer for SGF diagrams.
+CLI to generate diagrams of Go games from SGF game records.
 
-By default, sgf\-render generates SVG output, but can also generate PNG or text
-output with the \-\-format option. Text output is primarily intended for
-quickly examining an SGF file from the terminal, and only supports of subset of
-the full functionality.
+sgf\-render is suitable for generating diagrams to illustrate board positions,
+sequences, tsumego problems and solutions, or whole game kifu. Most SGF markup
+and properties are supported. Default output is clean and easily customizable
+SVG.
 
 [NODE SELECTION]
 Node numbers can be selected with the \-\-node\-number flag. For a simple
