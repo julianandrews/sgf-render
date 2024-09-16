@@ -72,6 +72,8 @@ unsafe impl Sync for UsageError {}
 pub enum QueryError {
     ParseError(SgfParseError),
     IoError(std::io::Error),
+    GameNotFound,
+    VariationNotFound,
 }
 
 impl std::fmt::Display for QueryError {
@@ -79,6 +81,8 @@ impl std::fmt::Display for QueryError {
         match self {
             QueryError::ParseError(e) => write!(f, "{}", e),
             QueryError::IoError(e) => write!(f, "{}", e),
+            QueryError::GameNotFound => write!(f, "{}", "Game not found."),
+            QueryError::VariationNotFound => write!(f, "{}", "Variation not found."),
         }
     }
 }

@@ -38,7 +38,7 @@ pub struct SgfRenderArgs {
 #[derive(Debug, clap::Subcommand)]
 pub enum Command {
     /// Print a tree of the SGF's variations
-    Query,
+    Query(QueryArgs),
 }
 
 #[derive(Debug, Parser)]
@@ -225,5 +225,46 @@ impl std::str::FromStr for MoveNumberRange {
             .transpose()
             .map_err(|_| UsageError::InvalidLastMoveNumber)?;
         Ok(MoveNumberRange { start, end })
+    }
+}
+
+#[derive(Debug, Parser)]
+pub struct QueryArgs {
+    /// Print the index of the last game.
+    #[clap(long, group = "mode")]
+    pub last_game: bool,
+    /// Print the index of the last variation in the selected game.
+    #[clap(long, group = "mode")]
+    pub last_variation: bool,
+    /// Print the index of the last node in the selected variation.
+    #[clap(long, group = "mode")]
+    pub last_node: bool,
+    /// Game number to query.
+    #[arg(short, long, default_value_t = 0)]
+    pub game_number: u64,
+    /// Variation number to query.
+    #[arg(short, long, default_value_t = 0)]
+    pub variation: u64,
+}
+
+#[derive(Debug, Clone, Copy)]
+pub enum QueryMode {
+    Default,
+    LastGame,
+    LastVariation,
+    LastNode,
+}
+
+impl QueryArgs {
+    pub fn mode(&self) -> QueryMode {
+        if self.last_game {
+            QueryMode::LastGame
+        } else if self.last_variation {
+            QueryMode::LastVariation
+        } else if self.last_node {
+            QueryMode::LastNode
+        } else {
+            QueryMode::Default
+        }
     }
 }

@@ -4,7 +4,7 @@ use std::path::Path;
 use clap::Parser;
 use minidom::Element;
 
-use sgf_render::{Command, Goban, OutputFormat, RenderOptions, SgfRenderArgs};
+use sgf_render::{Command, Goban, OutputFormat, QueryArgs, RenderOptions, SgfRenderArgs};
 
 fn main() {
     let parsed_args = SgfRenderArgs::parse();
@@ -17,13 +17,13 @@ fn main() {
     };
 
     match parsed_args.command {
-        Some(Command::Query) => query(&input),
+        Some(Command::Query(query_args)) => query(&input, &query_args),
         None => render(&input, parsed_args),
     }
 }
 
-fn query(input: &str) {
-    if let Err(e) = sgf_render::query(input) {
+fn query(input: &str, query_args: &QueryArgs) {
+    if let Err(e) = sgf_render::query(input, query_args) {
         eprintln!("Failed to parse SGF: {}", e);
         std::process::exit(1);
     }

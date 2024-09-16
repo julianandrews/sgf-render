@@ -116,6 +116,10 @@ v0, 0-3
 └── v1, 3-3
 ```
 
+The `query` subcommand also supports a few options useful for providing machine
+readable output suitable for scripting. See `sgf-render query --help` for more
+information.
+
 ### Text output
 
 You can generate a text only diagram suitable for use from the terminal with

@@ -7,13 +7,16 @@ and properties are supported. Default output is clean and easily customizable
 SVG.
 
 [NODE SELECTION]
-Node numbers can be selected with the \-\-node\-number flag. For a simple
-SGF, \-\-node\-number and move number will usually line up since conventionally
-SGF files have no moves in the root node.
+For multi-game SGF collections, the game can be selected with the
+\-\-game-number flag.
 
 Variations can be selected with the \-\-variation flag, and are numbered in
 depth\-first traversal order. You can print a diagram of variations and their
 associated \-\-node\-number values with the 'query' command:
+
+Node numbers can be selected with the \-\-node\-number flag. For a simple
+SGF, \-\-node\-number and move number will usually line up since conventionally
+SGF files have no moves in the root node.
 
     $ sgf-render query input.sgf
     Game #0
@@ -37,6 +40,9 @@ associated \-\-node\-number values with the 'query' command:
     v0, 0-3
     ├── v0, 3-3
     └── v1, 3-3
+
+The query subcommand also supports a few options for producing machine
+readable output. See the examples for more detail.
 
 Text output (\-\-format text) can be useful for quickly finding the node you
 want to render.
@@ -125,6 +131,22 @@ Select the root node (usually before the first move)
 .TP
 \fBsgf\-render query input.sgf\fR
 Query an SGF file to see the available games and variations
+.TP
+\fBsgf\-render query --last-game input.sgf\fR
+Query an SGF to get the index of the last game in the collection
+.TP
+\fBsgf\-render query --last-variation input.sgf\fR
+Query an SGF to get the index of the last variation in the first game
+.TP
+\fBsgf\-render query --last-variation --game-number 2 input.sgf\fR
+Query an SGF to get the index of the last variation in the third game
+.TP
+\fBsgf\-render query --last-node input.sgf\fR
+Query an SGF to get the index of the last node in the first variation
+.TP
+\fBsgf\-render query --last-node --game-number 2 --variation 3 input.sgf\fR
+Query an SGF to get the index of the last node in the fourth variation of
+the third game.
 .TP
 \fBsgf\-render \-n 50 \-v 1 input.sgf\fR
 Select the 50th node the 1st variation
