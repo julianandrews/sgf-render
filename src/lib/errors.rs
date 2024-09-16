@@ -81,8 +81,8 @@ impl std::fmt::Display for QueryError {
         match self {
             QueryError::ParseError(e) => write!(f, "{}", e),
             QueryError::IoError(e) => write!(f, "{}", e),
-            QueryError::GameNotFound => write!(f, "{}", "Game not found."),
-            QueryError::VariationNotFound => write!(f, "{}", "Variation not found."),
+            QueryError::GameNotFound => write!(f, "Game not found."),
+            QueryError::VariationNotFound => write!(f, "Variation not found."),
         }
     }
 }
