@@ -237,9 +237,6 @@ impl Goban {
             return Err(GobanError::InvalidMove);
         }
         let key = (stone.x, stone.y);
-        if self.stones.contains_key(&key) {
-            return Err(GobanError::InvalidMove);
-        }
         self.stones.insert(key, stone.color);
 
         Ok(())
@@ -363,5 +360,16 @@ fn get_board_size(sgf_node: &SgfNode<go::Prop>) -> (u8, u8) {
         Some(go::Prop::SZ(size)) => *size,
         None => (19, 19),
         Some(_) => unreachable!(),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::Goban;
+
+    #[test]
+    fn play_over_existing_stone() {
+        let result = Goban::from_sgf("(;AB[ac];B[ac])", &Default::default());
+        assert!(result.is_ok());
     }
 }
