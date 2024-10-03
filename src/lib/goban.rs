@@ -357,9 +357,9 @@ impl Stone {
 
 fn get_board_size(sgf_node: &SgfNode<go::Prop>) -> Result<(u8, u8), GobanError> {
     match sgf_node.get_property("SZ") {
-        Some(go::Prop::SZ(size)) => Ok(*size),
+        Some(go::Prop::SZ((x, y))) if *x <= 52 && *y <= 52 => Ok((*x, *y)),
         None => Ok((19, 19)),
-        Some(_) => Err(GobanError::InvalidSzProperty),
+        _ => Err(GobanError::InvalidSzProperty),
     }
 }
 
