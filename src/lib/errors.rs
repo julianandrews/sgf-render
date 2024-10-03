@@ -10,6 +10,7 @@ pub enum GobanError {
     InvalidMove,
     InvalidRange,
     UnlabellableRange,
+    InvalidSzProperty,
 }
 
 impl std::fmt::Display for GobanError {
@@ -23,6 +24,7 @@ impl std::fmt::Display for GobanError {
             Self::MissingVariation => write!(f, "Selected variation not found"),
             Self::InvalidRange => write!(f, "Invalid range to render in goban"),
             Self::UnlabellableRange => write!(f, "Range too large for use with labels"),
+            Self::InvalidSzProperty => write!(f, "SZ property invalid"),
         }
     }
 }

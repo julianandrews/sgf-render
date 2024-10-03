@@ -44,7 +44,7 @@ impl Goban {
         let root_node = collection
             .get(node_description.game_number as usize)
             .ok_or(GobanError::MissingGame)?;
-        let board_size = get_board_size(root_node);
+        let board_size = get_board_size(root_node)?;
         let mut goban = Goban::new(board_size);
         let nodes = variation_nodes(root_node, node_description.variation)?;
         let mut node_count = 0;
@@ -355,21 +355,30 @@ impl Stone {
     }
 }
 
-fn get_board_size(sgf_node: &SgfNode<go::Prop>) -> (u8, u8) {
+fn get_board_size(sgf_node: &SgfNode<go::Prop>) -> Result<(u8, u8), GobanError> {
     match sgf_node.get_property("SZ") {
-        Some(go::Prop::SZ(size)) => *size,
-        None => (19, 19),
-        Some(_) => unreachable!(),
+        Some(go::Prop::SZ(size)) => Ok(*size),
+        None => Ok((19, 19)),
+        Some(_) => Err(GobanError::InvalidSzProperty),
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use super::Goban;
+    use crate::errors::GobanError;
+
+    use super::{get_board_size, Goban};
 
     #[test]
     fn play_over_existing_stone() {
         let result = Goban::from_sgf("(;AB[ac];B[ac])", &Default::default());
         assert!(result.is_ok());
+    }
+
+    #[test]
+    fn invalid_sz() {
+        let collection = sgf_parse::go::parse("(;SZ[foo])").unwrap();
+        let result = get_board_size(&collection[0]);
+        assert!(matches!(result, Err(GobanError::InvalidSzProperty)));
     }
 }
