@@ -81,11 +81,15 @@ jobs:
       with:
         toolchain: nightly
 
+    - name: Install help2man
+      run: |
+        sudo apt-get install -y help2man
+
     - name: Build .deb
       id: deb
       run: |
         cargo install cargo-deb
-        debfile=$(cargo deb)
+        debfile=$(scripts/build-deb.sh)
         result=$?
         echo "debfile=$(basename $debfile)" >> "$GITHUB_OUTPUT"
         exit $result
