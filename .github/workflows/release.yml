@@ -23,7 +23,7 @@ jobs:
           target: x86_64-apple-darwin
           archive-name: sgf-render-macos.tar.gz
         - build: windows
-          os: windows-2019
+          os: windows-2022
           rust: nightly-x86_64-msvc
           target: x86_64-pc-windows-msvc
           archive-name: sgf-render-windows.7z
