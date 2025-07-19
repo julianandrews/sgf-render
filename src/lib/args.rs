@@ -31,6 +31,9 @@ pub struct SgfRenderArgs {
     #[arg(short = 'f', long = "format", default_value = "svg")]
     #[cfg_attr(not(feature = "png"), arg(hide = true))]
     pub output_format: OutputFormat,
+    /// Parse the SGF file even if it contains errors (may drop invalid data)
+    #[arg(short, long, default_value_t = false)]
+    pub lenient: bool,
     #[clap(flatten)]
     pub render_args: RenderArgs,
 }

@@ -1,6 +1,6 @@
 use std::collections::{HashMap, HashSet, VecDeque};
 
-use sgf_parse::{go, SgfNode};
+use sgf_parse::{go, ParseOptions, SgfNode};
 
 use crate::errors::GobanError;
 use crate::render::{NodeDescription, NodeNumber};
@@ -39,11 +39,20 @@ impl Goban {
         (15, 15),
     ];
 
-    pub fn from_sgf(sgf: &str, node_description: &NodeDescription) -> Result<Self, GobanError> {
-        let collection = sgf_parse::go::parse(sgf)?;
+    pub fn from_sgf(
+        sgf: &str,
+        node_description: &NodeDescription,
+        strict: bool,
+    ) -> Result<Self, GobanError> {
+        let parse_options = ParseOptions {
+            lenient: !strict,
+            ..Default::default()
+        };
+        let collection = sgf_parse::parse_with_options(sgf, &parse_options)?;
         let root_node = collection
             .get(node_description.game_number as usize)
-            .ok_or(GobanError::MissingGame)?;
+            .ok_or(GobanError::MissingGame)?
+            .as_go_node()?;
         let board_size = get_board_size(root_node)?;
         let mut goban = Goban::new(board_size);
         let nodes = variation_nodes(root_node, node_description.variation)?;
@@ -371,7 +380,7 @@ mod tests {
 
     #[test]
     fn play_over_existing_stone() {
-        let result = Goban::from_sgf("(;AB[ac];B[ac])", &Default::default());
+        let result = Goban::from_sgf("(;AB[ac];B[ac])", &Default::default(), true);
         assert!(result.is_ok());
     }
 
@@ -380,5 +389,17 @@ mod tests {
         let collection = sgf_parse::go::parse("(;SZ[foo])").unwrap();
         let result = get_board_size(&collection[0]);
         assert!(matches!(result, Err(GobanError::InvalidSzProperty)));
+    }
+
+    #[test]
+    fn strict_parsing_fails_for_bad_sgf() {
+        let result = Goban::from_sgf("(;AB[ac];B[ac]", &Default::default(), true);
+        assert!(!result.is_ok());
+    }
+
+    #[test]
+    fn lenient_parsing_works_for_bad_sgf() {
+        let result = Goban::from_sgf("(;AB[ac];B[ac]", &Default::default(), false);
+        assert!(result.is_ok());
     }
 }

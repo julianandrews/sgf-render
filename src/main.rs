@@ -37,7 +37,7 @@ fn render(input: &str, parsed_args: SgfRenderArgs) {
             std::process::exit(1);
         }
     };
-    let goban = match Goban::from_sgf(input, &options.node_description) {
+    let goban = match Goban::from_sgf(input, &options.node_description, !parsed_args.lenient) {
         Ok(goban) => goban,
         Err(e) => {
             eprintln!("Failed to generate goban: {}", e);

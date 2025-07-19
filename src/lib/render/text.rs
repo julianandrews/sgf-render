@@ -110,7 +110,7 @@ mod tests {
         .iter()
         .collect();
         let sgf = std::fs::read_to_string(d).unwrap();
-        let goban = Goban::from_sgf(&sgf, &options.node_description).unwrap();
+        let goban = Goban::from_sgf(&sgf, &options.node_description, true).unwrap();
         render(&goban, &options).unwrap()
     }
 

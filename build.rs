@@ -133,7 +133,7 @@ fn {test_name}() {{
     let input = include_str!(r"{path}{separator}input.sgf");
     let expected = include_str!(r"{path}{separator}output.svg");
 
-    let goban = Goban::from_sgf(input, &options.node_description).unwrap();
+    let goban = Goban::from_sgf(input, &options.node_description, true).unwrap();
     let svg = svg::render(&goban, &options).unwrap();
     let mut buffer: Vec<u8> = vec![];
     svg.write_to(&mut buffer).unwrap();
