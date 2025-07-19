@@ -11,7 +11,7 @@ fn main() {
     let input = match read_input(&parsed_args.infile) {
         Ok(goban) => goban,
         Err(e) => {
-            eprintln!("Failed to read input: {}", e);
+            eprintln!("Failed to read input: {e}");
             std::process::exit(1);
         }
     };
@@ -24,7 +24,7 @@ fn main() {
 
 fn query(input: &str, query_args: &QueryArgs) {
     if let Err(e) = sgf_render::query(input, query_args) {
-        eprintln!("Failed to parse SGF: {}", e);
+        eprintln!("Failed to parse SGF: {e}");
         std::process::exit(1);
     }
 }
@@ -33,14 +33,14 @@ fn render(input: &str, parsed_args: SgfRenderArgs) {
     let options = match parsed_args.render_args.options(&parsed_args.output_format) {
         Ok(options) => options,
         Err(e) => {
-            eprintln!("Failed to parse arguments: {}", e);
+            eprintln!("Failed to parse arguments: {e}");
             std::process::exit(1);
         }
     };
     let goban = match Goban::from_sgf(input, &options.node_description, !parsed_args.lenient) {
         Ok(goban) => goban,
         Err(e) => {
-            eprintln!("Failed to generate goban: {}", e);
+            eprintln!("Failed to generate goban: {e}");
             std::process::exit(1);
         }
     };
@@ -50,7 +50,7 @@ fn render(input: &str, parsed_args: SgfRenderArgs) {
         parsed_args.outfile,
         parsed_args.output_format,
     ) {
-        eprintln!("Failed to write output: {}", e);
+        eprintln!("Failed to write output: {e}");
         std::process::exit(1);
     }
 }
@@ -82,7 +82,7 @@ fn write_output<P: AsRef<Path>>(
         }
         OutputFormat::Text => {
             let diagram = sgf_render::text::render(goban, options)?;
-            writeln!(writer, "{}", diagram)?
+            writeln!(writer, "{diagram}")?
         }
         #[cfg(feature = "png")]
         OutputFormat::Png => {

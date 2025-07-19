@@ -18,7 +18,7 @@ fn generate_styles() {
     let mut outfile = fs::File::create(outfile_path).unwrap();
     writeln!(
         outfile,
-        r#"/// Automatically generated styles.
+        r#"// Automatically generated styles.
 
 use crate::render::GobanStyle;"#
     )
@@ -102,7 +102,7 @@ fn generate_tests() {
 fn write_tests_header(outfile: &mut fs::File) {
     write!(
         outfile,
-        r#"/// Automatically generated tests.
+        r#"// Automatically generated tests.
 
 use clap::Parser;
 
@@ -140,10 +140,7 @@ fn {test_name}() {{
     let result = std::str::from_utf8(&buffer).unwrap();
 
     assert_eq!(result, expected);
-}}"#,
-        test_name = test_name,
-        path = path,
-        separator = separator,
+}}"#
     )
     .unwrap();
 }

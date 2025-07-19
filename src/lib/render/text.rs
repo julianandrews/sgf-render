@@ -20,7 +20,7 @@ pub fn render(goban: &Goban, options: &RenderOptions) -> Result<String, GobanErr
     };
     if options.label_sides.contains(BoardSide::North) {
         let line: String = x_range.clone().map(board_label_text).collect();
-        lines.push(format!("{}{}", label_padding, line));
+        lines.push(format!("{label_padding}{line}"));
     }
     for y in y_range {
         let mut line = x_range
@@ -37,7 +37,7 @@ pub fn render(goban: &Goban, options: &RenderOptions) -> Result<String, GobanErr
     }
     if options.label_sides.contains(BoardSide::South) {
         let line: String = x_range.clone().map(board_label_text).collect();
-        lines.push(format!("{}{}", label_padding, line));
+        lines.push(format!("{label_padding}{line}"));
     }
     Ok(lines.join("\n"))
 }

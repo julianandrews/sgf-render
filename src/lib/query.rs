@@ -36,10 +36,10 @@ fn query_variation_index(
 ) -> Result<u64, QueryError> {
     let sgf_node = collection
         .get(game_number as usize)
-        .ok_or_else(|| QueryError::GameNotFound)?;
+        .ok_or(QueryError::GameNotFound)?;
     let node = variation_roots(sgf_node)
         .last()
-        .ok_or_else(|| QueryError::VariationNotFound)?;
+        .ok_or(QueryError::VariationNotFound)?;
     Ok(node.variation)
 }
 
@@ -50,7 +50,7 @@ fn query_node_index(
 ) -> Result<usize, QueryError> {
     let sgf_node = collection
         .get(game_number as usize)
-        .ok_or_else(|| QueryError::GameNotFound)?;
+        .ok_or(QueryError::GameNotFound)?;
     let count = variation_nodes(sgf_node, variation)
         .map_err(|_| QueryError::VariationNotFound)?
         .count();
@@ -65,7 +65,7 @@ fn write_query_text(
     mut writer: impl Write,
 ) -> Result<(), QueryError> {
     for (game_num, node) in collection.iter().enumerate() {
-        writeln!(writer, "Game #{}", game_num)?;
+        writeln!(writer, "Game #{game_num}")?;
         write_game_text(node, &mut writer)?;
         if game_num < collection.len() - 1 {
             writeln!(writer)?;

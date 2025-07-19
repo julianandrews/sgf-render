@@ -16,8 +16,8 @@ pub enum GobanError {
 impl std::fmt::Display for GobanError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::ParseError(e) => write!(f, "{}", e),
-            Self::StyleDefError(e) => write!(f, "Invalid defs in style: {}", e),
+            Self::ParseError(e) => write!(f, "{e}"),
+            Self::StyleDefError(e) => write!(f, "Invalid defs in style: {e}"),
             Self::InvalidMove => write!(f, "Invalid move"),
             Self::InsufficientSgfNodes => write!(f, "Insufficient SGF nodes found"),
             Self::MissingGame => write!(f, "Selected game not found"),
@@ -53,13 +53,13 @@ impl std::fmt::Display for UsageError {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         match self {
             UsageError::InvalidRange => write!(f, "Invalid range"),
-            UsageError::StyleReadError(e) => write!(f, "Failed to read style file: {}", e),
+            UsageError::StyleReadError(e) => write!(f, "Failed to read style file: {e}"),
             UsageError::InvalidFirstMoveNumber => write!(f, "Invalid first move number"),
             UsageError::InvalidLastMoveNumber => write!(f, "Invalid last move number"),
             UsageError::InvalidBoardSides => write!(f, "Invalid board sides"),
-            UsageError::InvalidNodeNumber(s) => write!(f, "Invalid node number '{}'", s),
+            UsageError::InvalidNodeNumber(s) => write!(f, "Invalid node number '{s}'"),
             UsageError::InvalidTextOutputOption(s) => {
-                write!(f, "{} not supported for text output", s)
+                write!(f, "{s} not supported for text output")
             }
             UsageError::InvalidTileSet => write!(f, "Must be 11 characters long"),
         }
@@ -81,8 +81,8 @@ pub enum QueryError {
 impl std::fmt::Display for QueryError {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         match self {
-            QueryError::ParseError(e) => write!(f, "{}", e),
-            QueryError::IoError(e) => write!(f, "{}", e),
+            QueryError::ParseError(e) => write!(f, "{e}"),
+            QueryError::IoError(e) => write!(f, "{e}"),
             QueryError::GameNotFound => write!(f, "Game not found."),
             QueryError::VariationNotFound => write!(f, "Variation not found."),
         }

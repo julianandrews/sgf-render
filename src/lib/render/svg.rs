@@ -63,7 +63,7 @@ pub fn render(goban: &Goban, options: &RenderOptions) -> Result<Element, GobanEr
         };
 
         let scale = format_float(options.viewbox_width / diagram_width);
-        let transform = format!("scale({}, {})", scale, scale);
+        let transform = format!("scale({scale}, {scale})");
         let mut diagram_builder = Element::builder("g", NAMESPACE)
             .attr("id", "diagram")
             .attr("transform", transform)
@@ -597,7 +597,7 @@ fn draw_repeated_stones(
     for (i, (move_num, original)) in repeated_moves.iter().enumerate() {
         let column = f64::from((i % columns) as u32);
         let mut tspan_builder = Element::builder("tspan", NAMESPACE)
-            .append(format!("{}→{}", move_num, original))
+            .append(format!("{move_num}→{original}"))
             .attr("x", format_float(x + entry_width * column));
         if i % columns == 0 && i != 0 {
             tspan_builder = tspan_builder.attr("dy", format_float(entry_height));
@@ -820,7 +820,7 @@ fn get_margins(label_sides: &BoardSideSet) -> (f64, f64, f64, f64) {
 }
 
 fn format_float(x: f64) -> String {
-    format!("{:.4}", x)
+    format!("{x:.4}")
         .trim_end_matches('0')
         .trim_end_matches('.')
         .to_string()

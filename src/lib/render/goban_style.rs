@@ -112,7 +112,7 @@ impl GobanStyle {
         let mut defs = vec![linehead, arrowhead];
         if let Some(s) = &self.defs {
             // Wrap
-            let wrapped = format!("<svg xmlns=\"{}\">{}</svg>", NAMESPACE, s);
+            let wrapped = format!("<svg xmlns=\"{NAMESPACE}\">{s}</svg>");
             let wrapper: Element = wrapped.parse().map_err(GobanError::StyleDefError)?;
             for child in wrapper.children() {
                 defs.push(child.clone());
