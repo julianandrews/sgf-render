@@ -533,13 +533,13 @@ dependencies = [
 
 [[package]]
 name = "sgf-parse"
-version = "4.2.5"
+version = "4.2.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "75adc9f7a45d2520cd67f394a158712609811e89ceeaf37b4f5b6aac1e2243f7"
+checksum = "4475df1c12a749e7056f5e1c337d070fea81976722859f480c02af12e6394eb7"
 
 [[package]]
 name = "sgf-render"
-version = "3.3.0"
+version = "3.3.1"
 dependencies = [
  "clap",
  "getopts",
