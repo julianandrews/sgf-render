@@ -23,7 +23,7 @@ png = ["resvg", "usvg", "tiny-skia"]
 getopts = "0.2.21"
 lazy_static = "1.4.0"
 minidom = "0.15.2"
-sgf-parse = "4.2.7"
+sgf-parse = "4.2.8"
 toml = "0.8.10"
 serde = { version = "1.0", features = ["derive"] }
 resvg = { version = "0.40.0", features = ["text"], optional = true }
